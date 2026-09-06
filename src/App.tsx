@@ -11,6 +11,7 @@ import { Setup, Login, Register, Recover, Checkout } from "./pages/auth";
 import StudentArea from "./pages/student";
 import TeacherArea from "./pages/teacher";
 import AdminArea from "./pages/admin";
+import PartnerArea from "./pages/partners";
 import { TicketsConsole } from "./pages/admin2";
 import { ManagementRouter, UsuariosAcessos } from "./pages/management";
 import { canAccessArea, isStaff, homeFor } from "./lib/api";
@@ -169,6 +170,11 @@ function Router() {
     case "rh": { const g = guardArea("rh"); page = g || <ManagementRouter area="rh" path={path} segs={segs} />; break; }
     case "financeiro": { const g = guardArea("finance"); page = g || <ManagementRouter area="finance" path={path} segs={segs} />; break; }
     case "atendimento": { const g = guardArea("atendimento"); page = g || <ManagementRouter area="atendimento" path={path} segs={segs} />; break; }
+    case "parceiros": {
+      if (!user) { page = <Redirect to={`/login?next=${encodeURIComponent("/parceiros")}`} />; break; }
+      page = user.role === "partner" || user.role === "ngo" || user.role === "admin" ? <PartnerArea /> : <Redirect to={homeFor(user.role)} />;
+      break;
+    }
     case "recuperar": page = <Recover />; break;
     case "checkout": {
       const g = guard("student");
@@ -195,7 +201,7 @@ function Router() {
   }
 
   // páginas sem o shell do site
-  const bare = ["aluno", "ava", "professor", "admin", "suporte", "login", "cadastro", "recuperar", "setup", "checkout", "rh", "financeiro", "atendimento", "acessos", "intranet"].includes(s0);
+  const bare = ["aluno", "ava", "professor", "admin", "suporte", "login", "cadastro", "recuperar", "setup", "checkout", "rh", "financeiro", "atendimento", "acessos", "intranet", "parceiros"].includes(s0);
   return (
     <>
       <div className="cy-bg" /><div className="cy-grid" /><div className="cy-scan" />
