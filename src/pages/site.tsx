@@ -116,20 +116,36 @@ export function CoursePage({ slug }: { slug: string }) {
     ["O certificado é reconhecido?", `Sim: certificado de conclusão com ${c.hours}h, código único e QR Code, verificável publicamente na página de validação da Cyber Academy.`],
     ["E se eu não gostar?", "Você tem 7 dias de garantia incondicional: reembolso integral processado pelo Mercado Pago e cancelamento automático da matrícula."],
   ];
+  const pricing = coursePricing(c);
+  const isSub = pricing.model === "subscription";
   const priceCard = (
     <Card className="p-6 lg:sticky lg:top-24">
       <div className="h-[150px] rounded-lg overflow-hidden mb-5"><CoverImg src={c.image} title={c.title} className="h-full" /></div>
-      {c.promoActive && c.promoPrice ? (
-        <div className="flex items-end gap-3">
-          <span className="font-display font-bold text-[32px] text-ember tnum">{fmtBRL(effectivePrice(c))}</span>
-          <span className="font-mono text-[13px] text-dim line-through mb-1">{fmtBRL(Number(c.price))}</span>
-        </div>
+      {isSub ? (
+        <>
+          <div className="flex items-baseline gap-2">
+            <span className="font-display font-bold text-[32px] text-cy-300 tnum">{fmtBRL(pricing.monthly)}</span>
+            <span className="font-mono text-[13px] text-dim">/mês</span>
+          </div>
+          <div className="font-mono text-[12px] text-fog mt-1">plano de {pricing.months} mensalidades · total {fmtBRL(pricing.total)}</div>
+          <div className="font-mono text-[11.5px] text-dim mt-1 flex items-center gap-2"><I n="card" s={13} /> Assinatura recorrente via Mercado Pago</div>
+        </>
       ) : (
-        <span className="font-display font-bold text-[32px] text-cy-300 tnum">{fmtBRL(Number(c.price))}</span>
+        <>
+          {c.promoActive && c.promoPrice ? (
+            <div className="flex items-end gap-3">
+              <span className="font-display font-bold text-[32px] text-ember tnum">{fmtBRL(effectivePrice(c))}</span>
+              <span className="font-mono text-[13px] text-dim line-through mb-1">{fmtBRL(Number(c.price))}</span>
+            </div>
+          ) : (
+            <span className="font-display font-bold text-[32px] text-cy-300 tnum">{fmtBRL(Number(c.price))}</span>
+          )}
+          {c.installments > 1 && <div className="font-mono text-[12px] text-fog mt-1">em até {c.installments}x de {fmtBRL(effectivePrice(c) / c.installments)} no cartão</div>}
+          <div className="font-mono text-[11.5px] text-dim mt-1 flex items-center gap-2"><I n="pix" s={13} /> Pix à vista · <I n="card" s={13} /> Cartão via Mercado Pago</div>
+        </>
       )}
-      {c.installments > 1 && <div className="font-mono text-[12px] text-fog mt-1">em até {c.installments}x de {fmtBRL(effectivePrice(c) / c.installments)} no cartão</div>}
-      <div className="font-mono text-[11.5px] text-dim mt-1 flex items-center gap-2"><I n="pix" s={13} /> Pix à vista · <I n="card" s={13} /> Cartão via Mercado Pago</div>
-      <button onClick={buy} className="cy-btn cy-btn-e w-full py-3.5 text-[14px] mt-5">COMPRAR AGORA <I n="arrowR" s={16} /></button>
+      {c.freeReenroll && <div className="cy-badge b-amber mt-2"><I n="refresh" s={10} /> rematrícula grátis após concluir</div>}
+      <button onClick={buy} className="cy-btn cy-btn-e w-full py-3.5 text-[14px] mt-5">{isSub ? "ASSINAR AGORA" : "COMPRAR AGORA"} <I n="arrowR" s={16} /></button>
       <div className="text-center font-mono text-[10.5px] text-dim mt-2.5">acesso liberado automaticamente após o webhook</div>
       <div className="mt-5 space-y-2.5">
         {[
@@ -184,7 +200,12 @@ export function CoursePage({ slug }: { slug: string }) {
           </section>
 
           <section className="rv">
-            <h2 className="font-display font-semibold text-[20px] text-cy-300 mb-4 flex items-center gap-2.5"><I n="layers" s={18} /> Conteúdo programático</h2>
+            <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+              <h2 className="font-display font-semibold text-[20px] text-cy-300 flex items-center gap-2.5"><I n="layers" s={18} /> Grade curricular</h2>
+              <span className="font-mono text-[11.5px] text-dim">
+                {(() => { const tm = modules.reduce((s: number, m: Row) => s + m.lessons.reduce((a: number, l: Row) => a + (l.durationMin || 0), 0), 0); return `${modules.length} módulos · ${lessons.length} aulas · ${Math.floor(tm / 60)}h${tm % 60 ? ` ${tm % 60}min` : ""} de grade · carga oficial ${c.hours}h`; })()}
+              </span>
+            </div>
             <div className="space-y-3">
               {modules.length === 0 && <Card className="p-6 text-[13.5px] text-dim">Módulos serão publicados em breve pela coordenação.</Card>}
               {modules.map((m, i) => {
@@ -197,7 +218,7 @@ export function CoursePage({ slug }: { slug: string }) {
                         <span className="font-display font-bold text-[17px] text-cy-600 w-8">{String(i + 1).padStart(2, "0")}</span>
                         <div>
                           <div className="font-display font-semibold text-[14.5px] text-mist">{m.title}</div>
-                          <div className="font-mono text-[10.5px] text-dim mt-0.5">{ls.length} aulas · {ls.reduce((s: number, l: Row) => s + (l.durationMin || 0), 0)} min</div>
+                          <div className="font-mono text-[10.5px] text-dim mt-0.5">{ls.length} aulas · {(() => { const mm = ls.reduce((s: number, l: Row) => s + (l.durationMin || 0), 0); return `${Math.floor(mm / 60)}h${mm % 60 ? ` ${mm % 60}min` : ""}`; })()}</div>
                         </div>
                       </div>
                       <I n="chevD" s={17} c={`text-fog transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
@@ -270,6 +291,7 @@ export function About() {
     <div ref={ref} className="max-w-[1000px] mx-auto px-5 py-16">
       <SectionHead kicker="Institucional" title={s.schoolName || "Cyber Academy"} desc="Uma escola de tecnologia construída em cima de um sistema acadêmico de verdade — não de uma playlist de vídeos." />
       <div className="rv space-y-5 text-[14.5px] text-fog leading-[1.85]">
+        {s.aboutText && <p className="text-cy-200/90">{s.aboutText}</p>}
         <p>Nascemos com uma convicção: <strong className="text-mist">educação tecnológica precisa de infraestrutura acadêmica</strong>. Por isso desenvolvemos o SIA — nosso Sistema de Informações Acadêmicas — que registra cada matrícula, cada aula assistida, cada nota e cada certificado com a mesma seriedade de uma instituição de ensino regulamentada.</p>
         <p>O site vende, o Mercado Pago processa, o SIA governa a vida acadêmica e o AVA cuida da experiência de aprendizagem. Quando um pagamento é aprovado, a matrícula nasce sozinha, com número único. Quando o aluno conclui os critérios, o certificado é emitido — e qualquer empregador pode validá-lo publicamente.</p>
       </div>
@@ -424,7 +446,7 @@ export function Contact() {
       <div className="rv">
         <SectionHead kicker="Contato" title="Fale com a escola" />
         <div className="space-y-4">
-          {[["mail", "contato@cyberacademy.com.br"], ["term", "Atendimento: seg–sex, 9h às 18h"], ["globe", "Av. Paulista, 1000 · São Paulo/SP"]].map(([ic, t]) => (
+          {(() => { const st = getSettings(); return [["mail", st.contactEmail || "contato@cyberacademy.com.br"], ["term", st.contactPhone ? `${st.contactPhone} · seg–sex, 9h às 18h` : "Atendimento: seg–sex, 9h às 18h"], ["globe", st.contactAddress || "São Paulo/SP"]]; })().map(([ic, t]) => (
             <div key={t} className="cy-card p-4 flex items-center gap-3.5 text-[13.5px] text-fog"><I n={ic} s={18} c="text-cy-400" />{t}</div>
           ))}
           <p className="text-[12.5px] text-dim leading-relaxed">Alunos matriculados: usem o módulo de <strong className="text-fog">Suporte</strong> no portal — o tempo de resposta é priorizado.</p>

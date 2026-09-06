@@ -320,6 +320,19 @@ function AvaCourse({ courseId }: { courseId: string }) {
         </div>
         {nextLesson && <a href={`#/aluno/aula/${nextLesson.id}`} className="cy-btn cy-btn-e px-4 py-2.5 text-[12px] hidden sm:inline-flex"><I n="play" s={14} /> {p.percent > 0 ? "Continuar" : "Iniciar"}</a>}
       </div>
+      {(() => {
+        const totalMin = modules.reduce((s, m) => s + m.lessons.reduce((a: number, l: Row) => a + (l.durationMin || 0), 0), 0);
+        const avg = weightedAvg(user!.id, courseId);
+        const doneMin = modules.reduce((s, m) => s + m.lessons.filter((l: Row) => lessonState(user!.id, l.id)?.completed).reduce((a: number, l: Row) => a + (l.durationMin || 0), 0), 0);
+        return (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <Stat icon="clock" label="Carga do curso" value={`${Math.floor(totalMin / 60)}h${totalMin % 60 ? ` ${totalMin % 60}min` : ""}`} sub={`${p.total} aulas · ${modules.length} módulos`} />
+            <Stat icon="playc" label="Horas assistidas" value={`${Math.floor(doneMin / 60)}h${doneMin % 60 ? ` ${doneMin % 60}m` : ""}`} tone="amber" sub={`${p.done}/${p.total} aulas concluídas`} />
+            <Stat icon="chart" label="Progresso" value={`${p.percent}%`} sub="registrado no SIA" />
+            <Stat icon="target" label="Média geral" value={avg.count ? `${avg.avg}` : "—"} sub={avg.count ? `${avg.count} nota(s) lançada(s)` : "sem notas ainda"} tone="amber" />
+          </div>
+        );
+      })()}
       <Card className="p-4 mb-6">
         <div className="flex items-center gap-4">
           <div className="flex-1"><Bar v={p.percent} h={9} /></div>
@@ -335,7 +348,7 @@ function AvaCourse({ courseId }: { courseId: string }) {
                 <span className="font-display font-bold text-[18px] text-cy-600">{String(mi + 1).padStart(2, "0")}</span>
                 <div>
                   <h3 className="font-display font-semibold text-[15px] text-mist">{m.title}</h3>
-                  <div className="font-mono text-[10px] text-dim">{m.done}/{m.total} aulas · {m.percent}%</div>
+                  <div className="font-mono text-[10px] text-dim">{m.done}/{m.total} aulas · {(() => { const mm = m.lessons.reduce((a: number, l: Row) => a + (l.durationMin || 0), 0); return `${Math.floor(mm / 60)}h${mm % 60 ? ` ${mm % 60}m` : ""}`; })()} · {m.percent}%</div>
                 </div>
               </div>
               <div className="w-24 hidden sm:block"><Bar v={m.percent} /></div>

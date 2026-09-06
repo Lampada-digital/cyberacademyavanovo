@@ -56,6 +56,13 @@ function blank(): DB {
     tables,
     settings: {
       schoolName: "Cyber Academy",
+      slogan: "Tecnologia que forma carreiras",
+      heroTitle: "Aprenda tecnologia do zero ao nível profissional",
+      heroSub: "Cursos com videoaulas, projetos reais, avaliações, certificado verificável e um ecossistema acadêmico completo (SIA + AVA).",
+      aboutText: "A Cyber Academy é uma escola de tecnologia com ecossistema acadêmico próprio. Do cadastro à emissão do certificado, toda a jornada do aluno é registrada no SIA — matrículas, notas, frequência e certificados verificáveis publicamente.",
+      contactEmail: "contato@cyberacademy.com.br",
+      contactPhone: "(11) 4004-2026",
+      contactAddress: "Av. Paulista, 1000 · São Paulo/SP",
       passScore: 70,
       certSigner: "Direção Acadêmica — Cyber Academy",
       certCity: "São Paulo",

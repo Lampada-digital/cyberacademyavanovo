@@ -49,8 +49,7 @@ export default function Home() {
               <Scramble text="DOMINE O DIGITAL." delay={28} />
             </h1>
             <p className="text-[15.5px] md:text-[16.5px] text-fog leading-relaxed mt-6 max-w-[520px]">
-              Formações intensivas em <strong className="text-mist">desenvolvimento, cibersegurança e dados</strong> — com portal do aluno,
-              AVA com progresso real, avaliações corrigidas por professores e <strong className="text-cy-300">certificado verificável por QR Code</strong>.
+              {getSettings().heroSub || "Formações intensivas com portal do aluno, AVA com progresso real e certificado verificável."}
             </p>
             <div className="flex flex-wrap gap-3.5 mt-8">
               <a href="#/cursos" className="cy-btn cy-btn-e px-6 py-3.5 text-[13.5px]">Explorar cursos <I n="arrowR" s={16} /></a>

@@ -198,6 +198,25 @@ function AuthWrap({ title, sub, children }: { title: string; sub: string; childr
 
 /* ================= CHECKOUT + MERCADO PAGO ================= */
 type Step = "resumo" | "pagamento" | "processando" | "sucesso" | "erro";
+
+/** Formata o número do cartão em blocos enquanto o usuário digita. */
+function formatCardNumber(v: string): string {
+  const digits = v.replace(/\D/g, "").slice(0, 19);
+  return digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+}
+/** Detecta a bandeira pelo prefixo (BIN). Aceita todas as principais. */
+function cardBrand(v: string): string {
+  const d = v.replace(/\D/g, "");
+  if (!d) return "";
+  if (/^4/.test(d)) return "VISA";
+  if (/^(5[1-5]|2[2-7])/.test(d)) return "MASTERCARD";
+  if (/^3[47]/.test(d)) return "AMEX";
+  if (/^(636|438935|504175|451416|636297)/.test(d)) return "ELO";
+  if (/^(38|60)/.test(d)) return "HIPER";
+  if (/^6/.test(d)) return "HIPERCARD";
+  return "CARTÃO";
+}
+
 export function Checkout({ courseId }: { courseId: string }) {
   const { user, refresh } = useApp();
   const toast = useToast();
@@ -247,7 +266,7 @@ export function Checkout({ courseId }: { courseId: string }) {
     ] as [string, number][];
     steps.forEach(([, t], i) => timers.current.push(window.setTimeout(() => setPipe(i + 1), t)));
     timers.current.push(window.setTimeout(() => {
-      const res = handleWebhook({ type: "payment", paymentId: p.mpPaymentId, status: method === "pix" ? "approved" : card.number.replace(/\s/g, "").endsWith("0002") ? "rejected" : "approved", x_signature: "ts=1718·v1=a94b…f31d" });
+      const res = handleWebhook({ type: "payment", paymentId: p.mpPaymentId, status: "approved", x_signature: "ts=1718·v1=a94b…f31d" });
       setResult(res);
       setStep(res.ok ? "sucesso" : "erro");
       refresh();
@@ -327,8 +346,12 @@ export function Checkout({ courseId }: { courseId: string }) {
                   </div>
                   {method === "card" ? (
                     <div className="space-y-4">
-                      <Field label="Número do cartão" req hint="Sandbox: qualquer número é aprovado · final 0002 simula recusa">
-                        <TIn value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" />
+                      <Field label="Número do cartão" req hint="Sandbox: todas as bandeiras são aceitas e aprovadas (Visa, Master, Elo, Amex, Hiper…)">
+                        <div className="relative">
+                          <TIn value={card.number} inputMode="numeric" placeholder="4242 4242 4242 4242"
+                            onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} />
+                          {cardBrand(card.number) && <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[11px] font-bold text-cy-300 tracking-wider">{cardBrand(card.number)}</span>}
+                        </div>
                       </Field>
                       <Field label="Nome impresso" req><TIn value={card.name} onChange={(e) => setCard({ ...card, name: e.target.value })} placeholder="COMO NO CARTÃO" /></Field>
                       <div className="grid grid-cols-2 gap-3">
@@ -336,7 +359,7 @@ export function Checkout({ courseId }: { courseId: string }) {
                         <Field label="CVV" req><TIn value={card.cvv} onChange={(e) => setCard({ ...card, cvv: e.target.value })} placeholder="123" /></Field>
                       </div>
                       <Btn v="p" className="w-full py-3.5 text-[14px]" onClick={() => {
-                        if (card.number.replace(/\s/g, "").length < 12 || !card.name) { toast("Preencha os dados do cartão.", "err"); return; }
+                        if (card.number.replace(/\D/g, "").length < 6 || !card.name.trim()) { toast("Informe um número de cartão e o nome impresso.", "err"); return; }
                         startPayment();
                       }}>{isSub ? `Assinar · 1ª mensalidade ${fmtBRL(price)}` : `Pagar ${fmtBRL(price)} ${inst > 1 ? `em ${inst}x` : ""}`}</Btn>
                     </div>
