@@ -88,6 +88,7 @@ function Router() {
     case "privacidade": page = <Privacy />; break;
     case "cookies": page = <Cookies />; break;
     case "validar-certificado": page = <ValidateCert code={segs[1]} />; break;
+    case "validar-carteirinha": page = <ValidateCard code={segs[1]} />; break;
     case "login": page = user ? <Redirect to={user.role === "admin" ? "/admin" : user.role === "teacher" ? "/professor" : user.role === "support" ? "/suporte" : "/aluno"} /> : <Login next={query.get("next") || undefined} />; break;
     case "cadastro": page = user ? <Redirect to="/aluno" /> : <Register next={query.get("next") || undefined} />; break;
     case "recuperar": page = <Recover />; break;

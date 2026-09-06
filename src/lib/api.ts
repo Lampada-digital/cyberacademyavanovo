@@ -5,7 +5,7 @@
 import {
   all, one, where, find, insert, update, remove, uid, now, audit, sendEmail,
   notify, nextEnrollmentNumber, nextCertCode, nextOrderNumber, hashPw,
-  getSettings, type Row, wipeDB, save,
+  getSettings, type Row, wipeDB, save, fmtBRL,
 } from "./db";
 
 /* ================= SESSÃO / AUTH ================= */
@@ -119,6 +119,54 @@ export const courseById = (id: string) => find("courses", id);
 export const courseBySlug = (slug: string) => one("courses", (c) => c.slug === slug);
 export const effectivePrice = (c: Row) => (c.promoActive && c.promoPrice ? Number(c.promoPrice) : Number(c.price));
 
+/* ================= MODELO DE PRECIFICAÇÃO (avulso × mensalidade) ================= */
+export interface Pricing {
+  model: "one_time" | "subscription";
+  total: number;            // valor total do curso
+  monthly: number;          // valor da mensalidade
+  months: number;           // nº de mensalidades (plano)
+  freeReenroll: boolean;    // rematrícula grátis após conclusão
+  label: string;            // rótulo comercial, ex.: "12x de R$ 89,90/mês"
+}
+export function coursePricing(c: Row): Pricing {
+  const total = effectivePrice(c);
+  const model = c.pricingModel === "subscription" ? "subscription" : "one_time";
+  const months = Math.max(1, Number(c.planMonths) || 1);
+  const monthly = c.pricingModel === "subscription" && c.monthlyPrice ? Number(c.monthlyPrice) : Math.round((total / months) * 100) / 100;
+  const freeReenroll = !!c.freeReenroll;
+  const label = model === "subscription"
+    ? `${months}x de ${fmtBRL(monthly)}/mês`
+    : `${fmtBRL(total)}${c.installments > 1 ? ` · até ${c.installments}x` : " à vista"}`;
+  return { model, total: model === "subscription" ? Math.round(monthly * months * 100) / 100 : total, monthly, months, freeReenroll, label };
+}
+
+/** Parcelas/mensalidades de um pedido (cronograma financeiro). */
+export function orderInstallments(orderId: string): Row[] {
+  return where("installments", (i) => i.orderId === orderId).sort((a, b) => a.n - b.n);
+}
+
+/** Rematrícula grátis: aluno concluído reativa o acesso sem novo pagamento. */
+export function reenrollFree(studentId: string, courseId: string): Row {
+  const c = find("courses", courseId);
+  if (!c) throw new Error("Curso não encontrado.");
+  const p = coursePricing(c);
+  if (!p.freeReenroll) throw new Error("Este curso não possui rematrícula grátis habilitada.");
+  const done = one("enrollments", (e) => e.studentId === studentId && e.courseId === courseId && e.status === "COMPLETED");
+  if (!done) throw new Error("Rematrícula grátis vale para cursos já concluídos.");
+  const active = one("enrollments", (e) => e.studentId === studentId && e.courseId === courseId && e.status === "ACTIVE");
+  if (active) throw new Error("Você já possui matrícula ativa neste curso.");
+  const u = find("users", studentId)!;
+  const en = insert("enrollments", {
+    number: nextEnrollmentNumber(), studentId, courseId, classId: c.defaultClassId || null,
+    status: "ACTIVE", origin: "reenroll-free", orderId: null, paymentId: null,
+    startDate: now(), dueDate: new Date(Date.now() + 365 * 86400e3).toISOString(), progress: 0,
+  });
+  audit(u, "ENROLLMENT", "enrollments", en.id, `Rematrícula grátis ${en.number} · ${c.title}`);
+  notify(studentId, "Rematrícula grátis ativa", `Acesso ao curso ${c.title} reativado sem custo. Matrícula ${en.number}.`, "enrollment");
+  sendEmail(u.email, "Rematrícula grátis — Cyber Academy", `Sua rematrícula no curso ${c.title} foi ativada gratuitamente. Matrícula ${en.number}.`);
+  return en;
+}
+
 export function courseTree(courseId: string) {
   const course = find("courses", courseId);
   if (!course) return null;
@@ -135,13 +183,39 @@ export const teacherName = (t?: Row) => t?.name || "A definir";
 
 /* ================= CHECKOUT + MERCADO PAGO + WEBHOOK ================= */
 export function createOrder(user: Row, course: Row, installments: number): Row {
-  const amount = effectivePrice(course);
+  const p = coursePricing(course);
+  const isSub = p.model === "subscription";
+  // assinatura: cobra a 1ª mensalidade agora e gera o cronograma das demais
+  const amount = isSub ? p.monthly : effectivePrice(course);
   const order = insert("orders", {
     number: nextOrderNumber(), userId: user.id, courseId: course.id,
-    amount, installments, status: "created", gateway: "mercadopago",
+    amount, installments: isSub ? p.months : installments, status: "created",
+    gateway: "mercadopago", model: p.model,
   });
-  audit(user, "CREATE", "orders", order.id, `Pedido ${order.number} · ${course.title}`);
+  if (isSub) {
+    for (let n = 1; n <= p.months; n++) {
+      const due = new Date();
+      due.setMonth(due.getMonth() + (n - 1));
+      insert("installments", {
+        orderId: order.id, userId: user.id, courseId: course.id, n,
+        amount: p.monthly, dueDate: due.toISOString(),
+        status: n === 1 ? "pending" : "scheduled", // 1ª mensalidade paga no checkout
+        paidAt: null,
+      });
+    }
+  }
+  audit(user, "CREATE", "orders", order.id, `Pedido ${order.number} · ${course.title} · ${p.label}`);
   return order;
+}
+
+/** Liquida a mensalidade atual de uma assinatura e agenda a cobrança da próxima. */
+export function settleSubscriptionMonth(pay: Row) {
+  const order = find("orders", pay.orderId);
+  if (!order || order.model !== "subscription") return;
+  const due = one("installments", (i) => i.orderId === order.id && i.status === "pending");
+  if (due) update("installments", due.id, { status: "paid", paidAt: now() });
+  const next = one("installments", (i) => i.orderId === order.id && i.status === "scheduled");
+  if (next) update("installments", next.id, { status: "pending" });
 }
 
 /** Simula a criação do pagamento no Checkout Pro (backend → Mercado Pago). */
@@ -180,6 +254,7 @@ export function handleWebhook(payload: { type: string; paymentId: string; status
   if (confirmed === "approved" || confirmed === "approved_webhook") {
     update("payments", pay.id, { status: "approved", paidAt: now() });
     update("orders", pay.orderId, { status: "paid", paidAt: now() });
+    settleSubscriptionMonth(pay);
     const order = find("orders", pay.orderId)!;
     const student = find("users", order.userId)!;
     const course = find("courses", order.courseId)!;
