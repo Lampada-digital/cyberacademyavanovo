@@ -1,0 +1,481 @@
+/* ============================================================
+   SIA API — camada de serviços (equivalente ao backend FastAPI)
+   auth JWT-like · RBAC · checkout · webhook · acadêmico
+   ============================================================ */
+import {
+  all, one, where, find, insert, update, remove, uid, now, audit, sendEmail,
+  notify, nextEnrollmentNumber, nextCertCode, nextOrderNumber, hashPw,
+  getSettings, type Row, wipeDB, save,
+} from "./db";
+
+/* ================= SESSÃO / AUTH ================= */
+const SKEY = "ca_session";
+
+export function currentUser(): Row | null {
+  try {
+    const raw = localStorage.getItem(SKEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (s.exp < Date.now()) { localStorage.removeItem(SKEY); return null; }
+    const u = find("users", s.userId);
+    if (!u || u.status === "inactive") return null;
+    return u;
+  } catch { return null; }
+}
+
+export function homeFor(role: string): string {
+  if (role === "admin") return "/admin";
+  if (role === "teacher") return "/professor";
+  if (role === "support") return "/suporte";
+  return "/aluno";
+}
+
+export async function login(email: string, pass: string): Promise<Row> {
+  const u = one("users", (x) => x.email.toLowerCase() === email.trim().toLowerCase());
+  if (!u) throw new Error("E-mail não encontrado. Verifique ou crie sua conta.");
+  if (u.status === "inactive") throw new Error("Conta desativada. Contate o suporte.");
+  const h = await hashPw(pass);
+  if (u.passHash !== h) {
+    u.loginFails = (u.loginFails || 0) + 1; save();
+    throw new Error(u.loginFails >= 5 ? "Conta temporariamente bloqueada por tentativas excessivas." : "Senha incorreta.");
+  }
+  u.loginFails = 0; save();
+  const token = uid() + uid();
+  insert("sessions", { userId: u.id, token, exp: Date.now() + 8 * 3600e3 });
+  localStorage.setItem(SKEY, JSON.stringify({ userId: u.id, token, exp: Date.now() + 8 * 3600e3 }));
+  audit(u, "LOGIN", "users", u.id, "Autenticação via JWT");
+  return u;
+}
+
+export function logout() {
+  const u = currentUser();
+  if (u) audit(u, "LOGOUT", "users", u.id);
+  localStorage.removeItem(SKEY);
+}
+
+export async function register(data: { name: string; email: string; pass: string; cpf?: string; phone?: string; acceptTerms: boolean; acceptPrivacy: boolean; news?: boolean }): Promise<Row> {
+  if (!data.name.trim() || !data.email.includes("@") || data.pass.length < 6)
+    throw new Error("Preencha nome, e-mail válido e senha com 6+ caracteres.");
+  if (!data.acceptTerms || !data.acceptPrivacy)
+    throw new Error("É necessário aceitar os Termos de Uso e a Política de Privacidade (LGPD).");
+  if (one("users", (x) => x.email.toLowerCase() === data.email.trim().toLowerCase()))
+    throw new Error("Este e-mail já possui conta. Faça login.");
+  const passHash = await hashPw(data.pass);
+  const u = insert("users", {
+    name: data.name.trim(), email: data.email.trim().toLowerCase(), passHash,
+    cpf: data.cpf || "", phone: data.phone || "", role: "student", status: "active", loginFails: 0,
+  });
+  insert("terms_acceptances", { userId: u.id, doc: "termos", version: "1.0", ip: "local", at: now() });
+  insert("terms_acceptances", { userId: u.id, doc: "privacidade", version: "1.0", ip: "local", at: now() });
+  insert("consents", { userId: u.id, kind: "marketing", granted: !!data.news, at: now() });
+  audit(u, "CREATE", "users", u.id, "Conta de aluno criada (cadastro público)");
+  sendEmail(u.email, "Confirmação de cadastro — Cyber Academy", `Olá ${u.name}, sua conta foi criada com sucesso. Bem-vindo(a) à Cyber Academy!`);
+  notify(u.id, "Boas-vindas à Cyber Academy", "Sua conta foi criada. Explore o catálogo e matricule-se em um curso.");
+  return u;
+}
+
+export async function setupAdmin(data: { school: string; name: string; email: string; pass: string }): Promise<Row> {
+  if (all("users").length > 0) throw new Error("O sistema já foi configurado.");
+  const { setSettings } = await import("./db");
+  setSettings({ schoolName: data.school.trim() || "Cyber Academy" });
+  const passHash = await hashPw(data.pass);
+  const u = insert("users", { name: data.name.trim(), email: data.email.trim().toLowerCase(), passHash, role: "admin", status: "active" });
+  audit(u, "CREATE", "users", u.id, "Administrador inicial criado (setup)");
+  audit(u, "UPDATE", "settings", "", "Configuração inicial da instituição");
+  return u;
+}
+
+export async function changePassword(userId: string, current: string, next: string): Promise<void> {
+  const u = find("users", userId)!;
+  if ((await hashPw(current)) !== u.passHash) throw new Error("Senha atual incorreta.");
+  if (next.length < 6) throw new Error("A nova senha precisa de 6+ caracteres.");
+  update("users", userId, { passHash: await hashPw(next) });
+  audit(u, "UPDATE", "users", userId, "Senha alterada");
+}
+
+export function requestReset(email: string): boolean {
+  const u = one("users", (x) => x.email.toLowerCase() === email.trim().toLowerCase());
+  if (!u) return false;
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  insert("password_resets", { userId: u.id, code, exp: Date.now() + 30 * 60e3, used: false });
+  sendEmail(u.email, "Recuperação de senha — Cyber Academy", `Seu código de recuperação é: ${code}. Válido por 30 minutos.`);
+  audit(null, "UPDATE", "password_resets", u.id, "Código de recuperação emitido");
+  return true;
+}
+
+export async function doReset(email: string, code: string, newPass: string): Promise<void> {
+  const u = one("users", (x) => x.email.toLowerCase() === email.trim().toLowerCase());
+  const r = u && one("password_resets", (p) => p.userId === u.id && p.code === code.trim() && !p.used && p.exp > Date.now());
+  if (!u || !r) throw new Error("Código inválido ou expirado.");
+  update("users", u.id, { passHash: await hashPw(newPass) });
+  update("password_resets", r.id, { used: true });
+  sendEmail(u.email, "Senha redefinida — Cyber Academy", "Sua senha foi redefinida com sucesso.");
+  audit(null, "UPDATE", "users", u.id, "Senha redefinida via código");
+}
+
+/* ================= CATÁLOGO ================= */
+export const publishedCourses = () => where("courses", (c) => c.published);
+export const courseById = (id: string) => find("courses", id);
+export const courseBySlug = (slug: string) => one("courses", (c) => c.slug === slug);
+export const effectivePrice = (c: Row) => (c.promoActive && c.promoPrice ? Number(c.promoPrice) : Number(c.price));
+
+export function courseTree(courseId: string) {
+  const course = find("courses", courseId);
+  if (!course) return null;
+  const modules: Row[] = where("course_modules", (m) => m.courseId === courseId)
+    .sort((a, b) => a.order - b.order)
+    .map((m: Row) => Object.assign({}, m, {
+      lessons: where("lessons", (l) => l.moduleId === m.id).sort((a, b) => a.order - b.order),
+    }));
+  const teacher = find("teachers", course.teacherId);
+  return { course, modules, teacher };
+}
+
+export const teacherName = (t?: Row) => t?.name || "A definir";
+
+/* ================= CHECKOUT + MERCADO PAGO + WEBHOOK ================= */
+export function createOrder(user: Row, course: Row, installments: number): Row {
+  const amount = effectivePrice(course);
+  const order = insert("orders", {
+    number: nextOrderNumber(), userId: user.id, courseId: course.id,
+    amount, installments, status: "created", gateway: "mercadopago",
+  });
+  audit(user, "CREATE", "orders", order.id, `Pedido ${order.number} · ${course.title}`);
+  return order;
+}
+
+/** Simula a criação do pagamento no Checkout Pro (backend → Mercado Pago). */
+export function createGatewayPayment(order: Row, method: string): Row {
+  const pay = insert("payments", {
+    orderId: order.id, userId: order.userId, courseId: order.courseId,
+    amount: order.amount, installments: order.installments, method,
+    gateway: "mercadopago", mpPaymentId: "MP-" + Math.floor(Math.random() * 9e8 + 1e8),
+    status: "pending",
+  });
+  insert("payment_transactions", { paymentId: pay.id, type: "authorization", detail: "Pagamento iniciado no Checkout Pro", at: now() });
+  update("orders", order.id, { paymentId: pay.id });
+  return pay;
+}
+
+/**
+ * POST /api/payments/mercadopago/webhook
+ * 1. valida autenticidade  2. identifica pagamento  3. consulta no MP
+ * 4. confirma status  5. localiza pedido  6. atualiza pagamento/pedido
+ * 7. cria matrícula  8. libera curso  9. auditoria  10. comunicação
+ */
+export function handleWebhook(payload: { type: string; paymentId: string; status: string; x_signature?: string }): { ok: boolean; message: string; enrollment?: Row } {
+  audit(null, "WEBHOOK_RECEIVED", "payments", payload.paymentId, `type=${payload.type} status=${payload.status} sign=${payload.x_signature ? "válida" : "AUSENTE"}`);
+  if (!payload.x_signature) {
+    audit(null, "WEBHOOK_PROCESSED", "payments", payload.paymentId, "Rejeitado: assinatura inválida");
+    return { ok: false, message: "Webhook rejeitado: assinatura inválida." };
+  }
+  const pay = one("payments", (p) => p.mpPaymentId === payload.paymentId || p.id === payload.paymentId);
+  if (!pay) return { ok: false, message: "Pagamento não localizado." };
+  if (pay.status === "approved") return { ok: false, message: "Pagamento já processado (idempotência)." };
+
+  // "consulta no Mercado Pago" — confirma a fonte oficial, nunca o retorno do checkout
+  const confirmed = payload.status;
+  insert("payment_transactions", { paymentId: pay.id, type: "webhook", detail: `Notificação ${payload.type} → ${confirmed}`, at: now() });
+
+  if (confirmed === "approved" || confirmed === "approved_webhook") {
+    update("payments", pay.id, { status: "approved", paidAt: now() });
+    update("orders", pay.orderId, { status: "paid", paidAt: now() });
+    const order = find("orders", pay.orderId)!;
+    const student = find("users", order.userId)!;
+    const course = find("courses", order.courseId)!;
+
+    const enrollment = insert("enrollments", {
+      number: nextEnrollmentNumber(), studentId: student.id, courseId: course.id,
+      classId: course.defaultClassId || null, status: "ACTIVE", origin: "checkout-mercadopago",
+      orderId: order.id, paymentId: pay.id, startDate: now(),
+      dueDate: new Date(Date.now() + (course.hours || 60) * 86400e3 * 2).toISOString(),
+      progress: 0,
+    });
+    audit(null, "WEBHOOK_PROCESSED", "payments", pay.id, `Pagamento ${pay.mpPaymentId} aprovado`);
+    audit(null, "PAYMENT", "payments", pay.id, "Pagamento confirmado via webhook");
+    audit(null, "ENROLLMENT", "enrollments", enrollment.id, `Matrícula ${enrollment.number} criada automaticamente`);
+    sendEmail(student.email, "Pagamento aprovado — Cyber Academy", `Olá ${student.name}, confirmamos o pagamento de ${course.title}. Sua matrícula ${enrollment.number} foi criada.`);
+    sendEmail(student.email, "Curso liberado — Cyber Academy", `O curso ${course.title} já está disponível no seu AVA. Bons estudos!`);
+    notify(student.id, "Pagamento aprovado ✔", `Pedido ${order.number} confirmado pelo Mercado Pago.`, "finance");
+    notify(student.id, "Matrícula criada", `Matrícula ${enrollment.number} · ${course.title}. Acesso liberado ao AVA.`, "enrollment");
+    return { ok: true, message: "Pagamento aprovado, matrícula criada e curso liberado.", enrollment };
+  }
+  update("payments", pay.id, { status: "rejected" });
+  update("orders", pay.orderId, { status: "cancelled" });
+  audit(null, "WEBHOOK_PROCESSED", "payments", pay.id, `Pagamento ${confirmed}`);
+  return { ok: false, message: "Pagamento não aprovado pelo gateway." };
+}
+
+export function refundPayment(actor: Row, paymentId: string) {
+  const pay = find("payments", paymentId);
+  if (!pay || pay.status !== "approved") throw new Error("Somente pagamentos aprovados podem ser reembolsados.");
+  update("payments", paymentId, { status: "refunded", refundedAt: now() });
+  update("orders", pay.orderId, { status: "refunded" });
+  const en = one("enrollments", (e) => e.paymentId === paymentId);
+  if (en) update("enrollments", en.id, { status: "CANCELLED" });
+  insert("payment_transactions", { paymentId, type: "refund", detail: "Reembolso processado", at: now() });
+  audit(actor, "REFUND", "payments", paymentId, "Reembolso emitido");
+  const u = find("users", pay.userId);
+  if (u) notify(u.id, "Reembolso processado", "Seu pagamento foi reembolsado. A matrícula vinculada foi cancelada.", "finance");
+}
+
+/* ================= MATRÍCULAS / PROGRESSO ================= */
+export const myEnrollments = (studentId: string) => where("enrollments", (e) => e.studentId === studentId);
+
+export function publishedLessons(courseId: string): Row[] {
+  return where("lessons", (l) => l.courseId === courseId && l.published);
+}
+
+export function lessonState(studentId: string, lessonId: string): Row | undefined {
+  return one("lesson_progress", (p) => p.studentId === studentId && p.lessonId === lessonId);
+}
+
+export function markLesson(studentId: string, lesson: Row, percent: number, completed = false) {
+  const pct = Math.max(0, Math.min(100, Math.round(percent)));
+  const done = completed || pct >= 100;
+  const existing = lessonState(studentId, lesson.id);
+  if (existing) update("lesson_progress", existing.id, { percent: Math.max(existing.percent || 0, pct), completed: done || existing.completed, updatedAt: now() });
+  else insert("lesson_progress", { studentId, lessonId: lesson.id, courseId: lesson.courseId, moduleId: lesson.moduleId, percent: pct, completed: done });
+  if (done) {
+    const u = find("users", studentId);
+    if (u) audit(u, "UPDATE", "lesson_progress", lesson.id, `Aula "${lesson.title}" concluída`);
+  }
+  checkCompletionFor(studentId, lesson.courseId);
+}
+
+export function courseProgress(studentId: string, courseId: string) {
+  const lessons = publishedLessons(courseId);
+  const states = where("lesson_progress", (p) => p.studentId === studentId && p.courseId === courseId);
+  const byLesson = new Map(states.map((s) => [s.lessonId, s]));
+  const done = lessons.filter((l) => byLesson.get(l.id)?.completed).length;
+  const percent = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
+  const modules = where("course_modules", (m) => m.courseId === courseId).sort((a, b) => a.order - b.order).map((m) => {
+    const ls = lessons.filter((l) => l.moduleId === m.id);
+    const md = ls.filter((l) => byLesson.get(l.id)?.completed).length;
+    return { ...m, lessons: ls, done: md, total: ls.length, percent: ls.length ? Math.round((md / ls.length) * 100) : 0 };
+  });
+  return { percent, done, total: lessons.length, modules, byLesson };
+}
+
+/* ================= NOTAS ================= */
+export function upsertGrade(g: { studentId: string; courseId: string; moduleId?: string; kind: string; refId: string; refTitle: string; score: number; max: number; weight: number; status: string; feedback?: string; gradedBy?: string }) {
+  const existing = one("grades", (x) => x.studentId === g.studentId && x.kind === g.kind && x.refId === g.refId);
+  if (existing) return update("grades", existing.id, { ...g });
+  return insert("grades", { ...g, date: now() });
+}
+
+export function weightedAvg(studentId: string, courseId: string): { avg: number; count: number } {
+  const gs = where("grades", (g) => g.studentId === studentId && g.courseId === courseId && (g.status === "graded" || g.status === "auto_graded"));
+  if (!gs.length) return { avg: 0, count: 0 };
+  let num = 0, den = 0;
+  gs.forEach((g) => { const pct = g.max ? (g.score / g.max) * 100 : 0; num += pct * (g.weight || 1); den += g.weight || 1; });
+  return { avg: den ? Math.round((num / den) * 10) / 10 : 0, count: gs.length };
+}
+
+/* ================= ATIVIDADES / AVALIAÇÕES (tentativas + correção) ================= */
+export function autoScore(item: Row, answers: Record<string, any>) {
+  let score = 0; const max = (item.questions || []).reduce((s: number, q: Row) => s + (q.points || 1), 0);
+  const detail: Record<string, boolean> = {};
+  (item.questions || []).forEach((q: Row) => {
+    const a = answers[q.qid];
+    let ok = false;
+    if (q.type === "single") ok = a === q.correct;
+    else if (q.type === "tf") ok = String(a) === String(q.correct);
+    else if (q.type === "multi") {
+      const c = [...(q.correct || [])].sort().join(",");
+      const v = [...(a || [])].sort().join(",");
+      ok = c === v && c !== "";
+    }
+    detail[q.qid] = ok;
+    if (ok) score += q.points || 1;
+  });
+  return { score, max, detail };
+}
+
+export function submitAttempt(kind: "activity" | "assessment", itemId: string, student: Row, answers: Record<string, any>) {
+  const item = find(kind === "activity" ? "activities" : "assessments", itemId);
+  if (!item) throw new Error("Item não encontrado.");
+  const prev = where("attempts", (a) => a.kind === kind && a.itemId === itemId && a.studentId === student.id && a.status !== "abandoned");
+  if (item.attempts && prev.length >= item.attempts) throw new Error("Limite de tentativas atingido.");
+  const { score, max, detail } = autoScore(item, answers);
+  const hasEssay = (item.questions || []).some((q: Row) => q.type === "essay" || q.type === "open");
+  const status = hasEssay ? "review" : "auto_graded";
+  const at = insert("attempts", {
+    kind, itemId, itemTitle: item.title, courseId: item.courseId, studentId: student.id,
+    answers, detail, objScore: score, essayScore: null, score: hasEssay ? null : score, max,
+    status, submittedAt: now(), n: prev.length + 1,
+  });
+  audit(student, "CREATE", "attempts", at.id, `${kind === "activity" ? "Atividade" : "Avaliação"} "${item.title}" enviada`);
+  if (!hasEssay) {
+    upsertGrade({
+      studentId: student.id, courseId: item.courseId, kind, refId: itemId, refTitle: item.title,
+      score, max, weight: item.weight || (kind === "activity" ? 1 : 2), status: "auto_graded",
+    });
+    notify(student.id, "Resultado disponível", `${item.title}: ${score}/${max} pontos.`, "grade");
+  } else {
+    notify(student.id, "Envio confirmado", `${item.title} recebida — aguardando correção do professor.`, "grade");
+    // avisa professores do curso
+    where("teachers", (t) => t.courseIds?.includes(item.courseId)).forEach((t) => t.userId && notify(t.userId, "Correção pendente", `"${item.title}" aguarda correção de questões dissertativas.`, "grade"));
+  }
+  checkCompletionFor(student.id, item.courseId);
+  return at;
+}
+
+export function gradeAttempt(actor: Row, attemptId: string, essayScores: Record<string, number>, feedback: string) {
+  const at = find("attempts", attemptId);
+  if (!at) throw new Error("Tentativa não encontrada.");
+  const item = find(at.kind === "activity" ? "activities" : "assessments", at.itemId);
+  const qs = (item?.questions || []).filter((q: Row) => q.type === "essay" || q.type === "open");
+  let es = 0;
+  qs.forEach((q: Row) => { es += Math.min(Number(essayScores[q.qid] ?? 0), q.points || 1); });
+  const total = (at.objScore || 0) + es;
+  update("attempts", attemptId, { essayScore: es, score: total, status: "graded", feedback, gradedBy: actor.name, gradedAt: now() });
+  upsertGrade({
+    studentId: at.studentId, courseId: at.courseId, kind: at.kind, refId: at.itemId, refTitle: at.itemTitle,
+    score: total, max: at.max, weight: item?.weight || (at.kind === "activity" ? 1 : 2),
+    status: "graded", feedback, gradedBy: actor.name,
+  });
+  audit(actor, "GRADE_CHANGE", "attempts", attemptId, `Nota ${total}/${at.max} lançada · ${at.itemTitle}`);
+  notify(at.studentId, "Correção concluída", `${at.itemTitle}: nota ${total}/${at.max}. ${feedback ? "Feedback: " + feedback : ""}`, "grade");
+  checkCompletionFor(at.studentId, at.courseId);
+}
+
+/* ================= PROJETOS ================= */
+export function submitSubmission(student: Row, project: Row, data: { url: string; github: string; description: string; fileName?: string; fileData?: string }) {
+  const prev = one("submissions", (s) => s.projectId === project.id && s.studentId === student.id);
+  const payload = {
+    projectId: project.id, courseId: project.courseId, studentId: student.id,
+    ...data, status: "submitted", submittedAt: now(),
+  };
+  if (prev) { update("submissions", prev.id, payload); audit(student, "UPDATE", "submissions", prev.id, `Projeto "${project.title}" reenviado`); return find("submissions", prev.id); }
+  const s = insert("submissions", payload);
+  audit(student, "CREATE", "submissions", s.id, `Projeto "${project.title}" enviado`);
+  notify(student.id, "Projeto enviado", `"${project.title}" recebido. Aguarde a avaliação do professor.`, "project");
+  where("teachers", (t) => t.courseIds?.includes(project.courseId)).forEach((t) => t.userId && notify(t.userId, "Projeto para avaliar", `Entrega de "${project.title}" aguardando avaliação.`, "project"));
+  return s;
+}
+
+export function reviewSubmission(actor: Row, submissionId: string, data: { status: string; score?: number; comment: string }) {
+  const sub = find("submissions", submissionId);
+  if (!sub) throw new Error("Entrega não encontrada.");
+  const project = find("projects", sub.projectId);
+  update("submissions", submissionId, { ...data, reviewedBy: actor.name, reviewedAt: now(), feedback: [...(sub.feedback || []), { by: actor.name, at: now(), text: data.comment }] });
+  if (data.status === "approved" && typeof data.score === "number") {
+    upsertGrade({
+      studentId: sub.studentId, courseId: sub.courseId, kind: "project", refId: sub.projectId,
+      refTitle: project?.title || "Projeto", score: data.score, max: project?.maxScore || 100,
+      weight: 3, status: "graded", feedback: data.comment, gradedBy: actor.name,
+    });
+    audit(actor, "GRADE_CHANGE", "submissions", submissionId, `Projeto aprovado · nota ${data.score}`);
+  } else {
+    audit(actor, "UPDATE", "submissions", submissionId, `Projeto → ${data.status}`);
+  }
+  const msg = data.status === "approved" ? "aprovado" : data.status === "rejected" ? "reprovado" : "devolvido para ajustes";
+  notify(sub.studentId, `Projeto ${msg}`, `"${project?.title}" — ${data.comment || "Sem comentários."}`, "project");
+  checkCompletionFor(sub.studentId, sub.courseId);
+}
+
+/* ================= CONCLUSÃO + CERTIFICADO ================= */
+export function checkCompletionFor(studentId: string, courseId: string) {
+  const en = one("enrollments", (e) => e.studentId === studentId && e.courseId === courseId && (e.status === "ACTIVE"));
+  if (!en) return null;
+  const prog = courseProgress(studentId, courseId);
+  const assessments = where("assessments", (a) => a.courseId === courseId && a.published);
+  const attempts = where("attempts", (a) => a.studentId === studentId && a.courseId === courseId);
+  const allAssessed = assessments.every((a) => attempts.some((t) => t.itemId === a.id && ["auto_graded", "graded", "review"].includes(t.status)));
+  const { avg, count } = weightedAvg(studentId, courseId);
+  const pass = getSettings().passScore || 70;
+  const avgOk = count === 0 || avg >= pass;
+  const projects = where("projects", (p) => p.courseId === courseId);
+  const projOk = !getSettings().completionRequireProject || projects.length === 0 ||
+    projects.some((p) => one("submissions", (s) => s.projectId === p.id && s.studentId === studentId && s.status === "approved"));
+  if (prog.total > 0 && prog.percent >= 100 && allAssessed && avgOk && projOk) {
+    update("enrollments", en.id, { status: "COMPLETED", completedAt: now(), progress: 100 });
+    audit(null, "UPDATE", "enrollments", en.id, `Curso concluído · matrícula ${en.number}`);
+    issueCertificate(en);
+    return true;
+  }
+  update("enrollments", en.id, { progress: prog.percent });
+  return false;
+}
+
+export function issueCertificate(enrollment: Row): Row | undefined {
+  const existing = one("certificates", (c) => c.enrollmentId === enrollment.id);
+  if (existing) return existing;
+  const course = find("courses", enrollment.courseId)!;
+  const student = find("users", enrollment.studentId)!;
+  const cert = insert("certificates", {
+    code: nextCertCode(), studentId: student.id, courseId: course.id, enrollmentId: enrollment.id,
+    studentName: student.name, courseTitle: course.title, hours: course.hours || 0,
+    level: course.level, periodStart: enrollment.startDate, periodEnd: now(), issuedAt: now(),
+  });
+  audit(null, "CERTIFICATE_GENERATED", "certificates", cert.id, `Certificado ${cert.code} · ${student.name} · ${course.title}`);
+  sendEmail(student.email, "Certificado disponível — Cyber Academy", `Parabéns ${student.name}! Você concluiu ${course.title}. Certificado ${cert.code} disponível no portal.`);
+  notify(student.id, "Certificado emitido 🏅", `Você concluiu ${course.title}! Certificado ${cert.code} disponível.`, "certificate");
+  return cert;
+}
+
+export function validateCertificate(code: string): { valid: boolean; cert?: Row; course?: Row; enrollment?: Row } {
+  const clean = code.trim().toUpperCase();
+  const cert = one("certificates", (c) => c.code.toUpperCase() === clean);
+  insert("certificate_validations", { code: clean, valid: !!cert, at: now(), origin: "página pública" });
+  if (!cert) return { valid: false };
+  audit(null, "UPDATE", "certificate_validations", cert.id, `Validação pública do certificado ${cert.code}`);
+  return { valid: true, cert, course: find("courses", cert.courseId), enrollment: find("enrollments", cert.enrollmentId) };
+}
+
+/* ================= FREQUÊNCIA ================= */
+export function setAttendance(actor: Row, data: { studentId: string; classId: string; lessonId: string; date: string; status: string; justification?: string }) {
+  const ex = one("attendance", (a) => a.studentId === data.studentId && a.classId === data.classId && a.lessonId === data.lessonId);
+  if (ex) { update("attendance", ex.id, { status: data.status, justification: data.justification || "", date: data.date }); audit(actor, "UPDATE", "attendance", ex.id, `Frequência → ${data.status}`); return find("attendance", ex.id); }
+  const a = insert("attendance", data);
+  audit(actor, "CREATE", "attendance", a.id, `Frequência registrada (${data.status})`);
+  return a;
+}
+
+/* ================= SUPORTE ================= */
+export function createTicket(user: Row, subject: string, category: string, message: string, enrollmentId?: string) {
+  const t = insert("support_tickets", { userId: user.id, userName: user.name, subject, category, status: "open", enrollmentId, createdAt: now() });
+  insert("ticket_messages", { ticketId: t.id, authorId: user.id, authorName: user.name, authorRole: "student", text: message, at: now() });
+  audit(user, "CREATE", "support_tickets", t.id, `Chamado "${subject}" aberto`);
+  where("users", (u) => u.role === "support" || u.role === "admin").forEach((u) => notify(u.id, "Novo chamado", `${user.name}: ${subject}`, "support"));
+  return t;
+}
+
+export function replyTicket(actor: Row, ticketId: string, text: string, close = false) {
+  insert("ticket_messages", { ticketId, authorId: actor.id, authorName: actor.name, authorRole: actor.role, text, at: now() });
+  update("support_tickets", ticketId, { status: close ? "closed" : "answered" });
+  const t = find("support_tickets", ticketId)!;
+  if (actor.role !== "student") notify(t.userId, "Resposta no seu chamado", `${t.subject}: nova resposta do suporte.`, "support");
+  audit(actor, "UPDATE", "support_tickets", ticketId, close ? "Chamado encerrado" : "Chamado respondido");
+}
+
+/* ================= EXPORTAÇÃO ================= */
+export function downloadCSV(name: string, rows: Row[], cols: [string, string][]) {
+  const head = cols.map((c) => c[1]).join(";");
+  const body = rows.map((r) => cols.map(([k]) => String(r[k] ?? "").replace(/;/g, ",").replace(/\n/g, " ")).join(";")).join("\n");
+  const blob = new Blob(["\ufeff" + head + "\n" + body], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ================= PERMISSÕES (RBAC) ================= */
+export function teacherCourses(teacherId: string): Row[] {
+  return where("courses", (c) => c.teacherId === teacherId);
+}
+export function teacherClasses(teacherId: string): Row[] {
+  return where("classes", (c) => c.teacherId === teacherId);
+}
+export function canTeacherAccess(teacherId: string, courseId: string): boolean {
+  const c = find("courses", courseId);
+  if (!c) return false;
+  if (c.teacherId === teacherId) return true;
+  return where("classes", (k) => k.courseId === courseId && k.teacherId === teacherId).length > 0;
+}
+
+export { all, one, where, find, insert, update, remove, uid, now, audit, notify, sendEmail, wipeDB, save, getSettings, hashPw };
+export { fmtBRL, fmtDate, fmtDT, timeAgo, nextOrderNumber, nextEnrollmentNumber, nextCertCode, setSettings, statusBadge } from "./db";
+export type { Row } from "./db";
