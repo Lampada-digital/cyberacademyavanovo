@@ -4,7 +4,7 @@ import { AppShell, type NavItem } from "../components/layout";
 import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg } from "../components/ui";
 import { useApp, navigate } from "../state";
 import { CourseContent } from "./teacher";
-import { TicketsConsole, AdminSystem } from "./admin2";
+import { TicketsConsole, AdminSystem, SiteCMS } from "./admin2";
 import { seedDemo, hasData, IMG } from "../lib/seed";
 import {
   refundPayment, all, one, where, find, insert, update, remove, audit, notify,
@@ -85,6 +85,7 @@ export const NAV_ADMIN: NavItem[] = [
   { to: "/admin/alunos", icon: "users", label: "Alunos" },
   { to: "/admin/professores", icon: "cap", label: "Professores" },
   { to: "/admin/cursos", icon: "layers", label: "Cursos" },
+  { to: "/admin/site", icon: "globe", label: "Conteúdo do site" },
   { to: "/admin/turmas", icon: "cal", label: "Turmas" },
   { to: "/admin/matriculas", icon: "award", label: "Matrículas" },
   { to: "/admin/documentos", icon: "file", label: "Documentos" },
@@ -107,6 +108,7 @@ export default function AdminArea({ path, segs }: { path: string; segs: string[]
     case "alunos": page = <Alunos />; break;
     case "professores": page = <Professores />; break;
     case "cursos": page = segs[2] ? <CourseContent courseId={segs[2]} actor={user!} /> : <Cursos />; break;
+    case "site": page = <SiteCMS />; break;
     case "turmas": page = <Turmas />; break;
     case "matriculas": page = <Matriculas />; break;
     case "documentos": page = <DocumentReview />; break;
