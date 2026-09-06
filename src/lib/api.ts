@@ -137,24 +137,39 @@ export const courseBySlug = (slug: string) => one("courses", (c) => c.slug === s
 export const effectivePrice = (c: Row) => (c.promoActive && c.promoPrice ? Number(c.promoPrice) : Number(c.price));
 
 /* ================= MODELO DE PRECIFICAÇÃO (avulso × mensalidade) ================= */
+/** Modelo único de venda: MENSALIDADES.
+ *  - monthly: valor integral da mensalidade
+ *  - promoMonthly: mensalidade promocional (opcional)
+ *  RESSALVA: a promoção vale apenas se cada mensalidade for paga ATÉ a data de
+ *  vencimento. Passado o prazo, a mensalidade volta ao VALOR INTEGRAL. */
 export interface Pricing {
-  model: "one_time" | "subscription";
-  total: number;            // valor total do curso
-  monthly: number;          // valor da mensalidade
+  model: "subscription";
+  monthly: number;          // mensalidade integral
+  promoMonthly: number;     // mensalidade promocional (0 = sem promoção)
   months: number;           // nº de mensalidades (plano)
-  freeReenroll: boolean;    // rematrícula grátis após conclusão
-  label: string;            // rótulo comercial, ex.: "12x de R$ 89,90/mês"
+  freeReenroll: boolean;
+  label: string;
+  note: string;             // ressalva da promoção
 }
 export function coursePricing(c: Row): Pricing {
-  const total = effectivePrice(c);
-  const model = c.pricingModel === "subscription" ? "subscription" : "one_time";
   const months = Math.max(1, Number(c.planMonths) || 1);
-  const monthly = c.pricingModel === "subscription" && c.monthlyPrice ? Number(c.monthlyPrice) : Math.round((total / months) * 100) / 100;
+  const monthly = Number(c.monthlyPrice) || Math.round((effectivePrice(c) / months) * 100) / 100;
+  const promoMonthly = c.promoActive ? Number(c.promoPrice) || 0 : 0;
   const freeReenroll = !!c.freeReenroll;
-  const label = model === "subscription"
-    ? `${months}x de ${fmtBRL(monthly)}/mês`
-    : `${fmtBRL(total)}${c.installments > 1 ? ` · até ${c.installments}x` : " à vista"}`;
-  return { model, total: model === "subscription" ? Math.round(monthly * months * 100) / 100 : total, monthly, months, freeReenroll, label };
+  const eff = promoMonthly > 0 && promoMonthly < monthly ? promoMonthly : monthly;
+  const label = `${months}x de ${fmtBRL(eff)}/mês`;
+  const note = promoMonthly > 0
+    ? `Mensalidade promocional de ${fmtBRL(promoMonthly)} válida somente com pagamento até a data de vencimento. Em atraso, a mensalidade passa a ser cobrada pelo valor integral de ${fmtBRL(monthly)}.`
+    : `Mensalidade de ${fmtBRL(monthly)} — pagamento via boleto, Pix ou cartão até o vencimento.`;
+  return { model: "subscription", monthly, promoMonthly, months, freeReenroll, label, note };
+}
+/** Valor da mensalidade vigente: promocional se paga em dia, integral se em atraso. */
+export function installmentAmount(inst: Row, course: Row): { amount: number; late: boolean } {
+  const p = coursePricing(course);
+  const due = new Date(inst.dueDate).getTime();
+  const late = Date.now() > due;
+  if (!late && p.promoMonthly > 0 && p.promoMonthly < p.monthly) return { amount: p.promoMonthly, late: false };
+  return { amount: p.monthly, late };
 }
 
 /** Parcelas/mensalidades de um pedido (cronograma financeiro). */
@@ -199,30 +214,45 @@ export function courseTree(courseId: string) {
 export const teacherName = (t?: Row) => t?.name || "A definir";
 
 /* ================= CHECKOUT + MERCADO PAGO + WEBHOOK ================= */
-export function createOrder(user: Row, course: Row, installments: number): Row {
+/**
+ * Cria o pedido no modelo de MENSALIDADES.
+ * payDay: dia do mês escolhido pelo aluno para vencimento (ex.: 5, 10, 15…).
+ * method: "boleto" | "pix" | "credit" | "debit".
+ * Desconto de parceiro (percent) é aplicado sobre a mensalidade.
+ */
+export function createOrder(user: Row, course: Row, opts: { payDay: number; method: string; partnerDiscount?: number }): Row {
   const p = coursePricing(course);
-  const isSub = p.model === "subscription";
-  // assinatura: cobra a 1ª mensalidade agora e gera o cronograma das demais
-  const amount = isSub ? p.monthly : effectivePrice(course);
+  const disc = opts.partnerDiscount || 0;
+  const base = (v: number) => Math.round(v * (1 - disc / 100) * 100) / 100;
+  const monthly = base(p.monthly);
+  const promo = p.promoMonthly > 0 ? base(p.promoMonthly) : 0;
   const order = insert("orders", {
     number: nextOrderNumber(), userId: user.id, courseId: course.id,
-    amount, installments: isSub ? p.months : installments, status: "created",
-    gateway: "mercadopago", model: p.model,
+    amount: promo || monthly, installments: p.months, status: "created",
+    gateway: "mercadopago", model: "subscription", payDay: opts.payDay, method: opts.method,
+    partnerDiscount: disc,
   });
-  if (isSub) {
-    for (let n = 1; n <= p.months; n++) {
-      const due = new Date();
-      due.setMonth(due.getMonth() + (n - 1));
-      insert("installments", {
-        orderId: order.id, userId: user.id, courseId: course.id, n,
-        amount: p.monthly, dueDate: due.toISOString(),
-        status: n === 1 ? "pending" : "scheduled", // 1ª mensalidade paga no checkout
-        paidAt: null,
-      });
-    }
+  for (let n = 1; n <= p.months; n++) {
+    const due = new Date();
+    due.setDate(opts.payDay);
+    due.setMonth(due.getMonth() + (n - 1));
+    if (n === 1 && due.getTime() < Date.now()) due.setMonth(due.getMonth() + 1);
+    insert("installments", {
+      orderId: order.id, userId: user.id, courseId: course.id, n,
+      amount: promo || monthly, dueDate: due.toISOString(),
+      status: n === 1 ? "pending" : "scheduled", paidAt: null, boleto: null,
+    });
   }
-  audit(user, "CREATE", "orders", order.id, `Pedido ${order.number} · ${course.title} · ${p.label}`);
+  audit(user, "CREATE", "orders", order.id, `Pedido ${order.number} · ${course.title} · ${p.label}${disc ? ` · parceiro -${disc}%` : ""}`);
   return order;
+}
+
+/** Gera a linha digitável de um boleto (simulação de backend bancário). */
+export function boletoLinhaDigitavel(pay: Row): string {
+  let h = 0;
+  for (let i = 0; i < pay.id.length; i++) h = (h * 33 + pay.id.charCodeAt(i)) >>> 0;
+  const g = (n: number) => String((h >> n) % 100000).padStart(5, "0");
+  return `23793.${g(2)}  ${g(7)}.${g(12)}  ${g(17)}.${g(22)}  ${g(3)}  ${String(Math.round(pay.amount * 100)).padStart(10, "0")}`;
 }
 
 /** Liquida a mensalidade atual de uma assinatura e agenda a cobrança da próxima. */
@@ -833,6 +863,128 @@ export function sessionExpired(): boolean {
     if (ses && (ses.revoked || (ses.exp || 0) < Date.now())) { localStorage.removeItem(SKEY); return true; }
   } catch { localStorage.removeItem(SKEY); }
   return false;
+}
+
+/* ================= PARCERIAS (escolas parceiras) ================= */
+export function partnerByCode(code: string): Row | undefined {
+  return one("partnerships", (p) => p.code === code?.trim().toUpperCase() && p.status === "ACTIVE");
+}
+export function createPartnership(admin: Row, d: Record<string, any>): Row {
+  const code = d.code || ("CA-" + (d.schoolName || "PAR").slice(0, 3).toUpperCase() + "-" + String(all("partnerships").length + 1).padStart(3, "0")).toUpperCase();
+  const pt = insert("partnerships", { schoolName: d.schoolName, contactName: d.contactName || "", contactEmail: d.contactEmail || "", contactPhone: d.contactPhone || "", discountPercent: Number(d.discountPercent) || 10, code, status: "ACTIVE", createdAt: now() });
+  audit(admin, "CREATE", "partnerships", pt.id, `Parceria ${pt.schoolName} (${pt.code}) desconto ${pt.discountPercent}%`);
+  return pt;
+}
+export function linkPartnerStudent(studentId: string, partnerId: string) {
+  if (one("partner_students", (ps) => ps.studentId === studentId)) return;
+  insert("partner_students", { studentId, partnerId, linkedAt: now() });
+}
+export function studentPartner(studentId: string): Row | undefined {
+  const link = one("partner_students", (ps) => ps.studentId === studentId);
+  return link ? find("partnerships", link.partnerId) : undefined;
+}
+
+/* ================= CONTRATOS POR CURSO ================= */
+export function courseContract(courseId: string): Row | undefined {
+  return where("course_contracts", (c) => c.courseId === courseId).sort((a, b) => b.version - a.version)[0];
+}
+export function acceptContract(user: Row, courseId: string): Row {
+  const c = courseContract(courseId);
+  if (!c) throw new Error("Curso sem contrato vigente.");
+  if (one("contract_acceptances", (a) => a.userId === user.id && a.contractId === c.id)) throw new Error("Contrato já aceito.");
+  const acc = insert("contract_acceptances", { userId: user.id, contractId: c.id, courseId, at: now(), ip: "local" });
+  audit(user, "CREATE", "contract_acceptances", acc.id, `Aceite do contrato "${c.title}" v${c.version}`);
+  return acc;
+}
+
+/* ================= SOLICITAÇÕES DE SERVIÇO (AVA) ================= */
+export const SERVICE_TYPES: Record<string, string> = {
+  historico: "Histórico escolar",
+  declaracao: "Declaração / comprovante",
+  financeiro: "Serviços financeiros",
+  certificado: "2ª via de certificado",
+  outro: "Solicitação geral",
+};
+export function createServiceRequest(user: Row, d: { type: string; subject: string; description: string }): Row {
+  const sr = insert("service_requests", { userId: user.id, type: d.type, subject: d.subject, description: d.description, status: "PENDING", response: "", createdAt: now() });
+  audit(user, "CREATE", "service_requests", sr.id, `${SERVICE_TYPES[d.type] || d.type}: ${d.subject}`);
+  where("users", (u) => ["admin", "support", "finance", "atendimento"].includes(u.role)).forEach((u) => notify(u.id, "Nova solicitação de aluno", `${user.name}: ${d.subject}`, "support"));
+  return sr;
+}
+export function respondServiceRequest(actor: Row, id: string, response: string, done: boolean) {
+  const sr = find("service_requests", id);
+  if (!sr) return;
+  update("service_requests", id, { response, status: done ? "COMPLETED" : "IN_PROGRESS", answeredAt: now() });
+  audit(actor, "UPDATE", "service_requests", id, `${done ? "Concluída" : "Em andamento"}: ${sr.subject}`);
+  notify(sr.userId, done ? "Solicitação concluída" : "Solicitação em andamento", `${sr.subject} — ${response.slice(0, 120)}`, "support");
+}
+
+/* ================= CENTRAL DE CARREIRAS ================= */
+export function bookCareerSession(user: Row, d: { service: string; date: string; notes: string }): Row {
+  const s = insert("career_sessions", { userId: user.id, service: d.service, date: d.date, notes: d.notes, status: "scheduled", createdAt: now() });
+  audit(user, "CREATE", "career_sessions", s.id, `Agendamento: ${d.service}`);
+  where("users", (u) => ["admin", "support", "atendimento"].includes(u.role)).forEach((u) => notify(u.id, "Novo agendamento de carreira", `${user.name}: ${d.service}`, "info"));
+  return s;
+}
+export function requestCvReview(user: Row, cvText: string): Row {
+  const r = insert("cv_requests", { userId: user.id, cvText, status: "PENDING", feedback: "", createdAt: now() });
+  audit(user, "CREATE", "cv_requests", r.id, "Revisão de currículo solicitada");
+  return r;
+}
+
+/* ================= ONGs (cursos gratuitos) ================= */
+export function createNgo(admin: Row, d: Record<string, any>): Row {
+  const o = insert("ngos", { name: d.name, contactName: d.contactName || "", contactEmail: d.contactEmail || "", status: "ACTIVE", createdAt: now() });
+  audit(admin, "CREATE", "ngos", o.id, `ONG cadastrada: ${d.name}`);
+  return o;
+}
+export function assignNgoCourse(admin: Row, ngoId: string, courseId: string) {
+  if (one("ngo_courses", (n) => n.ngoId === ngoId && n.courseId === courseId)) return;
+  insert("ngo_courses", { ngoId, courseId, seats: 20, createdAt: now() });
+  audit(admin, "CREATE", "ngo_courses", "", `Curso gratuito liberado para ONG`);
+}
+export function ngoFreeEnroll(user: Row, ngoId: string, courseId: string): Row {
+  const nc = one("ngo_courses", (n) => n.ngoId === ngoId && n.courseId === courseId);
+  if (!nc) throw new Error("Este curso não está liberado para sua ONG.");
+  if (one("enrollments", (e) => e.studentId === user.id && e.courseId === courseId && ["ACTIVE", "COMPLETED"].includes(e.status))) throw new Error("Você já está matriculado neste curso.");
+  const en = insert("enrollments", {
+    number: nextEnrollmentNumber(), studentId: user.id, courseId, classId: null,
+    status: "ACTIVE", origin: "ngo-free", orderId: null, paymentId: null, ngoId,
+    startDate: now(), dueDate: new Date(Date.now() + 365 * 86400e3).toISOString(), progress: 0,
+  });
+  audit(user, "ENROLLMENT", "enrollments", en.id, `Matrícula gratuita ONG ${en.number}`);
+  notify(user.id, "Curso gratuito liberado", `Matrícula ${en.number} ativa — bons estudos!`, "enrollment");
+  return en;
+}
+export function userNgo(userId: string): Row | undefined {
+  const u = find("users", userId);
+  return u?.ngoId ? find("ngos", u.ngoId) : undefined;
+}
+
+/* ================= DIÁRIO DE CLASSE / FREQUÊNCIA (AVA) ================= */
+/** Presença = aula assistida/concluída no AVA. Retorna % de presença do aluno no curso. */
+export function studentAttendance(studentId: string, courseId: string): { present: number; total: number; percent: number } {
+  const lessons = publishedLessons(courseId);
+  const states = new Map(where("lesson_progress", (p) => p.studentId === studentId && lessons.some((l) => l.id === p.lessonId)).map((s) => [s.lessonId, s]));
+  const present = lessons.filter((l) => (states.get(l.id)?.percent || 0) >= 75).length;
+  const total = lessons.length;
+  return { present, total, percent: total ? Math.round((present / total) * 100) : 0 };
+}
+export function minAttendance(): number {
+  return Number(getSettings().minAttendance ?? 75);
+}
+/** Diário de classe: por aluno, presença em cada aula. */
+export function classDiary(courseId: string) {
+  const lessons = publishedLessons(courseId);
+  const ens = where("enrollments", (e) => e.courseId === courseId && ["ACTIVE", "COMPLETED"].includes(e.status));
+  return ens.map((e) => {
+    const att = studentAttendance(e.studentId, courseId);
+    const perLesson = lessons.map((l) => {
+      const st = one("lesson_progress", (p) => p.studentId === e.studentId && p.lessonId === l.id);
+      return { lesson: l.title, present: (st?.percent || 0) >= 75, percent: st?.percent || 0 };
+    });
+    return { enrollment: e, student: find("users", e.studentId), attendance: att, perLesson };
+  }).filter((d) => d.student);
 }
 
 export { all, one, where, find, insert, update, remove, uid, now, audit, notify, sendEmail, wipeDB, save, getSettings, hashPw };

@@ -20,6 +20,9 @@ export const TABLES = [
   "notifications", "support_tickets", "ticket_messages",
   "audit_logs", "emails", "posts", "faqs", "files",
   "documents", "forum_posts", "lesson_notes", "xp_events",
+  "partnerships", "partner_students", "course_contracts", "contract_acceptances",
+  "service_requests", "career_sessions", "jobs", "cv_requests",
+  "ngos", "ngo_courses", "lab_access",
 ];
 
 export const DOC_KINDS: Record<string, string> = {
@@ -215,6 +218,9 @@ export const STATUS_LABEL: Record<string, [string, string]> = {
   auto_graded: ["Corrigida", "b-green"], review: ["Aguard. correção", "b-amber"], graded: ["Nota lançada", "b-green"],
   expired: ["Expirada", "b-coral"], published: ["Publicado", "b-green"], unpublished: ["Não publicado", "b-mist"],
   active: ["Ativo", "b-green"], inactive: ["Inativo", "b-mist"],
+  IN_PROGRESS: ["Em andamento", "b-mp"],
+  scheduled: ["Agendada", "b-amber"], confirmed: ["Confirmada", "b-green"], done: ["Realizada", "b-green"],
+  filled: ["Preenchida", "b-mist"], partner: ["Parceira", "b-amber"], overdue: ["Em atraso", "b-coral"],
   PENDING_REVIEW: ["Em análise", "b-amber"], APPROVED: ["Aprovado", "b-green"], REJECTED: ["Rejeitado", "b-coral"],
   on: ["Ativado", "b-green"], off: ["Desativado", "b-mist"],
 };

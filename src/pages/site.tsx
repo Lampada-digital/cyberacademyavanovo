@@ -117,35 +117,23 @@ export function CoursePage({ slug }: { slug: string }) {
     ["E se eu não gostar?", "Você tem 7 dias de garantia incondicional: reembolso integral processado pelo Mercado Pago e cancelamento automático da matrícula."],
   ];
   const pricing = coursePricing(c);
-  const isSub = pricing.model === "subscription";
+  const hasPromo = pricing.promoMonthly > 0 && pricing.promoMonthly < pricing.monthly;
   const priceCard = (
     <Card className="p-6 lg:sticky lg:top-24">
       <div className="h-[150px] rounded-lg overflow-hidden mb-5"><CoverImg src={c.image} title={c.title} className="h-full" /></div>
-      {isSub ? (
-        <>
-          <div className="flex items-baseline gap-2">
-            <span className="font-display font-bold text-[32px] text-cy-300 tnum">{fmtBRL(pricing.monthly)}</span>
-            <span className="font-mono text-[13px] text-dim">/mês</span>
-          </div>
-          <div className="font-mono text-[12px] text-fog mt-1">plano de {pricing.months} mensalidades · total {fmtBRL(pricing.total)}</div>
-          <div className="font-mono text-[11.5px] text-dim mt-1 flex items-center gap-2"><I n="card" s={13} /> Assinatura recorrente via Mercado Pago</div>
-        </>
-      ) : (
-        <>
-          {c.promoActive && c.promoPrice ? (
-            <div className="flex items-end gap-3">
-              <span className="font-display font-bold text-[32px] text-ember tnum">{fmtBRL(effectivePrice(c))}</span>
-              <span className="font-mono text-[13px] text-dim line-through mb-1">{fmtBRL(Number(c.price))}</span>
-            </div>
-          ) : (
-            <span className="font-display font-bold text-[32px] text-cy-300 tnum">{fmtBRL(Number(c.price))}</span>
-          )}
-          {c.installments > 1 && <div className="font-mono text-[12px] text-fog mt-1">em até {c.installments}x de {fmtBRL(effectivePrice(c) / c.installments)} no cartão</div>}
-          <div className="font-mono text-[11.5px] text-dim mt-1 flex items-center gap-2"><I n="pix" s={13} /> Pix à vista · <I n="card" s={13} /> Cartão via Mercado Pago</div>
-        </>
-      )}
-      {c.freeReenroll && <div className="cy-badge b-amber mt-2"><I n="refresh" s={10} /> rematrícula grátis após concluir</div>}
-      <button onClick={buy} className="cy-btn cy-btn-e w-full py-3.5 text-[14px] mt-5"><I n="cap" s={17} /> {isSub ? "ASSINAR AGORA" : "INSCREVER-SE AGORA"}</button>
+      <div className="flex items-baseline gap-2">
+        <span className={`font-display font-bold text-[32px] tnum ${hasPromo ? "text-ember" : "text-cy-300"}`}>{fmtBRL(hasPromo ? pricing.promoMonthly : pricing.monthly)}</span>
+        <span className="font-mono text-[13px] text-dim">/mês</span>
+      </div>
+      {hasPromo && <div className="font-mono text-[12px] text-dim mt-0.5"><span className="line-through">{fmtBRL(pricing.monthly)}</span> · mensalidade promocional</div>}
+      <div className="font-mono text-[12px] text-fog mt-1">plano de {pricing.months} mensalidades · total {fmtBRL(Math.round((hasPromo ? pricing.promoMonthly : pricing.monthly) * pricing.months * 100) / 100)}</div>
+      <div className="font-mono text-[11.5px] text-dim mt-1 flex items-center gap-2"><I n="pix" s={13} /> Pix · <I n="card" s={13} /> Boleto · Cartão via Mercado Pago</div>
+      <div className="mt-3 cy-card p-3 border-ember/40 text-[11px] text-fog leading-relaxed flex gap-2">
+        <I n="alert" s={14} c="text-ember shrink-0 mt-0.5" />
+        <span>{pricing.note}</span>
+      </div>
+      {c.freeReenroll && <div className="cy-badge b-amber mt-3"><I n="refresh" s={10} /> rematrícula grátis após concluir</div>}
+      <button onClick={buy} className="cy-btn cy-btn-e w-full py-3.5 text-[14px] mt-5"><I n="cap" s={17} /> INSCREVER-SE AGORA</button>
       <div className="text-center font-mono text-[10.5px] text-dim mt-2.5">acesso liberado automaticamente após o webhook</div>
       <div className="mt-5 space-y-2.5">
         {[

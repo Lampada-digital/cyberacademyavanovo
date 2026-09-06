@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { I, Logo } from "../components/icons";
-import { Btn, Card, Field, TIn, CoverImg, useToast, Badge } from "../components/ui";
+import { Btn, Card, Field, TIn, TSel, CoverImg, useToast, Badge } from "../components/ui";
 import { QRMatrix } from "../components/fx";
 import { useApp, navigate } from "../state";
 import {
   login, register, setupAdmin, createOrder, createGatewayPayment, handleWebhook,
-  courseById, effectivePrice, requestReset, doReset, one, myEnrollments, coursePricing,
+  courseById, requestReset, doReset, one, myEnrollments, coursePricing,
+  acceptContract, courseContract, studentPartner,
   fmtBRL, type Row,
 } from "../lib/api";
 
@@ -226,15 +227,19 @@ export function Checkout({ courseId }: { courseId: string }) {
   const toast = useToast();
   const course = courseById(courseId);
   const [step, setStep] = useState<Step>("resumo");
-  const [inst, setInst] = useState(1);
-  const [method, setMethod] = useState<"card" | "pix">("card");
+  const [payDay, setPayDay] = useState(10);
+  const [method, setMethod] = useState<"boleto" | "pix" | "credit" | "debit">("pix");
   const [card, setCard] = useState({ number: "", name: "", exp: "", cvv: "" });
+  const [agreeContract, setAgreeContract] = useState(false);
   const [order, setOrder] = useState<Row | null>(null);
   const [pay, setPay] = useState<Row | null>(null);
   const [pipe, setPipe] = useState(0);
   const [result, setResult] = useState<{ ok: boolean; message: string; enrollment?: Row } | null>(null);
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const contract = course ? courseContract(course.id) : undefined;
+  const partner = user ? studentPartner(user.id) : undefined;
+  const discount = partner ? Number(partner.discountPercent) || 0 : 0;
   if (!user) return null;
   if (!course || !course.published) {
     return <div className="max-w-[700px] mx-auto px-5 py-24 text-center"><h1 className="display-xl text-[24px] text-mist">Curso indisponível</h1><p className="text-fog mt-2 text-[13.5px]">Este curso não está publicado no catálogo.</p><a href="#/cursos" className="cy-btn cy-btn-p px-5 py-2.5 text-[12.5px] mt-5 inline-flex">Ver catálogo</a></div>;
@@ -252,17 +257,17 @@ export function Checkout({ courseId }: { courseId: string }) {
     </div>;
   }
   const pricing = coursePricing(course);
-  const isSub = pricing.model === "subscription";
-  const price = isSub ? pricing.monthly : effectivePrice(course);
-  const already = (window as any).__enr; void already;
+  const price = Math.round(pricing.monthly * (1 - discount / 100) * 100) / 100;
+  const effMonthly = pricing.promoMonthly > 0 && pricing.promoMonthly < pricing.monthly
+    ? Math.round(pricing.promoMonthly * (1 - discount / 100) * 100) / 100 : price;
 
   const startPayment = () => {
-    const o = createOrder(user, course, inst);
+    const o = createOrder(user, course, { payDay, method, partnerDiscount: discount });
     const p = createGatewayPayment(o, method);
     setOrder(o); setPay(p);
     setStep("processando"); setPipe(0);
     const steps = [
-      ["Pedido criado no SIA", 500],
+      ["Pedido criado no SIA (modelo mensalidades)", 500],
       ["Checkout Pro inicializado · preferência enviada ao Mercado Pago", 1300],
       ["Pagamento autorizado pelo comprador", 2400],
       ["Webhook recebido · POST /api/payments/mercadopago/webhook", 3300],
@@ -295,62 +300,83 @@ export function Checkout({ courseId }: { courseId: string }) {
             {/* RESUMO */}
             {step === "resumo" && (
               <Card className="p-6 md:p-7 anim-fade-up">
-                <div className="font-mono text-[11px] tracking-[.16em] uppercase text-fog mb-4">1 · Confirmação dos dados</div>
+                <div className="font-mono text-[11px] tracking-[.16em] uppercase text-fog mb-4">1 · Confirmação da inscrição</div>
                 <div className="flex items-center gap-3 text-[13.5px] text-fog mb-6">
                   <I n="user" s={16} c="text-cy-400" /> {user.name} · {user.email}
+                  {partner && <span className="cy-badge b-amber">parceiro · -{discount}%</span>}
                 </div>
-                {isSub ? (
-                  <div className="border border-cy-600/50 rounded-lg p-5 bg-cy-900/25">
-                    <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-3 flex items-center gap-2"><I n="wallet" s={14} /> Assinatura · plano de mensalidades</div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-display font-bold text-[30px] text-cy-300 tnum">{fmtBRL(pricing.monthly)}</span>
-                      <span className="text-[13px] text-dim">/mês · por {pricing.months} meses</span>
-                    </div>
-                    <div className="font-mono text-[11px] text-dim mt-1.5">total do plano {fmtBRL(pricing.total)}</div>
-                    <ul className="mt-4 space-y-1.5 text-[12.5px] text-fog">
-                      <li className="flex items-center gap-2"><I n="checkc" s={13} c="text-cy-400" /> Acesso imediato ao AVA após a 1ª mensalidade</li>
-                      <li className="flex items-center gap-2"><I n="checkc" s={13} c="text-cy-400" /> Cobrança recorrente via Mercado Pago (a cada ciclo)</li>
-                      {course.freeReenroll && <li className="flex items-center gap-2"><I n="refresh" s={13} c="text-ember" /> Rematrícula grátis após concluir</li>}
-                    </ul>
+                <div className="border border-cy-600/50 rounded-lg p-5 bg-cy-900/25">
+                  <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-3 flex items-center gap-2"><I n="wallet" s={14} /> Plano de mensalidades</div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-display font-bold text-[30px] text-cy-300 tnum">{fmtBRL(effMonthly)}</span>
+                    <span className="text-[13px] text-dim">/mês · por {pricing.months} meses</span>
                   </div>
-                ) : (
-                  <Field label="Parcelamento">
-                    <div className="grid sm:grid-cols-3 gap-2.5">
-                      {Array.from({ length: course.installments || 1 }, (_, i) => i + 1).map((n) => (
-                        <button key={n} onClick={() => setInst(n)}
-                          className={`cy-card p-3.5 text-left transition-all ${inst === n ? "border-ember/70 shadow-[0_0_0_1px_rgba(245,184,75,.4)]" : "hover:border-cy-600"}`}>
-                          <div className="font-display font-semibold text-[13.5px] text-mist">{n}x de {fmtBRL(price / n)}</div>
-                          <div className="font-mono text-[10.5px] text-dim mt-0.5">{n === 1 ? "à vista · Pix ou cartão" : "sem juros"}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </Field>
-                )}
-                <div className="mt-6 flex items-start gap-3 text-[12.5px] text-fog cy-card p-4 border-cy-700">
-                  <I n="shield" s={17} c="text-cy-400 shrink-0 mt-0.5" />
-                  Após a aprovação, o webhook do Mercado Pago cria sua matrícula automaticamente no SIA e libera o AVA. {isSub ? "As mensalidades seguintes são cobradas a cada ciclo." : "Garantia de 7 dias."}
+                  {pricing.promoMonthly > 0 && pricing.promoMonthly < pricing.monthly && (
+                    <div className="font-mono text-[11px] text-ember mt-1.5">mensalidade promocional aplicada (pagando em dia)</div>
+                  )}
+                  <div className="font-mono text-[11px] text-dim mt-1.5">total do plano {fmtBRL(Math.round(effMonthly * pricing.months * 100) / 100)}</div>
+                  <div className="mt-3 cy-card p-3 border-ember/40 text-[11.5px] text-fog leading-relaxed flex gap-2">
+                    <I n="alert" s={15} c="text-ember shrink-0 mt-0.5" />
+                    <span>{pricing.note}</span>
+                  </div>
+                  <ul className="mt-4 space-y-1.5 text-[12.5px] text-fog">
+                    <li className="flex items-center gap-2"><I n="checkc" s={13} c="text-cy-400" /> Acesso imediato ao AVA após a 1ª mensalidade</li>
+                    <li className="flex items-center gap-2"><I n="checkc" s={13} c="text-cy-400" /> Pagamento via boleto, Pix ou cartão (crédito/débito)</li>
+                    {course.freeReenroll && <li className="flex items-center gap-2"><I n="refresh" s={13} c="text-ember" /> Rematrícula grátis após concluir</li>}
+                  </ul>
                 </div>
-                <Btn v="e" className="w-full py-3.5 mt-6 text-[14px]" onClick={() => setStep("pagamento")}>
-                  Pagar com Mercado Pago <I n="arrowR" s={16} />
+                <div className="grid sm:grid-cols-2 gap-4 mt-5">
+                  <Field label="Dia de pagamento" hint="vencimento de cada mensalidade">
+                    <TSel value={payDay} onChange={(e) => setPayDay(Number(e.target.value))}>
+                      {[5, 10, 15, 20, 25].map((d) => <option key={d} value={d}>todo dia {d}</option>)}
+                    </TSel>
+                  </Field>
+                  <Field label="Forma de pagamento">
+                    <TSel value={method} onChange={(e) => setMethod(e.target.value as any)}>
+                      <option value="pix">Pix</option>
+                      <option value="boleto">Boleto bancário</option>
+                      <option value="credit">Cartão de crédito</option>
+                      <option value="debit">Cartão de débito</option>
+                    </TSel>
+                  </Field>
+                </div>
+                {contract && (
+                  <div className="mt-5 cy-card p-4 border-cy-700">
+                    <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-2 flex items-center gap-2"><I n="file" s={14} /> Contrato do curso · {contract.title} (v{contract.version})</div>
+                    <p className="text-[12px] text-fog leading-relaxed max-h-[110px] overflow-y-auto whitespace-pre-line">{contract.content}</p>
+                    <label className="flex items-start gap-2.5 mt-3 text-[12.5px] text-fog cursor-pointer">
+                      <input type="checkbox" className="mt-0.5 accent-[#03A6A6]" checked={agreeContract} onChange={(e) => setAgreeContract(e.target.checked)} />
+                      <span>Li e aceito o contrato de prestação de serviços educacionais <span className="text-dim">(aceite registrado no SIA)</span></span>
+                    </label>
+                  </div>
+                )}
+                <div className="mt-5 flex items-start gap-3 text-[12.5px] text-fog cy-card p-4 border-cy-700">
+                  <I n="shield" s={17} c="text-cy-400 shrink-0 mt-0.5" />
+                  Após a aprovação, o webhook do Mercado Pago cria sua matrícula no SIA e libera o AVA. As mensalidades seguintes vencem todo dia {payDay}.
+                </div>
+                <Btn v="e" className="w-full py-3.5 mt-6 text-[14px]" disabled={!!contract && !agreeContract}
+                  onClick={() => { if (contract) acceptContract(user, course.id); setStep("pagamento"); }}>
+                  Continuar para o pagamento <I n="arrowR" s={16} />
                 </Btn>
               </Card>
             )}
 
-            {/* PAGAMENTO (sandbox Checkout Pro) */}
+            {/* PAGAMENTO (sandbox Mercado Pago) */}
             {step === "pagamento" && (
               <Card className="overflow-hidden anim-fade-up">
                 <div className="px-6 py-4 flex items-center justify-between" style={{ background: "#0A2B3D" }}>
-                  <span className="font-display font-bold text-[15px] text-[#BFE7F8]">mercado<span className="text-[#7AD4F7]">pago</span> <span className="font-mono text-[10px] ml-2 text-[#5E93AC] uppercase tracking-widest">sandbox · checkout pro</span></span>
+                  <span className="font-display font-bold text-[15px] text-[#BFE7F8]">mercado<span className="text-[#7AD4F7]">pago</span> <span className="font-mono text-[10px] ml-2 text-[#5E93AC] uppercase tracking-widest">sandbox · 1ª mensalidade</span></span>
                   <I n="lock" s={16} c="text-[#7AD4F7]" />
                 </div>
                 <div className="p-6">
-                  <div className="flex gap-2 mb-6">
-                    <button onClick={() => setMethod("card")} className={`cy-btn px-4 py-2.5 text-[12.5px] ${method === "card" ? "cy-btn-p" : "cy-btn-g"}`}><I n="card" s={15} /> Cartão</button>
-                    <button onClick={() => setMethod("pix")} className={`cy-btn px-4 py-2.5 text-[12.5px] ${method === "pix" ? "cy-btn-p" : "cy-btn-g"}`}><I n="pix" s={15} /> Pix</button>
+                  <div className="flex gap-2 mb-6 flex-wrap">
+                    {([["pix", "pix", "Pix"], ["boleto", "file", "Boleto"], ["credit", "card", "Crédito"], ["debit", "card", "Débito"]] as [string, string, string][]).map(([k, ic, l]) => (
+                      <button key={k} onClick={() => setMethod(k as any)} className={`cy-btn px-4 py-2.5 text-[12.5px] ${method === k ? "cy-btn-p" : "cy-btn-g"}`}><I n={ic} s={15} /> {l}</button>
+                    ))}
                   </div>
-                  {method === "card" ? (
+                  {(method === "credit" || method === "debit") ? (
                     <div className="space-y-4">
-                      <Field label="Número do cartão" req hint="Sandbox: todas as bandeiras são aceitas e aprovadas (Visa, Master, Elo, Amex, Hiper…)">
+                      <Field label={`Número do cartão (${method === "credit" ? "crédito" : "débito"})`} req hint="Sandbox: todas as bandeiras são aceitas e aprovadas (Visa, Master, Elo, Amex, Hiper…)">
                         <div className="relative">
                           <TIn value={card.number} inputMode="numeric" placeholder="4242 4242 4242 4242"
                             onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} />
@@ -365,14 +391,24 @@ export function Checkout({ courseId }: { courseId: string }) {
                       <Btn v="p" className="w-full py-3.5 text-[14px]" onClick={() => {
                         if (card.number.replace(/\D/g, "").length < 6 || !card.name.trim()) { toast("Informe um número de cartão e o nome impresso.", "err"); return; }
                         startPayment();
-                      }}>{isSub ? `Assinar · 1ª mensalidade ${fmtBRL(price)}` : `Pagar ${fmtBRL(price)} ${inst > 1 ? `em ${inst}x` : ""}`}</Btn>
+                      }}>Pagar 1ª mensalidade {fmtBRL(effMonthly)}</Btn>
+                    </div>
+                  ) : method === "pix" ? (
+                    <div className="text-center py-4">
+                      <QRMatrix code={`PIX-${course.id}-${payDay}`} size={168} />
+                      <p className="text-[13px] text-fog mt-4">Escaneie com o app do seu banco ou</p>
+                      <Btn v="p" className="mt-4 px-6 py-3" onClick={startPayment}><I n="pix" s={15} /> Simular confirmação do Pix · {fmtBRL(effMonthly)}</Btn>
+                      <p className="font-mono text-[10.5px] text-dim mt-3">O QR real é gerado pela API do Mercado Pago (credenciais no backend).</p>
                     </div>
                   ) : (
                     <div className="text-center py-4">
-                      <QRMatrix code={`PIX-${order?.id || "pref"}-${course.id}`} size={168} />
-                      <p className="text-[13px] text-fog mt-4">Escaneie com o app do seu banco ou</p>
-                      <Btn v="p" className="mt-4 px-6 py-3" onClick={startPayment}><I n="pix" s={15} /> Simular confirmação do Pix</Btn>
-                      <p className="font-mono text-[10.5px] text-dim mt-3">O QR real é gerado pela API do Mercado Pago (credenciais no backend).</p>
+                      <div className="cy-card inline-block p-5 border-cy-700 text-left">
+                        <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-2">Boleto · 1ª mensalidade</div>
+                        <div className="font-mono text-[13px] text-mist tracking-wider">{`23793.${String(payDay).padStart(5, "0")}  ${String(Math.round(effMonthly * 100)).padStart(5, "0")}.${course.id.slice(0, 5)}  00000.${payDay}00000  0  ${String(Math.round(effMonthly * 100)).padStart(10, "0")}`}</div>
+                      </div>
+                      <p className="text-[13px] text-fog mt-4">Pagável em qualquer banco até o vencimento (dia {payDay}).</p>
+                      <Btn v="p" className="mt-4 px-6 py-3" onClick={startPayment}><I n="file" s={15} /> Simular compensação do boleto</Btn>
+                      <p className="font-mono text-[10.5px] text-dim mt-3">A linha digitável real é emitida pelo backend bancário.</p>
                     </div>
                   )}
                 </div>
@@ -442,19 +478,11 @@ export function Checkout({ courseId }: { courseId: string }) {
             <h3 className="font-display font-semibold text-[14.5px] text-mist leading-snug">{course.title}</h3>
             <div className="flex gap-3 mt-2 font-mono text-[10.5px] text-dim"><span>{course.hours}h</span><span>·</span><span>{course.level}</span><span>·</span><span>acesso 24 meses</span></div>
             <div className="border-t border-line mt-4 pt-4 space-y-2">
-              {isSub ? (
-                <>
-                  <div className="flex justify-between text-[13px]"><span className="text-fog">Mensalidade</span><span className="font-mono text-mist tnum">{fmtBRL(price)}/mês</span></div>
-                  <div className="flex justify-between text-[13px]"><span className="text-fog">Plano</span><span className="font-mono text-mist">{pricing.months} meses</span></div>
-                  <div className="flex justify-between text-[14px] pt-2 border-t border-line"><span className="text-mist font-semibold">Total do plano</span><span className="font-display font-bold text-ember tnum">{fmtBRL(pricing.total)}</span></div>
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between text-[13px]"><span className="text-fog">Valor</span><span className="font-mono text-mist tnum">{fmtBRL(price)}</span></div>
-                  <div className="flex justify-between text-[13px]"><span className="text-fog">Parcelas</span><span className="font-mono text-mist">{inst}x de {fmtBRL(price / inst)}</span></div>
-                  <div className="flex justify-between text-[14px] pt-2 border-t border-line"><span className="text-mist font-semibold">Total</span><span className="font-display font-bold text-ember tnum">{fmtBRL(price)}</span></div>
-                </>
-              )}
+              <div className="flex justify-between text-[13px]"><span className="text-fog">Mensalidade</span><span className="font-mono text-mist tnum">{fmtBRL(effMonthly)}/mês</span></div>
+              <div className="flex justify-between text-[13px]"><span className="text-fog">Plano</span><span className="font-mono text-mist">{pricing.months} meses</span></div>
+              <div className="flex justify-between text-[13px]"><span className="text-fog">Vencimento</span><span className="font-mono text-mist">dia {payDay}</span></div>
+              {discount > 0 && <div className="flex justify-between text-[13px]"><span className="text-fog">Desconto parceiro</span><span className="font-mono text-ember tnum">-{discount}%</span></div>}
+              <div className="flex justify-between text-[14px] pt-2 border-t border-line"><span className="text-mist font-semibold">Total do plano</span><span className="font-display font-bold text-ember tnum">{fmtBRL(Math.round(effMonthly * pricing.months * 100) / 100)}</span></div>
             </div>
             <div className="flex items-center gap-2 mt-4 font-mono text-[10.5px] text-dim"><I n="lock" s={12} c="text-cy-500" /> Credenciais MP somente no backend (env)</div>
           </Card>
