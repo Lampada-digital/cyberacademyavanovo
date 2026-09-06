@@ -21,14 +21,21 @@ export function SiteShell({ children, path }: { children: React.ReactNode; path:
           </nav>
           <div className="hidden lg:flex items-center gap-3">
             {user ? (
-              <>
-                <a href={`#${homeFor(user.role)}`} className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]"><I n="term" s={15} /> Portal {user.role === "admin" ? "Admin" : user.role === "teacher" ? "Professor" : "do Aluno"}</a>
-                <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
-              </>
+              user.role === "student" ? (
+                <>
+                  <a href="#/aluno" className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]"><I n="cap" s={15} /> Portal do Aluno</a>
+                  <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
+                </>
+              ) : (
+                <>
+                  <a href="#/intranet" className="cy-btn cy-btn-e px-3.5 py-2 text-[12px]"><I n="lock" s={15} /> Intranet</a>
+                  <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
+                </>
+              )
             ) : (
               <>
-                <a href="#/login" className="cy-btn cy-btn-x px-3.5 py-2 text-[12px]">Entrar</a>
-                <a href="#/cursos" className="cy-btn cy-btn-p px-4 py-2 text-[12px]">Começar agora <I n="arrowR" s={15} /></a>
+                <a href="#/intranet" className="cy-btn cy-btn-x px-3.5 py-2 text-[12px]"><I n="lock" s={14} /> Intranet</a>
+                <a href="#/cursos" className="cy-btn cy-btn-p px-4 py-2 text-[12px]">Inscrever-se <I n="arrowR" s={15} /></a>
               </>
             )}
           </div>
@@ -41,11 +48,15 @@ export function SiteShell({ children, path }: { children: React.ReactNode; path:
             ))}
             <div className="flex gap-2 pt-3">
               {user ? (
-                <a href={`#${homeFor(user.role)}`} className="cy-btn cy-btn-p px-4 py-2.5 text-[12px] flex-1"><I n="term" s={15} /> Meu portal</a>
+                user.role === "student" ? (
+                  <a href="#/aluno" className="cy-btn cy-btn-p px-4 py-2.5 text-[12px] flex-1"><I n="cap" s={15} /> Portal do Aluno</a>
+                ) : (
+                  <a href="#/intranet" className="cy-btn cy-btn-e px-4 py-2.5 text-[12px] flex-1"><I n="lock" s={15} /> Intranet</a>
+                )
               ) : (
                 <>
-                  <a href="#/login" className="cy-btn cy-btn-g px-4 py-2.5 text-[12px] flex-1">Entrar</a>
-                  <a href="#/cadastro" className="cy-btn cy-btn-p px-4 py-2.5 text-[12px] flex-1">Cadastro</a>
+                  <a href="#/intranet" className="cy-btn cy-btn-g px-4 py-2.5 text-[12px] flex-1"><I n="lock" s={14} /> Intranet</a>
+                  <a href="#/cadastro" className="cy-btn cy-btn-p px-4 py-2.5 text-[12px] flex-1">Inscrever-se</a>
                 </>
               )}
             </div>
@@ -77,6 +88,7 @@ export function SiteShell({ children, path }: { children: React.ReactNode; path:
             {[["/cursos", "Catálogo de cursos"], ["/login", "Portal do Aluno"], ["/validar-certificado", "Validar certificado"], ["/faq", "Perguntas frequentes"]].map(([to, l]) => (
               <a key={to} href={`#${to}`} className="block text-[13px] text-fog hover:text-cy-300 py-1.5 transition-colors">{l}</a>
             ))}
+            <a href="#/intranet" className="block text-[13px] text-ember hover:text-ember-600 py-1.5 transition-colors font-semibold flex items-center gap-1.5"><I n="lock" s={12} /> Intranet (equipe)</a>
           </div>
           <div>
             <h4 className="font-mono text-[11px] tracking-[.18em] uppercase text-cy-500 mb-4">LGPD</h4>

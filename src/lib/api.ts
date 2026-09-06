@@ -27,7 +27,24 @@ export function homeFor(role: string): string {
   if (role === "admin") return "/admin";
   if (role === "teacher") return "/professor";
   if (role === "support") return "/suporte";
+  if (role === "rh") return "/rh";
+  if (role === "finance") return "/financeiro";
+  if (role === "atendimento") return "/atendimento";
   return "/aluno";
+}
+
+/* Áreas de trabalho (gestão) — cada usuário acessa só a sua; admin acessa todas */
+export const STAFF_AREAS: Record<string, string> = {
+  rh: "RH", finance: "Financeiro", atendimento: "Atendimento", support: "Suporte", teacher: "Professor", admin: "Administração",
+};
+export const AREA_ROLES = ["rh", "finance", "atendimento"];
+export function isStaff(role: string): boolean {
+  return ["admin", "teacher", "support", "rh", "finance", "atendimento"].includes(role);
+}
+export function canAccessArea(user: Row | null, area: string): boolean {
+  if (!user) return false;
+  if (user.role === "admin") return true; // dono acessa tudo
+  return user.role === area;
 }
 
 export async function login(email: string, pass: string): Promise<Row> {
@@ -768,6 +785,41 @@ export function resumeLesson(studentId: string, courseId: string): Row | undefin
   const started = lessons.find((l) => { const s = states.get(l.id); return s && !s.completed; });
   if (started) return started;
   return lessons.find((l) => !states.get(l.id)?.completed);
+}
+
+/* ================= EQUIPE (RH / Financeiro / Atendimento) ================= */
+export async function createStaffUser(actor: Row, data: { name: string; email: string; pass: string; role: string; dept?: string; phone?: string; salary?: number }) {
+  if (actor.role !== "admin") throw new Error("Somente o administrador pode cadastrar a equipe.");
+  if (!data.name.trim() || !data.email.includes("@")) throw new Error("Nome e e-mail válidos são obrigatórios.");
+  if (data.pass.length < 6) throw new Error("A senha inicial precisa de 6+ caracteres.");
+  if (one("users", (u) => u.email.toLowerCase() === data.email.trim().toLowerCase())) throw new Error("Este e-mail já está cadastrado.");
+  const role = AREA_ROLES.includes(data.role) || data.role === "teacher" || data.role === "support" ? data.role : "atendimento";
+  const passHash = await hashPw(data.pass);
+  const u = insert("users", {
+    name: data.name.trim(), email: data.email.trim().toLowerCase(), passHash, role,
+    dept: data.dept || STAFF_AREAS[role] || "", phone: data.phone || "", salary: Number(data.salary) || 0,
+    status: "active", loginFails: 0, createdAt: now(),
+  });
+  audit(actor, "ROLE_CHANGE", "users", u.id, `Usuário de equipe criado: ${u.name} → área ${STAFF_AREAS[role] || role}`);
+  sendEmail(u.email, "Acesso liberado — Cyber Academy", `Olá ${u.name}, seu acesso à área ${STAFF_AREAS[role] || role} foi ativado. Entre pela Intranet.`);
+  notify(u.id, "Acesso liberado", `Você foi alocado(a) na área ${STAFF_AREAS[role] || role}. Acesse pela Intranet.`, "info");
+  return u;
+}
+
+export function setStaffRole(actor: Row, userId: string, role: string, dept?: string) {
+  if (actor.role !== "admin") throw new Error("Sem permissão.");
+  const u = find("users", userId);
+  if (!u) throw new Error("Usuário não encontrado.");
+  if (u.role === "admin") throw new Error("Não é possível alterar o administrador raiz.");
+  const valid = ["teacher", "support", ...AREA_ROLES].includes(role) ? role : u.role;
+  update("users", userId, { role: valid, ...(dept ? { dept } : {}) });
+  audit(actor, "ROLE_CHANGE", "users", userId, `${u.name} → área ${STAFF_AREAS[valid] || valid}${dept ? ` (${dept})` : ""}`);
+  notify(userId, "Área de trabalho atualizada", `Seu acesso agora é: ${STAFF_AREAS[valid] || valid}.`, "info");
+}
+
+/* ================= PROTEÇÃO DE CONTEÚDO ================= */
+export function isProtectedBuild(): boolean {
+  return true;
 }
 
 /* ================= SESSÃO EXPIRADA (segurança) ================= */

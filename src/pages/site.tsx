@@ -83,7 +83,7 @@ export function Catalog() {
                       ); })()}
                       {c.freeReenroll && <span className="cy-badge b-amber mt-1.5"><I n="refresh" s={10} /> rematrícula grátis</span>}
                     </div>
-                    <span className="cy-btn cy-btn-p px-3.5 py-2 text-[11.5px] pointer-events-none">Comprar</span>
+                    <span className="cy-btn cy-btn-e px-3.5 py-2 text-[11.5px] pointer-events-none"><I n="cap" s={13} /> Inscrever-se</span>
                   </div>
                 </div>
               </a>
@@ -108,7 +108,7 @@ export function CoursePage({ slug }: { slug: string }) {
   const lessons = where("lessons", (l) => l.courseId === c.id && l.published);
   const cat = all("course_categories").find((k: Row) => k.id === c.categoryId);
   const buy = () => {
-    if (!user) { toast("Entre ou crie sua conta para comprar.", "info"); navigate(`/login?next=/checkout/${c.id}`); return; }
+    if (!user) { toast("Crie sua conta para se inscrever no curso.", "info"); navigate(`/login?next=/checkout/${c.id}`); return; }
     navigate(`/checkout/${c.id}`);
   };
   const courseFaqs: [string, string][] = [
@@ -145,7 +145,7 @@ export function CoursePage({ slug }: { slug: string }) {
         </>
       )}
       {c.freeReenroll && <div className="cy-badge b-amber mt-2"><I n="refresh" s={10} /> rematrícula grátis após concluir</div>}
-      <button onClick={buy} className="cy-btn cy-btn-e w-full py-3.5 text-[14px] mt-5">{isSub ? "ASSINAR AGORA" : "COMPRAR AGORA"} <I n="arrowR" s={16} /></button>
+      <button onClick={buy} className="cy-btn cy-btn-e w-full py-3.5 text-[14px] mt-5"><I n="cap" s={17} /> {isSub ? "ASSINAR AGORA" : "INSCREVER-SE AGORA"}</button>
       <div className="text-center font-mono text-[10.5px] text-dim mt-2.5">acesso liberado automaticamente após o webhook</div>
       <div className="mt-5 space-y-2.5">
         {[

@@ -32,15 +32,19 @@ export function Setup() {
       <div className="w-full max-w-[520px] anim-fade-up">
         <div className="flex justify-center mb-8"><Logo s={44} /></div>
         <Card className="p-7 md:p-9">
-          <div className="cy-chip text-ember mb-2 flex items-center gap-2"><I n="alert" s={13} /> PRIMEIRO ACESSO</div>
+          <div className="cy-chip text-ember mb-2 flex items-center gap-2"><I n="alert" s={13} /> PRIMEIRO ACESSO · EXCLUSIVO DO DONO</div>
           <h1 className="display-xl text-[24px] text-mist">Configuração inicial do SIA</h1>
-          <p className="text-[13px] text-fog mt-2 leading-relaxed">A produção inicia sem dados comerciais. Crie o usuário administrador raiz para começar a cadastrar professores, cursos e turmas.</p>
+          <p className="text-[13px] text-fog mt-2 leading-relaxed">A produção inicia sem dados. Crie o seu <strong className="text-ember">usuário administrador (dono)</strong> — este login é exclusivo seu e dá acesso total. Depois, você libera o acesso dos professores e da equipe (RH, Financeiro, Atendimento) alocando cada um na sua área pela Intranet.</p>
           <div className="space-y-4 mt-6">
             <Field label="Nome da instituição" req><TIn value={f.school} onChange={(e) => setF({ ...f, school: e.target.value })} /></Field>
-            <Field label="Nome do administrador" req><TIn value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Ex.: Maria Souza" /></Field>
-            <Field label="E-mail" req><TIn type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="admin@cyberacademy.com.br" /></Field>
-            <Field label="Senha" req hint="Mínimo 6 caracteres · armazenada com hash SHA-256"><TIn type="password" value={f.pass} onChange={(e) => setF({ ...f, pass: e.target.value })} /></Field>
+            <Field label="Seu nome (dono)" req><TIn value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Ex.: Maria Souza" /></Field>
+            <Field label="Seu e-mail de administrador" req><TIn type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="admin@cyberacademy.com.br" /></Field>
+            <Field label="Sua senha de administrador" req hint="Mínimo 6 caracteres · hash SHA-256 · conhecida somente por você"><TIn type="password" value={f.pass} onChange={(e) => setF({ ...f, pass: e.target.value })} /></Field>
             <Btn v="e" className="w-full py-3" disabled={busy} onClick={go}>{busy ? "Configurando…" : "Inicializar sistema"}</Btn>
+            <div className="cy-card p-3 border-cy-700 text-[11.5px] text-fog flex items-start gap-2">
+              <I n="shield" s={15} c="text-cy-400 shrink-0 mt-0.5" />
+              Guarde estes dados: somente o administrador acessa o painel, cadastra a equipe e libera as áreas de trabalho.
+            </div>
           </div>
         </Card>
       </div>
