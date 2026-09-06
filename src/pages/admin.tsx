@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { I } from "../components/icons";
 import { AppShell, type NavItem } from "../components/layout";
-import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg } from "../components/ui";
+import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg } from "../components/ui";
 import { useApp, navigate } from "../state";
 import { CourseContent } from "./teacher";
 import { TicketsConsole, AdminSystem } from "./admin2";
@@ -9,6 +9,7 @@ import { seedDemo, hasData, IMG } from "../lib/seed";
 import {
   refundPayment, all, one, where, find, insert, update, remove, audit, notify,
   fmtBRL, fmtDate, fmtDT, type Row, effectivePrice, nextEnrollmentNumber, reviewDocument,
+  coursePricing, orderInstallments, reenrollFree,
 } from "../lib/api";
 import { DOC_KINDS } from "../lib/db";
 
@@ -221,6 +222,82 @@ function Dash() {
         </Card>
       </div>
 
+      {/* DESEMPENHO POR CURSO + RECEITA RECORRENTE */}
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
+        <Card className="p-5">
+          <h3 className="font-display font-semibold text-[15px] text-mist flex items-center gap-2 mb-4"><I n="layers" s={16} c="text-cy-400" /> Desempenho por curso</h3>
+          {courses.length === 0 ? <p className="text-[12.5px] text-dim">Nenhum curso cadastrado.</p> : (
+            <div className="overflow-x-auto">
+              <table className="cy-tbl">
+                <thead><tr><th>Curso</th><th>Modelo</th><th>Alunos</th><th>Receita</th><th>Conclusão</th></tr></thead>
+                <tbody>
+                  {courses.map((c) => {
+                    const ce = where("enrollments", (e) => e.courseId === c.id && e.status !== "CANCELLED");
+                    const crev = where("payments", (p) => p.courseId === c.id && p.status === "approved").reduce((s, p) => s + Number(p.amount), 0);
+                    const done = ce.filter((e) => e.status === "COMPLETED").length;
+                    const p = coursePricing(c);
+                    return (
+                      <tr key={c.id}>
+                        <td className="text-mist font-semibold">{c.title.slice(0, 30)}</td>
+                        <td>{p.model === "subscription" ? <span className="cy-badge b-teal">mensalidade</span> : <span className="cy-badge b-mist">avulso</span>}</td>
+                        <td className="font-mono">{ce.length}</td>
+                        <td className="font-mono text-ember tnum">{fmtBRL(crev)}</td>
+                        <td><div className="flex items-center gap-2"><div className="w-16"><Bar v={ce.length ? (done / ce.length) * 100 : 0} h={5} /></div><span className="font-mono text-[10.5px] text-dim">{done}/{ce.length}</span></div></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+        <Card className="p-5">
+          <h3 className="font-display font-semibold text-[15px] text-mist flex items-center gap-2 mb-4"><I n="wallet" s={16} c="text-cy-400" /> Assinaturas ativas</h3>
+          {(() => {
+            const subOrders = where("orders", (o) => o.model === "subscription" && o.status === "paid");
+            const scheduled = where("installments", (i) => ["scheduled", "pending"].includes(i.status));
+            const mrr = subOrders.reduce((s, o) => s + Number(o.amount), 0);
+            return (
+              <div className="space-y-3">
+                <div className="cy-card p-4 border-cy-700">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-dim">Receita recorrente mensal (MRR)</div>
+                  <div className="font-display font-bold text-[26px] text-cy-300 tnum mt-1">{fmtBRL(mrr)}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="cy-card p-3.5"><div className="font-mono text-[10px] uppercase text-dim">Planos ativos</div><div className="font-display font-bold text-[20px] text-mist tnum">{subOrders.length}</div></div>
+                  <div className="cy-card p-3.5"><div className="font-mono text-[10px] uppercase text-dim">Cobranças futuras</div><div className="font-display font-bold text-[20px] text-ember tnum">{fmtBRL(scheduled.reduce((s, i) => s + Number(i.amount), 0))}</div></div>
+                </div>
+                <p className="text-[11.5px] text-dim leading-relaxed">Mensalidades são cobradas via Mercado Pago a cada ciclo e liquidadas pelo webhook. Cronograma completo no módulo Financeiro.</p>
+              </div>
+            );
+          })()}
+        </Card>
+      </div>
+
+      {/* MATRÍCULAS RECENTES */}
+      <Card className="p-5">
+        <h3 className="font-display font-semibold text-[15px] text-mist flex items-center gap-2 mb-4"><I n="award" s={16} c="text-cy-400" /> Últimas matrículas</h3>
+        {ens.length === 0 ? <p className="text-[12.5px] text-dim">Nenhuma matrícula ainda.</p> : (
+          <div className="overflow-x-auto">
+            <table className="cy-tbl">
+              <thead><tr><th>Matrícula</th><th>Aluno</th><th>Curso</th><th>Origem</th><th>Data</th><th>Situação</th></tr></thead>
+              <tbody>
+                {ens.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")).slice(0, 6).map((e) => (
+                  <tr key={e.id}>
+                    <td className="font-mono text-cy-300 text-[12px]">{e.number}</td>
+                    <td className="text-mist">{find("users", e.studentId)?.name || "—"}</td>
+                    <td>{find("courses", e.courseId)?.title.slice(0, 28)}</td>
+                    <td className="font-mono text-[10.5px] uppercase">{e.origin === "reenroll-free" ? "rematrícula" : e.origin}</td>
+                    <td className="font-mono text-[11px]">{fmtDate(e.startDate)}</td>
+                    <td><Badge s={e.status} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[["/admin/cursos", "layers", "Gerenciar catálogo"], ["/admin/matriculas", "award", "Matrículas"], ["/admin/financeiro", "wallet", "Pedidos & pagamentos"], ["/admin/configuracoes", "gear", "Configurações do SIA"]].map(([to, ic, l]) => (
           <a key={to} href={`#${to}`} className="cy-card cy-card-h p-4 flex items-center gap-3 text-[13px] text-mist font-display">
@@ -408,6 +485,7 @@ function Cursos() {
     slug: "", title: "", subtitle: "", image: "", categoryId: "", teacherId: "", hours: 60, level: "Iniciante",
     description: "", objectives: "", audience: "", prerequisites: "", benefits: "", methodology: "", finalProject: "",
     certificateText: "concluiu o programa", price: 499, promoPrice: 0, promoActive: false, installments: 6, published: false,
+    pricingModel: "one_time", monthlyPrice: 89, planMonths: 6, freeReenroll: true,
   };
   const [f, setF] = useState<Row>(empty);
   const courses = all("courses");
@@ -426,6 +504,8 @@ function Cursos() {
     const payload = {
       ...f, hours: Number(f.hours), price: Number(f.price), promoPrice: Number(f.promoPrice) || 0, installments: Number(f.installments) || 1,
       objectives: lines(f.objectives), audience: lines(f.audience), prerequisites: lines(f.prerequisites), benefits: lines(f.benefits),
+      pricingModel: f.pricingModel || "one_time", monthlyPrice: Number(f.monthlyPrice) || 0, planMonths: Number(f.planMonths) || 1,
+      freeReenroll: !!f.freeReenroll,
     };
     if (edit && edit !== "new") { update("courses", edit.id, payload); audit(user, "UPDATE", "courses", edit.id, f.title); toast("Curso atualizado.", "ok"); }
     else { const c = insert("courses", payload); audit(user, "CREATE", "courses", c.id, f.title); toast("Curso criado! Agora monte módulos e aulas.", "ok"); }
@@ -451,8 +531,15 @@ function Cursos() {
               <div className="p-4">
                 <h3 className="font-display font-semibold text-[14px] text-mist leading-snug">{c.title}</h3>
                 <div className="font-mono text-[10.5px] text-dim mt-1.5">/{c.slug}</div>
-                <div className="flex items-center justify-between mt-3">
-                  <span className="font-display font-bold text-ember tnum text-[15px]">{fmtBRL(effectivePrice(c))}</span>
+                <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
+                  <div>
+                    {c.pricingModel === "subscription" ? (
+                      <span className="font-display font-bold text-cy-300 tnum text-[15px]">{fmtBRL(coursePricing(c).monthly)}<span className="text-[10px] font-normal text-dim">/mês</span></span>
+                    ) : (
+                      <span className="font-display font-bold text-ember tnum text-[15px]">{fmtBRL(effectivePrice(c))}</span>
+                    )}
+                    {c.freeReenroll && <span className="cy-badge b-amber ml-2"><I n="refresh" s={10} /> remat. grátis</span>}
+                  </div>
                   <span className="font-mono text-[10.5px] text-dim">{c.hours}h · {where("lessons", (l) => l.courseId === c.id).length} aulas</span>
                 </div>
                 <div className="flex gap-1.5 mt-3 flex-wrap">
@@ -491,6 +578,26 @@ function Cursos() {
             <Field label="Preço promocional (0 = sem oferta)"><TIn type="number" value={f.promoPrice} onChange={(e) => setF({ ...f, promoPrice: e.target.value })} /></Field>
             <Field label="Parcelas máx."><TIn type="number" value={f.installments} onChange={(e) => setF({ ...f, installments: e.target.value })} /></Field>
             <Field label="Oferta ativa"><TSel value={String(!!f.promoActive)} onChange={(e) => setF({ ...f, promoActive: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel></Field>
+          </div>
+          <div className="border border-cy-700/50 rounded-lg p-4 bg-cy-900/20">
+            <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-3 flex items-center gap-2"><I n="wallet" s={14} /> Modelo de cobrança</div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Field label="Tipo de venda">
+                <TSel value={f.pricingModel} onChange={(e) => setF({ ...f, pricingModel: e.target.value })}>
+                  <option value="one_time">Pagamento único</option>
+                  <option value="subscription">Mensalidade (assinatura)</option>
+                </TSel>
+              </Field>
+              {f.pricingModel === "subscription" && (
+                <>
+                  <Field label="Valor da mensalidade (R$)" hint="cobrada a cada ciclo via Mercado Pago"><TIn type="number" value={f.monthlyPrice} onChange={(e) => setF({ ...f, monthlyPrice: e.target.value })} /></Field>
+                  <Field label="Nº de mensalidades (plano)" hint="ex.: 6 = plano semestral"><TIn type="number" value={f.planMonths} onChange={(e) => setF({ ...f, planMonths: e.target.value })} /></Field>
+                </>
+              )}
+              <Field label="Rematrícula grátis" hint="após concluir, o aluno reativa o acesso sem pagar">
+                <TSel value={String(!!f.freeReenroll)} onChange={(e) => setF({ ...f, freeReenroll: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel>
+              </Field>
+            </div>
           </div>
           <Field label="Descrição (página comercial)"><TArea rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -651,10 +758,31 @@ function Financeiro() {
     <div>
       <PageHead kicker="SIA · financeiro" title="Financeiro" desc="Pedidos e pagamentos processados pelo Mercado Pago, com transações e reembolsos." />
       <div className="flex gap-1 border-b border-line mb-5">
-        {[["pedidos", `Pedidos (${orders.length})`], ["pagamentos", `Pagamentos (${pays.length})`]].map(([k, l]) => (
+        {[["pedidos", `Pedidos (${orders.length})`], ["pagamentos", `Pagamentos (${pays.length})`], ["mensalidades", `Mensalidades (${all("installments").length})`]].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 font-display text-[12.5px] uppercase border-b-2 -mb-px ${tab === k ? "text-cy-300 border-cy-500" : "text-fog border-transparent"}`}>{l}</button>
         ))}
       </div>
+      {tab === "mensalidades" && (
+        all("installments").length === 0 ? <Empty icon="wallet" title="Nenhuma mensalidade" desc="Cursos com modelo de assinatura geram um cronograma de mensalidades cobradas via Mercado Pago." /> : (
+          <Card className="overflow-x-auto">
+            <table className="cy-tbl">
+              <thead><tr><th>Aluno</th><th>Curso</th><th>Ciclo</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead>
+              <tbody>
+                {all("installments").sort((a, b) => (a.dueDate || "").localeCompare(b.dueDate || "")).map((i) => (
+                  <tr key={i.id}>
+                    <td className="text-mist">{find("users", i.userId)?.name}</td>
+                    <td>{find("courses", i.courseId)?.title.slice(0, 24)}</td>
+                    <td className="font-mono text-cy-300">#{i.n}</td>
+                    <td className="font-mono tnum text-ember">{fmtBRL(i.amount)}</td>
+                    <td className="font-mono text-[11.5px]">{fmtDate(i.dueDate)}</td>
+                    <td><Badge s={i.status === "paid" ? "paid" : i.status === "pending" ? "pending" : "draft"} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )
+      )}
       {tab === "pedidos" ? (
         orders.length === 0 ? <Empty icon="wallet" title="Nenhum pedido" desc="Pedidos são criados no checkout do site." /> : (
           <Card className="overflow-x-auto">

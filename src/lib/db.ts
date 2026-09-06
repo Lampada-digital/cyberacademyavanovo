@@ -14,7 +14,7 @@ export const TABLES = [
   "enrollments", "lesson_progress", "course_progress", "attendance",
   "activities", "assessments", "questions", "assessment_questions",
   "attempts", "grades", "projects", "submissions",
-  "orders", "payments", "payment_transactions",
+  "orders", "payments", "payment_transactions", "installments",
   "certificates", "certificate_validations",
   "notifications", "support_tickets", "ticket_messages",
   "audit_logs", "emails", "posts", "faqs", "files",

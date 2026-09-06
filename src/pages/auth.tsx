@@ -5,7 +5,7 @@ import { QRMatrix } from "../components/fx";
 import { useApp, navigate } from "../state";
 import {
   login, register, setupAdmin, createOrder, createGatewayPayment, handleWebhook,
-  courseById, effectivePrice, requestReset, doReset, one, myEnrollments,
+  courseById, effectivePrice, requestReset, doReset, one, myEnrollments, coursePricing,
   fmtBRL, type Row,
 } from "../lib/api";
 
@@ -228,7 +228,9 @@ export function Checkout({ courseId }: { courseId: string }) {
       </div>
     </div>;
   }
-  const price = effectivePrice(course);
+  const pricing = coursePricing(course);
+  const isSub = pricing.model === "subscription";
+  const price = isSub ? pricing.monthly : effectivePrice(course);
   const already = (window as any).__enr; void already;
 
   const startPayment = () => {
@@ -274,20 +276,36 @@ export function Checkout({ courseId }: { courseId: string }) {
                 <div className="flex items-center gap-3 text-[13.5px] text-fog mb-6">
                   <I n="user" s={16} c="text-cy-400" /> {user.name} · {user.email}
                 </div>
-                <Field label="Parcelamento">
-                  <div className="grid sm:grid-cols-3 gap-2.5">
-                    {Array.from({ length: course.installments || 1 }, (_, i) => i + 1).map((n) => (
-                      <button key={n} onClick={() => setInst(n)}
-                        className={`cy-card p-3.5 text-left transition-all ${inst === n ? "border-ember/70 shadow-[0_0_0_1px_rgba(245,184,75,.4)]" : "hover:border-cy-600"}`}>
-                        <div className="font-display font-semibold text-[13.5px] text-mist">{n}x de {fmtBRL(price / n)}</div>
-                        <div className="font-mono text-[10.5px] text-dim mt-0.5">{n === 1 ? "à vista · Pix ou cartão" : "sem juros"}</div>
-                      </button>
-                    ))}
+                {isSub ? (
+                  <div className="border border-cy-600/50 rounded-lg p-5 bg-cy-900/25">
+                    <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-3 flex items-center gap-2"><I n="wallet" s={14} /> Assinatura · plano de mensalidades</div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display font-bold text-[30px] text-cy-300 tnum">{fmtBRL(pricing.monthly)}</span>
+                      <span className="text-[13px] text-dim">/mês · por {pricing.months} meses</span>
+                    </div>
+                    <div className="font-mono text-[11px] text-dim mt-1.5">total do plano {fmtBRL(pricing.total)}</div>
+                    <ul className="mt-4 space-y-1.5 text-[12.5px] text-fog">
+                      <li className="flex items-center gap-2"><I n="checkc" s={13} c="text-cy-400" /> Acesso imediato ao AVA após a 1ª mensalidade</li>
+                      <li className="flex items-center gap-2"><I n="checkc" s={13} c="text-cy-400" /> Cobrança recorrente via Mercado Pago (a cada ciclo)</li>
+                      {course.freeReenroll && <li className="flex items-center gap-2"><I n="refresh" s={13} c="text-ember" /> Rematrícula grátis após concluir</li>}
+                    </ul>
                   </div>
-                </Field>
+                ) : (
+                  <Field label="Parcelamento">
+                    <div className="grid sm:grid-cols-3 gap-2.5">
+                      {Array.from({ length: course.installments || 1 }, (_, i) => i + 1).map((n) => (
+                        <button key={n} onClick={() => setInst(n)}
+                          className={`cy-card p-3.5 text-left transition-all ${inst === n ? "border-ember/70 shadow-[0_0_0_1px_rgba(245,184,75,.4)]" : "hover:border-cy-600"}`}>
+                          <div className="font-display font-semibold text-[13.5px] text-mist">{n}x de {fmtBRL(price / n)}</div>
+                          <div className="font-mono text-[10.5px] text-dim mt-0.5">{n === 1 ? "à vista · Pix ou cartão" : "sem juros"}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+                )}
                 <div className="mt-6 flex items-start gap-3 text-[12.5px] text-fog cy-card p-4 border-cy-700">
                   <I n="shield" s={17} c="text-cy-400 shrink-0 mt-0.5" />
-                  Após a aprovação, o webhook do Mercado Pago cria sua matrícula automaticamente no SIA e libera o AVA. Garantia de 7 dias.
+                  Após a aprovação, o webhook do Mercado Pago cria sua matrícula automaticamente no SIA e libera o AVA. {isSub ? "As mensalidades seguintes são cobradas a cada ciclo." : "Garantia de 7 dias."}
                 </div>
                 <Btn v="e" className="w-full py-3.5 mt-6 text-[14px]" onClick={() => setStep("pagamento")}>
                   Pagar com Mercado Pago <I n="arrowR" s={16} />
@@ -320,7 +338,7 @@ export function Checkout({ courseId }: { courseId: string }) {
                       <Btn v="p" className="w-full py-3.5 text-[14px]" onClick={() => {
                         if (card.number.replace(/\s/g, "").length < 12 || !card.name) { toast("Preencha os dados do cartão.", "err"); return; }
                         startPayment();
-                      }}>Pagar {fmtBRL(price)} {inst > 1 ? `em ${inst}x` : ""}</Btn>
+                      }}>{isSub ? `Assinar · 1ª mensalidade ${fmtBRL(price)}` : `Pagar ${fmtBRL(price)} ${inst > 1 ? `em ${inst}x` : ""}`}</Btn>
                     </div>
                   ) : (
                     <div className="text-center py-4">
@@ -397,9 +415,19 @@ export function Checkout({ courseId }: { courseId: string }) {
             <h3 className="font-display font-semibold text-[14.5px] text-mist leading-snug">{course.title}</h3>
             <div className="flex gap-3 mt-2 font-mono text-[10.5px] text-dim"><span>{course.hours}h</span><span>·</span><span>{course.level}</span><span>·</span><span>acesso 24 meses</span></div>
             <div className="border-t border-line mt-4 pt-4 space-y-2">
-              <div className="flex justify-between text-[13px]"><span className="text-fog">Valor</span><span className="font-mono text-mist tnum">{fmtBRL(price)}</span></div>
-              <div className="flex justify-between text-[13px]"><span className="text-fog">Parcelas</span><span className="font-mono text-mist">{inst}x de {fmtBRL(price / inst)}</span></div>
-              <div className="flex justify-between text-[14px] pt-2 border-t border-line"><span className="text-mist font-semibold">Total</span><span className="font-display font-bold text-ember tnum">{fmtBRL(price)}</span></div>
+              {isSub ? (
+                <>
+                  <div className="flex justify-between text-[13px]"><span className="text-fog">Mensalidade</span><span className="font-mono text-mist tnum">{fmtBRL(price)}/mês</span></div>
+                  <div className="flex justify-between text-[13px]"><span className="text-fog">Plano</span><span className="font-mono text-mist">{pricing.months} meses</span></div>
+                  <div className="flex justify-between text-[14px] pt-2 border-t border-line"><span className="text-mist font-semibold">Total do plano</span><span className="font-display font-bold text-ember tnum">{fmtBRL(pricing.total)}</span></div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between text-[13px]"><span className="text-fog">Valor</span><span className="font-mono text-mist tnum">{fmtBRL(price)}</span></div>
+                  <div className="flex justify-between text-[13px]"><span className="text-fog">Parcelas</span><span className="font-mono text-mist">{inst}x de {fmtBRL(price / inst)}</span></div>
+                  <div className="flex justify-between text-[14px] pt-2 border-t border-line"><span className="text-mist font-semibold">Total</span><span className="font-display font-bold text-ember tnum">{fmtBRL(price)}</span></div>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-2 mt-4 font-mono text-[10.5px] text-dim"><I n="lock" s={12} c="text-cy-500" /> Credenciais MP somente no backend (env)</div>
           </Card>

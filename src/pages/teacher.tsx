@@ -279,19 +279,34 @@ function ModuleModal({ open, onClose, courseId, mod, actor }: { open: boolean; o
 function LessonModal({ state, onClose, courseId, actor }: { state: Row | null; onClose: () => void; courseId: string; actor: Row }) {
   const toast = useToast();
   const isNew = !!state && (state._new || !state.id);
-  const [f, setF] = useState({ title: "", description: "", durationMin: 30, videoUrl: "", published: false });
+  const [f, setF] = useState({ title: "", description: "", durationMin: 30, videoUrl: "", videoName: "", published: false });
+  const [uploading, setUploading] = useState(false);
   React.useEffect(() => {
-    if (state) setF({ title: state.title || "", description: state.description || "", durationMin: state.durationMin || 30, videoUrl: state.videoUrl || "", published: !!state.published });
+    if (state) setF({ title: state.title || "", description: state.description || "", durationMin: state.durationMin || 30, videoUrl: state.videoUrl || "", videoName: state.videoName || "", published: !!state.published });
   }, [state]);
   if (!state) return null;
+  const onVideoFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("video/")) { toast("Selecione um arquivo de vídeo (mp4/webm).", "err"); return; }
+    if (file.size > 4e6) { toast("Arquivo acima de 4MB — em produção o vídeo vai para o storage S3 (aqui é demonstração local).", "err"); return; }
+    setUploading(true);
+    const r = new FileReader();
+    r.onload = () => { setF((p) => ({ ...p, videoUrl: String(r.result), videoName: file.name })); setUploading(false); toast(`Vídeo "${file.name}" carregado (${(file.size / 1024 / 1024).toFixed(1)}MB).`, "ok"); };
+    r.onerror = () => { setUploading(false); toast("Falha ao ler o arquivo.", "err"); };
+    r.readAsDataURL(file);
+  };
   const save = () => {
     if (!f.title) { toast("Informe o título da aula.", "err"); return; }
-    const payload = { ...f, durationMin: Number(f.durationMin) || 30, videoType: /youtube|youtu\.be|vimeo/.test(f.videoUrl) ? "embed" : /\.mp4/.test(f.videoUrl) ? "mp4" : "simulated" };
+    const isUpload = f.videoUrl.startsWith("data:video");
+    const payload = {
+      ...f, durationMin: Number(f.durationMin) || 30,
+      videoType: isUpload ? "uploaded" : /youtube|youtu\.be|vimeo/.test(f.videoUrl) ? "embed" : /\.mp4/.test(f.videoUrl) ? "mp4" : "simulated",
+    };
     if (isNew) {
       const order = where("lessons", (l) => l.moduleId === state.moduleId).length + 1;
       const l = insert("lessons", { ...payload, moduleId: state.moduleId, courseId, order });
-      audit(actor, "CREATE", "lessons", l.id, f.title);
-    } else { update("lessons", state.id, payload); audit(actor, "UPDATE", "lessons", state.id, f.title); }
+      audit(actor, isUpload ? "FILE_UPLOAD" : "CREATE", "lessons", l.id, f.title);
+    } else { update("lessons", state.id, payload); audit(actor, isUpload ? "FILE_UPLOAD" : "UPDATE", "lessons", state.id, f.title); }
     toast("Aula salva.", "ok"); onClose();
   };
   return (
@@ -305,8 +320,16 @@ function LessonModal({ state, onClose, courseId, actor }: { state: Row | null; o
             <TSel value={String(f.published)} onChange={(e) => setF({ ...f, published: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel>
           </Field>
         </div>
-        <Field label="URL da videoaula" hint="YouTube/Vimeo (embed) ou arquivo .mp4 (storage S3). Vazio = player integrado com trilha da aula.">
-          <TIn value={f.videoUrl} onChange={(e) => setF({ ...f, videoUrl: e.target.value })} placeholder="https://…" />
+        <Field label="Videoaula" hint="Envie um arquivo de vídeo, cole um link do YouTube/Vimeo, ou deixe vazio para o player integrado com trilha da aula.">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="cy-btn cy-btn-g px-3.5 py-2 text-[12px] cursor-pointer">
+              <I n="video" s={14} /> {uploading ? "Carregando…" : f.videoName ? "Trocar vídeo" : "Enviar vídeo"}
+              <input type="file" accept="video/*" className="hidden" onChange={(e) => onVideoFile(e.target.files?.[0])} />
+            </label>
+            {f.videoName && <span className="font-mono text-[10.5px] text-cy-300 max-w-[200px] truncate">{f.videoName}</span>}
+            {f.videoName && <Btn v="x" sm onClick={() => setF({ ...f, videoUrl: "", videoName: "" })}><I n="trash" s={12} /></Btn>}
+          </div>
+          <TIn className="mt-2" value={f.videoUrl.startsWith("data:") ? "" : f.videoUrl} onChange={(e) => setF({ ...f, videoUrl: e.target.value, videoName: "" })} placeholder="https://youtube.com/… (opcional)" />
         </Field>
         <div className="flex justify-end gap-2"><Btn v="x" onClick={onClose}>Cancelar</Btn><Btn v="e" onClick={save}>Salvar aula</Btn></div>
       </div>

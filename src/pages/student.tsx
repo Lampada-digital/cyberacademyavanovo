@@ -7,7 +7,7 @@ import { useApp, navigate } from "../state";
 import {
   myEnrollments, courseTree, courseProgress, lessonState, markLesson, weightedAvg,
   submitAttempt, submitSubmission, createTicket, replyTicket, changePassword,
-  autoScore, canTeacherAccess, levelInfo, streakDays, awardXp, resumeLesson,
+  autoScore, canTeacherAccess, levelInfo, streakDays, awardXp, resumeLesson, reenrollFree,
   myDocuments, uploadDocument, issueStudentCard, enable2FA, confirm2FA, disable2FA,
   mySessions, revokeSession, forumPosts, createForumPost, deleteForumPost,
   lessonNote, saveLessonNote, passwordScore, updateProfile, currentTotp,
@@ -224,26 +224,37 @@ function Dashboard() {
 
 /* ================= MATRÍCULAS ================= */
 function Matriculas() {
-  const { user } = useApp();
+  const { user, refresh } = useApp();
+  const toast = useToast();
   const ens = myEnrollments(user!.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const reenroll = (courseId: string) => {
+    try { const en = reenrollFree(user!.id, courseId); toast(`Rematrícula grátis ativa! Matrícula ${en.number}.`, "ok"); refresh(); }
+    catch (e: any) { toast(e.message, "err"); }
+  };
   return (
     <div>
-      <PageHead kicker="SIA · matrículas" title="Minhas matrículas" desc="Cada matrícula possui número único gerado pelo backend e vínculo com pedido e pagamento." />
+      <PageHead kicker="SIA · matrículas" title="Minhas matrículas" desc="Cada matrícula possui número único gerado pelo backend e vínculo com pedido e pagamento. Cursos com rematrícula grátis podem ser reativados após a conclusão." />
       {ens.length === 0 ? <Empty icon="cap" title="Nenhuma matrícula" desc="Compre um curso no catálogo para gerar sua primeira matrícula."><a href="#/cursos" className="cy-btn cy-btn-e px-5 py-2.5 text-[12.5px]">Ver cursos</a></Empty> : (
         <Card className="overflow-x-auto">
           <table className="cy-tbl">
-            <thead><tr><th>Nº Matrícula</th><th>Curso</th><th>Início</th><th>Previsão</th><th>Origem</th><th>Situação</th></tr></thead>
+            <thead><tr><th>Nº Matrícula</th><th>Curso</th><th>Início</th><th>Previsão</th><th>Origem</th><th>Situação</th><th></th></tr></thead>
             <tbody>
-              {ens.map((e) => (
-                <tr key={e.id}>
-                  <td className="font-mono text-cy-300">{e.number}</td>
-                  <td className="text-mist font-semibold">{find("courses", e.courseId)?.title || "—"}</td>
-                  <td>{fmtDate(e.startDate)}</td>
-                  <td>{fmtDate(e.dueDate)}</td>
-                  <td className="font-mono text-[11px] uppercase">{e.origin}</td>
-                  <td><Badge s={e.status} /></td>
-                </tr>
-              ))}
+              {ens.map((e) => {
+                const c = find("courses", e.courseId);
+                const canReenroll = e.status === "COMPLETED" && c?.freeReenroll &&
+                  !ens.some((x) => x.courseId === e.courseId && x.status === "ACTIVE");
+                return (
+                  <tr key={e.id}>
+                    <td className="font-mono text-cy-300">{e.number}</td>
+                    <td className="text-mist font-semibold">{c?.title || "—"}</td>
+                    <td>{fmtDate(e.startDate)}</td>
+                    <td>{fmtDate(e.dueDate)}</td>
+                    <td className="font-mono text-[11px] uppercase">{e.origin === "reenroll-free" ? "rematrícula" : e.origin}</td>
+                    <td><Badge s={e.status} /></td>
+                    <td>{canReenroll && <Btn v="e" sm onClick={() => reenroll(e.courseId)}><I n="refresh" s={13} /> Rematricular grátis</Btn>}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </Card>
@@ -413,6 +424,7 @@ function LessonPlayer({ lessonId }: { lessonId: string }) {
   const materials = where("lesson_materials", (m) => m.lessonId === lesson.id);
   const isYT = lesson.videoUrl && /(youtube|youtu\.be|vimeo)/.test(lesson.videoUrl);
   const isMP4 = lesson.videoUrl && /\.mp4($|\?)/.test(lesson.videoUrl);
+  const isUploaded = lesson.videoUrl && lesson.videoUrl.startsWith("data:video");
 
   const startSim = () => {
     if (playing) return;
@@ -444,7 +456,7 @@ function LessonPlayer({ lessonId }: { lessonId: string }) {
           <div className="rounded-xl overflow-hidden border border-line bg-[#020C12] aspect-video relative group">
             {isYT ? (
               <iframe title={lesson.title} className="w-full h-full" src={lesson.videoUrl.replace("watch?v=", "embed/")} allowFullScreen />
-            ) : isMP4 ? (
+            ) : (isMP4 || isUploaded) ? (
               <video className="w-full h-full" src={lesson.videoUrl} controls onTimeUpdate={(e) => {
                 const v = e.target as HTMLVideoElement;
                 if (v.duration) { const p = Math.round((v.currentTime / v.duration) * 100); setPct(p); markLesson(user!.id, lesson, p); }

@@ -4,8 +4,8 @@ import { Btn, Card, CoverImg, Empty, Field, TIn, TArea, Tag, useToast } from "..
 import { QRMatrix, SectionHead, useReveal, Scramble } from "../components/fx";
 import { useApp, navigate } from "../state";
 import {
-  publishedCourses, courseBySlug, courseTree, effectivePrice, teacherName,
-  validateCertificate, all, where, insert, type Row, fmtBRL, fmtDate, getSettings, audit,
+  publishedCourses, courseBySlug, courseTree, effectivePrice, teacherName, coursePricing,
+  validateCertificate, validateStudentCard, all, where, insert, type Row, fmtBRL, fmtDate, getSettings, audit,
 } from "../lib/api";
 
 /* ============ CATÁLOGO ============ */
@@ -69,11 +69,19 @@ export function Catalog() {
                   </div>
                   <div className="flex items-end justify-between mt-4 pt-4 border-t border-line">
                     <div>
-                      {c.promoActive && c.promoPrice && <>
-                        <span className="text-[11px] text-dim line-through font-mono">{fmtBRL(Number(c.price))}</span>
-                      </>}
-                      <span className={`block font-display font-bold text-[19px] tnum ${c.promoActive ? "text-ember" : "text-cy-300"}`}>{fmtBRL(effectivePrice(c))}</span>
-                      {c.installments > 1 && <span className="font-mono text-[10.5px] text-dim">ou {c.installments}x de {fmtBRL(effectivePrice(c) / c.installments)}</span>}
+                      {(() => { const p = coursePricing(c); return p.model === "subscription" ? (
+                        <>
+                          <span className="block font-display font-bold text-[19px] tnum text-cy-300">{fmtBRL(p.monthly)}<span className="text-[11px] font-normal text-dim">/mês</span></span>
+                          <span className="font-mono text-[10.5px] text-dim">plano de {p.months} mensalidades</span>
+                        </>
+                      ) : (
+                        <>
+                          {c.promoActive && c.promoPrice && <span className="text-[11px] text-dim line-through font-mono">{fmtBRL(Number(c.price))}</span>}
+                          <span className={`block font-display font-bold text-[19px] tnum ${c.promoActive ? "text-ember" : "text-cy-300"}`}>{fmtBRL(effectivePrice(c))}</span>
+                          {c.installments > 1 && <span className="font-mono text-[10.5px] text-dim">ou {c.installments}x de {fmtBRL(effectivePrice(c) / c.installments)}</span>}
+                        </>
+                      ); })()}
+                      {c.freeReenroll && <span className="cy-badge b-amber mt-1.5"><I n="refresh" s={10} /> rematrícula grátis</span>}
                     </div>
                     <span className="cy-btn cy-btn-p px-3.5 py-2 text-[11.5px] pointer-events-none">Comprar</span>
                   </div>
@@ -522,6 +530,58 @@ export function ValidateCert({ code }: { code?: string }) {
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-2"><QRMatrix code={res.cert.code} size={110} /><span className="font-mono text-[10px] text-dim">matrícula {res.enrollment?.number}</span></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+/* ============ VALIDAÇÃO PÚBLICA DE CARTEIRINHA ============ */
+export function ValidateCard({ code }: { code?: string }) {
+  const [input, setInput] = useState(code || "");
+  const [res, setRes] = useState<null | ReturnType<typeof validateStudentCard>>(code ? validateStudentCard(code) : null);
+  return (
+    <div className="max-w-[760px] mx-auto px-5 py-16">
+      <SectionHead kicker="Transparência pública" title="Validar carteirinha de estudante"
+        desc="Consulta direta ao SIA: informe o número impresso na carteirinha digital (ou escaneie o QR Code) para verificar autenticidade e validade." />
+      <Card className="rv p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row gap-3 max-w-[560px]">
+          <div className="relative flex-1">
+            <I n="idcard" s={17} c="absolute left-3.5 top-1/2 -translate-y-1/2 text-dim" />
+            <input className="cy-in pl-10 font-mono uppercase tracking-wider" placeholder="CA-ID-2026-000001" value={input}
+              onChange={(e) => setInput(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === "Enter" && setRes(validateStudentCard(input))} />
+          </div>
+          <Btn v="e" className="px-7" onClick={() => setRes(validateStudentCard(input))}>Consultar SIA</Btn>
+        </div>
+        {res && !res.valid && (
+          <div className="mt-6 border border-coral/40 bg-coral/5 rounded-lg p-5 flex items-start gap-4 anim-fade-up">
+            <I n="alert" s={26} c="text-coral shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-display font-semibold text-coral">{res.expired ? "Carteirinha expirada" : "Carteirinha não localizada"}</h3>
+              <p className="text-[13px] text-fog mt-1 leading-relaxed">{res.expired ? "O número existe na base do SIA, mas a validade expirou. O aluno deve emitir uma nova versão pelo Portal do Aluno." : "O número informado não existe na base do SIA ou foi digitado incorretamente. A tentativa de validação foi registrada em auditoria."}</p>
+            </div>
+          </div>
+        )}
+        {res && res.valid && res.doc && (
+          <div className="mt-8 anim-fade-up">
+            <div className="flex items-center gap-2 mb-4 text-[#7BE0A2] font-mono text-[12px] tracking-wider uppercase"><I n="checkc" s={16} /> Autêntica · emitida pelo SIA</div>
+            <div className="relative overflow-hidden rounded-xl border border-cy-600 bg-gradient-to-br from-[#05202B] via-[#062A2E] to-[#0A3E41] p-8">
+              <div className="flex flex-col sm:flex-row gap-6 items-center">
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="cy-chip text-cy-400">CYBER ACADEMY · CARTEIRA DE ESTUDANTE</div>
+                  <h3 className="display-xl text-[24px] text-mist mt-3">{res.user?.name}</h3>
+                  <p className="text-[13.5px] text-fog mt-2 leading-relaxed">Curso: <strong className="text-cy-300">{res.course?.title}</strong></p>
+                  <div className="flex flex-wrap gap-x-6 gap-y-1 mt-4 font-mono text-[11.5px] text-dim">
+                    <span>matrícula {res.enrollment?.number}</span>
+                    <span>válida até {fmtDate(res.doc.validUntil)}</span>
+                    <span className="text-cy-400">{res.doc.cardNumber}</span>
+                  </div>
+                </div>
+                {res.user?.photo && <img src={res.user.photo} alt="foto" className="w-[90px] h-[110px] object-cover rounded-lg border border-cy-500/50" />}
               </div>
             </div>
           </div>
