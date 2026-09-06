@@ -30,16 +30,19 @@ export function homeFor(role: string): string {
   if (role === "rh") return "/rh";
   if (role === "finance") return "/financeiro";
   if (role === "atendimento") return "/atendimento";
+  if (role === "partner") return "/parceiros";
+  if (role === "ngo") return "/parceiros";
   return "/aluno";
 }
 
 /* Áreas de trabalho (gestão) — cada usuário acessa só a sua; admin acessa todas */
 export const STAFF_AREAS: Record<string, string> = {
-  rh: "RH", finance: "Financeiro", atendimento: "Atendimento", support: "Suporte", teacher: "Professor", admin: "Administração",
+  rh: "RH", finance: "Financeiro", atendimento: "Atendimento", support: "Suporte",
+  teacher: "Professor", admin: "Administração", partner: "Escola Parceira", ngo: "ONG Parceira",
 };
-export const AREA_ROLES = ["rh", "finance", "atendimento"];
+export const AREA_ROLES = ["rh", "finance", "atendimento", "partner", "ngo"];
 export function isStaff(role: string): boolean {
-  return ["admin", "teacher", "support", "rh", "finance", "atendimento"].includes(role);
+  return ["admin", "teacher", "support", "rh", "finance", "atendimento", "partner", "ngo"].includes(role);
 }
 export function canAccessArea(user: Row | null, area: string): boolean {
   if (!user) return false;
@@ -818,19 +821,20 @@ export function resumeLesson(studentId: string, courseId: string): Row | undefin
 }
 
 /* ================= EQUIPE (RH / Financeiro / Atendimento) ================= */
-export async function createStaffUser(actor: Row, data: { name: string; email: string; pass: string; role: string; dept?: string; phone?: string; salary?: number }) {
+export async function createStaffUser(actor: Row, data: { name: string; email: string; pass: string; role: string; cargo?: string; dept?: string; phone?: string; salary?: number; linkId?: string }) {
   if (actor.role !== "admin") throw new Error("Somente o administrador pode cadastrar a equipe.");
   if (!data.name.trim() || !data.email.includes("@")) throw new Error("Nome e e-mail válidos são obrigatórios.");
   if (data.pass.length < 6) throw new Error("A senha inicial precisa de 6+ caracteres.");
   if (one("users", (u) => u.email.toLowerCase() === data.email.trim().toLowerCase())) throw new Error("Este e-mail já está cadastrado.");
   const role = AREA_ROLES.includes(data.role) || data.role === "teacher" || data.role === "support" ? data.role : "atendimento";
   const passHash = await hashPw(data.pass);
+  const link = role === "partner" ? { partnerId: data.linkId || "" } : role === "ngo" ? { ngoId: data.linkId || "" } : {};
   const u = insert("users", {
     name: data.name.trim(), email: data.email.trim().toLowerCase(), passHash, role,
-    dept: data.dept || STAFF_AREAS[role] || "", phone: data.phone || "", salary: Number(data.salary) || 0,
-    status: "active", loginFails: 0, createdAt: now(),
+    cargo: data.cargo || "", dept: data.dept || STAFF_AREAS[role] || "", phone: data.phone || "", salary: Number(data.salary) || 0,
+    ...link, status: "active", loginFails: 0, createdAt: now(),
   });
-  audit(actor, "ROLE_CHANGE", "users", u.id, `Usuário de equipe criado: ${u.name} → área ${STAFF_AREAS[role] || role}`);
+  audit(actor, "ROLE_CHANGE", "users", u.id, `Usuário de equipe criado: ${u.name} (${data.cargo || "—"}) → área ${STAFF_AREAS[role] || role}`);
   sendEmail(u.email, "Acesso liberado — Cyber Academy", `Olá ${u.name}, seu acesso à área ${STAFF_AREAS[role] || role} foi ativado. Entre pela Intranet.`);
   notify(u.id, "Acesso liberado", `Você foi alocado(a) na área ${STAFF_AREAS[role] || role}. Acesse pela Intranet.`, "info");
   return u;
@@ -882,6 +886,30 @@ export function linkPartnerStudent(studentId: string, partnerId: string) {
 export function studentPartner(studentId: string): Row | undefined {
   const link = one("partner_students", (ps) => ps.studentId === studentId);
   return link ? find("partnerships", link.partnerId) : undefined;
+}
+/** Parceiro matricula um aluno: cria conta (se nova), vincula à escola e gera matrícula faturada. */
+export async function partnerEnrollStudent(actor: Row, d: { name: string; email: string; courseId: string }) {
+  const partner = actor.partnerId ? find("partnerships", actor.partnerId) : undefined;
+  if (!partner) throw new Error("Usuário sem escola parceira vinculada.");
+  const course = find("courses", d.courseId);
+  if (!course) throw new Error("Curso não encontrado.");
+  let student = one("users", (u) => u.email.toLowerCase() === d.email.trim().toLowerCase());
+  if (!student) {
+    const passHash = await hashPw("Aluno@" + (d.email.split("@")[0] || "cyber").slice(0, 6));
+    student = insert("users", { name: d.name.trim(), email: d.email.trim().toLowerCase(), passHash, role: "student", status: "active", loginFails: 0, createdAt: now() });
+    sendEmail(student.email, "Acesso Cyber Academy", `Sua conta foi criada pela escola parceira ${partner.schoolName}.`);
+  }
+  if (one("enrollments", (e) => e.studentId === student.id && e.courseId === d.courseId && ["ACTIVE", "COMPLETED"].includes(e.status)))
+    throw new Error("Este aluno já está matriculado neste curso.");
+  linkPartnerStudent(student.id, partner.id);
+  const pricing = coursePricing(course);
+  const discount = Number(partner.discountPercent) || 0;
+  const monthly = Math.round(pricing.monthly * (1 - discount / 100) * 100) / 100;
+  const order = insert("orders", { number: nextOrderNumber(), userId: student.id, courseId: course.id, amount: monthly, installments: pricing.months, status: "paid", paidAt: now(), gateway: "partner-invoice", model: "subscription", partnerId: partner.id });
+  const en = insert("enrollments", { number: nextEnrollmentNumber(), studentId: student.id, courseId: course.id, classId: null, status: "ACTIVE", origin: "partner", orderId: order.id, paymentId: null, partnerId: partner.id, startDate: now(), dueDate: new Date(Date.now() + 365 * 86400e3).toISOString(), progress: 0 });
+  audit(actor, "ENROLLMENT", "enrollments", en.id, `Parceria ${partner.schoolName}: matrícula ${en.number} de ${student.name} em ${course.title} (${discount}% desc.)`);
+  notify(student.id, "Matrícula ativa", `A escola ${partner.schoolName} matriculou você em ${course.title}. Acesse o AVA!`, "enrollment");
+  return { student, enrollment: en };
 }
 
 /* ================= CONTRATOS POR CURSO ================= */

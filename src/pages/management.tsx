@@ -5,6 +5,7 @@ import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, Pag
 import { useApp } from "../state";
 import {
   createStaffUser, setStaffRole, STAFF_AREAS, AREA_ROLES,
+  createPartnership, createNgo, assignNgoCourse,
   all, one, where, find, insert, update, remove, audit, notify,
   fmtBRL, fmtDate, fmtDT, timeAgo, type Row, effectivePrice,
 } from "../lib/api";
@@ -12,7 +13,8 @@ import { TicketsConsole } from "./admin2";
 
 const ROLE_LABEL: Record<string, string> = {
   admin: "Administração (dono)", teacher: "Professor", support: "Suporte",
-  rh: "RH", finance: "Financeiro", atendimento: "Atendimento / Call Center", student: "Aluno",
+  rh: "RH", finance: "Financeiro", atendimento: "Atendimento / Call Center",
+  partner: "Escola Parceira", ngo: "ONG Parceira", student: "Aluno",
 };
 
 /* ================= USUÁRIOS & ACESSOS (admin) ================= */
@@ -21,8 +23,10 @@ export function UsuariosAcessos() {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [del, setDel] = useState<Row | null>(null);
-  const [f, setF] = useState({ name: "", email: "", pass: "", role: "atendimento", dept: "", phone: "", salary: "" });
+  const [f, setF] = useState({ name: "", email: "", pass: "", role: "atendimento", cargo: "", dept: "", phone: "", salary: "", linkId: "" });
   const users = all("users").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+  const partnerships = all("partnerships");
+  const ngos = all("ngos");
   const staff = users.filter((u) => u.role !== "student");
   const students = users.filter((u) => u.role === "student");
 
@@ -30,7 +34,7 @@ export function UsuariosAcessos() {
     try {
       await createStaffUser(user!, { ...f, salary: Number(f.salary) || 0 });
       toast(`Usuário criado! ${f.name} já pode entrar pela Intranet na área ${STAFF_AREAS[f.role] || f.role}.`, "ok");
-      setOpen(false); setF({ name: "", email: "", pass: "", role: "atendimento", dept: "", phone: "", salary: "" });
+      setOpen(false); setF({ name: "", email: "", pass: "", role: "atendimento", cargo: "", dept: "", phone: "", salary: "", linkId: "" });
       refresh();
     } catch (e: any) { toast(e.message, "err"); }
   };
@@ -98,12 +102,29 @@ export function UsuariosAcessos() {
             <Field label="E-mail (login)" req><TIn type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></Field>
             <Field label="Senha inicial" req hint="mínimo 6 caracteres"><TIn type="password" value={f.pass} onChange={(e) => setF({ ...f, pass: e.target.value })} /></Field>
             <Field label="Área de trabalho" req>
-              <TSel value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>
-                {["atendimento", "rh", "finance", "teacher", "support"].map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
+              <TSel value={f.role} onChange={(e) => setF({ ...f, role: e.target.value, linkId: "" })}>
+                {["atendimento", "rh", "finance", "teacher", "support", "partner", "ngo"].map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
               </TSel>
             </Field>
+            <Field label="Cargo" hint="ex.: Coordenador, Atendente, Gestor de Parcerias"><TIn value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></Field>
             <Field label="Telefone"><TIn value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
             <Field label="Salário (R$)"><TIn type="number" value={f.salary} onChange={(e) => setF({ ...f, salary: e.target.value })} /></Field>
+            {f.role === "partner" && (
+              <Field label="Vincular à escola parceira" req hint="cadastre a escola em Parcerias primeiro">
+                <TSel value={f.linkId} onChange={(e) => setF({ ...f, linkId: e.target.value })}>
+                  <option value="">selecione…</option>
+                  {partnerships.map((p) => <option key={p.id} value={p.id}>{p.schoolName} · {p.code}</option>)}
+                </TSel>
+              </Field>
+            )}
+            {f.role === "ngo" && (
+              <Field label="Vincular à ONG" req hint="cadastre a ONG em Parcerias primeiro">
+                <TSel value={f.linkId} onChange={(e) => setF({ ...f, linkId: e.target.value })}>
+                  <option value="">selecione…</option>
+                  {ngos.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                </TSel>
+              </Field>
+            )}
           </div>
           <div className="cy-card p-3.5 border-cy-700 text-[12px] text-fog flex items-start gap-2.5">
             <I n="shield" s={16} c="text-cy-400 shrink-0 mt-0.5" />
@@ -542,6 +563,137 @@ function AtendimentoArea({ path, segs }: { path: string; segs: string[] }) {
       <Confirm open={!!del} onClose={() => setDel(null)} title="Remover ligação?" desc={`Registro de "${del?.client}" será removido.`}
         onYes={() => { if (del) { remove("calls", del.id); audit(user, "DELETE", "calls", del.id, del.client); toast("Removida.", "ok"); refresh(); } }} />
     </MgmtShell>
+  );
+}
+
+/* ================= PARCERIAS (admin) — escolas + ONGs ================= */
+export function Parcerias() {
+  const { user, refresh } = useApp();
+  const toast = useToast();
+  const [tab, setTab] = useState("escolas");
+  const [psOpen, setPsOpen] = useState(false);
+  const [ngoOpen, setNgoOpen] = useState(false);
+  const [courseModal, setCourseModal] = useState<Row | null>(null);
+  const [pf, setPf] = useState({ schoolName: "", contactName: "", contactEmail: "", contactPhone: "", discountPercent: "10", code: "" });
+  const [nf, setNf] = useState({ name: "", contactName: "", contactEmail: "" });
+  const [cf, setCf] = useState("");
+  const partnerships = all("partnerships");
+  const ngos = all("ngos");
+  const courses = all("courses").filter((c) => c.published);
+
+  const savePs = () => {
+    if (!pf.schoolName) { toast("Nome da escola obrigatório.", "err"); return; }
+    createPartnership(user!, { ...pf, discountPercent: Number(pf.discountPercent) || 10 });
+    setPsOpen(false); setPf({ schoolName: "", contactName: "", contactEmail: "", contactPhone: "", discountPercent: "10", code: "" });
+    toast("Escola parceira cadastrada! Agora crie o usuário de acesso em Usuários & Acessos (área Escola Parceira).", "ok"); refresh();
+  };
+  const saveNgo = () => {
+    if (!nf.name) { toast("Nome da ONG obrigatório.", "err"); return; }
+    createNgo(user!, nf);
+    setNgoOpen(false); setNf({ name: "", contactName: "", contactEmail: "" });
+    toast("ONG cadastrada! Libere cursos gratuitos e crie o usuário de acesso.", "ok"); refresh();
+  };
+
+  return (
+    <div>
+      <PageHead kicker="Administração · expansão" title="Parcerias"
+        desc="Gerencie escolas parceiras (com desconto nas mensalidades) e ONGs (cursos gratuitos). Depois crie o usuário de acesso de cada uma em Usuários & Acessos." />
+      <div className="flex gap-1 border-b border-line mb-6">
+        {[["escolas", `Escolas parceiras (${partnerships.length})`], ["ongs", `ONGs (${ngos.length})`]].map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 font-display text-[12.5px] uppercase border-b-2 -mb-px ${tab === k ? "text-cy-300 border-cy-500" : "text-fog border-transparent hover:text-mist"}`}>{l}</button>
+        ))}
+      </div>
+
+      {tab === "escolas" && (
+        <div className="anim-fade-in">
+          <div className="flex justify-end mb-4"><Btn v="e" onClick={() => setPsOpen(true)}><I n="plus" s={15} /> Nova escola parceira</Btn></div>
+          {partnerships.length === 0 ? <Empty icon="cap" title="Nenhuma escola parceira" desc="Cadastre a primeira escola para oferecer seus cursos com desconto." /> : (
+            <Card className="overflow-x-auto">
+              <table className="cy-tbl">
+                <thead><tr><th>Escola</th><th>Código</th><th>Desconto</th><th>Contato</th><th>Alunos</th><th>Status</th></tr></thead>
+                <tbody>
+                  {partnerships.map((p) => (
+                    <tr key={p.id}>
+                      <td className="text-mist font-semibold">{p.schoolName}</td>
+                      <td className="font-mono text-cy-300">{p.code}</td>
+                      <td><Tag tone="amber">-{p.discountPercent}%</Tag></td>
+                      <td><div className="text-[12px]">{p.contactName}</div><div className="font-mono text-[10.5px] text-dim">{p.contactEmail}</div></td>
+                      <td className="font-mono">{where("partner_students", (ps) => ps.partnerId === p.id).length}</td>
+                      <td><Badge s={p.status === "ACTIVE" ? "active" : "inactive"} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {tab === "ongs" && (
+        <div className="anim-fade-in">
+          <div className="flex justify-end mb-4"><Btn v="e" onClick={() => setNgoOpen(true)}><I n="plus" s={15} /> Nova ONG</Btn></div>
+          {ngos.length === 0 ? <Empty icon="globe" title="Nenhuma ONG cadastrada" desc="Cadastre uma ONG para liberar cursos gratuitos (bolsas sociais)." /> : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {ngos.map((n) => (
+                <Card key={n.id} className="p-5">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-display font-semibold text-[15px] text-mist">{n.name}</h3>
+                    <Badge s={n.status === "ACTIVE" ? "active" : "inactive"} />
+                  </div>
+                  <div className="font-mono text-[11px] text-dim mt-1">{n.contactName} · {n.contactEmail}</div>
+                  <div className="mt-3">
+                    <div className="font-mono text-[10.5px] text-fog uppercase tracking-wider mb-2">Cursos gratuitos liberados</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {where("ngo_courses", (nc) => nc.ngoId === n.id).map((nc) => (
+                        <Tag key={nc.id} tone="teal">{find("courses", nc.courseId)?.title.slice(0, 28)}</Tag>
+                      ))}
+                      {where("ngo_courses", (nc) => nc.ngoId === n.id).length === 0 && <span className="text-[11.5px] text-dim">nenhum curso liberado</span>}
+                    </div>
+                  </div>
+                  <Btn v="g" sm className="mt-4" onClick={() => { setCourseModal(n); setCf(""); }}><I n="plus" s={13} /> Liberar curso gratuito</Btn>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* MODAL escola */}
+      <Modal open={psOpen} onClose={() => setPsOpen(false)} title="Nova escola parceira" w={520}>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="sm:col-span-2"><Field label="Nome da escola" req><TIn value={pf.schoolName} onChange={(e) => setPf({ ...pf, schoolName: e.target.value })} /></Field></div>
+          <Field label="Contato (nome)"><TIn value={pf.contactName} onChange={(e) => setPf({ ...pf, contactName: e.target.value })} /></Field>
+          <Field label="E-mail"><TIn type="email" value={pf.contactEmail} onChange={(e) => setPf({ ...pf, contactEmail: e.target.value })} /></Field>
+          <Field label="Telefone"><TIn value={pf.contactPhone} onChange={(e) => setPf({ ...pf, contactPhone: e.target.value })} /></Field>
+          <Field label="Desconto (%)" hint="aplicado sobre as mensalidades"><TIn type="number" value={pf.discountPercent} onChange={(e) => setPf({ ...pf, discountPercent: e.target.value })} /></Field>
+        </div>
+        <div className="flex justify-end gap-2 mt-4"><Btn v="x" onClick={() => setPsOpen(false)}>Cancelar</Btn><Btn v="e" onClick={savePs}>Cadastrar escola</Btn></div>
+      </Modal>
+
+      {/* MODAL ONG */}
+      <Modal open={ngoOpen} onClose={() => setNgoOpen(false)} title="Nova ONG" w={480}>
+        <div className="space-y-3">
+          <Field label="Nome da ONG" req><TIn value={nf.name} onChange={(e) => setNf({ ...nf, name: e.target.value })} /></Field>
+          <Field label="Contato (nome)"><TIn value={nf.contactName} onChange={(e) => setNf({ ...nf, contactName: e.target.value })} /></Field>
+          <Field label="E-mail"><TIn type="email" value={nf.contactEmail} onChange={(e) => setNf({ ...nf, contactEmail: e.target.value })} /></Field>
+        </div>
+        <div className="flex justify-end gap-2 mt-4"><Btn v="x" onClick={() => setNgoOpen(false)}>Cancelar</Btn><Btn v="e" onClick={saveNgo}>Cadastrar ONG</Btn></div>
+      </Modal>
+
+      {/* MODAL liberar curso p/ ONG */}
+      <Modal open={!!courseModal} onClose={() => setCourseModal(null)} title={`Liberar curso gratuito — ${courseModal?.name}`} w={460}>
+        <Field label="Curso publicado" req>
+          <TSel value={cf} onChange={(e) => setCf(e.target.value)}>
+            <option value="">selecione…</option>
+            {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </TSel>
+        </Field>
+        <div className="flex justify-end gap-2 mt-4">
+          <Btn v="x" onClick={() => setCourseModal(null)}>Cancelar</Btn>
+          <Btn v="e" onClick={() => { if (!cf) return; assignNgoCourse(user!, courseModal!.id, cf); toast("Curso gratuito liberado para a ONG.", "ok"); setCourseModal(null); refresh(); }}>Liberar</Btn>
+        </div>
+      </Modal>
+    </div>
   );
 }
 

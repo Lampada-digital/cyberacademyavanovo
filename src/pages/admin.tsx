@@ -5,6 +5,7 @@ import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag
 import { useApp, navigate } from "../state";
 import { CourseContent } from "./teacher";
 import { TicketsConsole, AdminSystem, SiteCMS } from "./admin2";
+import { Parcerias } from "./management";
 import { seedDemo, hasData, IMG } from "../lib/seed";
 import {
   refundPayment, all, one, where, find, insert, update, remove, audit, notify,
@@ -94,6 +95,7 @@ export const NAV_ADMIN: NavItem[] = [
   { to: "/admin/suporte", icon: "msg", label: "Suporte" },
   { to: "/admin/notificacoes", icon: "bell", label: "Notificações" },
   { to: "/acessos", icon: "shield", label: "Usuários & Acessos" },
+  { to: "/admin/parcerias", icon: "globe", label: "Parcerias (Escolas/ONGs)" },
   { to: "/rh", icon: "users", label: "Área RH" },
   { to: "/financeiro", icon: "book", label: "Área Financeira" },
   { to: "/atendimento", icon: "term", label: "Call Center" },
@@ -113,6 +115,7 @@ export default function AdminArea({ path, segs }: { path: string; segs: string[]
     case "professores": page = <Professores />; break;
     case "cursos": page = segs[2] ? <CourseContent courseId={segs[2]} actor={user!} /> : <Cursos />; break;
     case "site": page = <SiteCMS />; break;
+    case "parcerias": page = <Parcerias />; break;
     case "turmas": page = <Turmas />; break;
     case "matriculas": page = <Matriculas />; break;
     case "documentos": page = <DocumentReview />; break;
