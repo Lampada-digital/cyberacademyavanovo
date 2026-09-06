@@ -89,10 +89,14 @@ export const NAV_ADMIN: NavItem[] = [
   { to: "/admin/turmas", icon: "cal", label: "Turmas" },
   { to: "/admin/matriculas", icon: "award", label: "Matrículas" },
   { to: "/admin/documentos", icon: "file", label: "Documentos" },
-  { to: "/admin/financeiro", icon: "wallet", label: "Financeiro" },
+  { to: "/admin/financeiro", icon: "wallet", label: "Pagamentos & Pedidos" },
   { to: "/admin/relatorios", icon: "chart", label: "Relatórios" },
   { to: "/admin/suporte", icon: "msg", label: "Suporte" },
   { to: "/admin/notificacoes", icon: "bell", label: "Notificações" },
+  { to: "/acessos", icon: "shield", label: "Usuários & Acessos" },
+  { to: "/rh", icon: "users", label: "Área RH" },
+  { to: "/financeiro", icon: "book", label: "Área Financeira" },
+  { to: "/atendimento", icon: "term", label: "Call Center" },
   { to: "/admin/usuarios", icon: "user", label: "Usuários" },
   { to: "/admin/auditoria", icon: "shield", label: "Auditoria" },
   { to: "/admin/configuracoes", icon: "gear", label: "Configurações" },
@@ -555,69 +559,101 @@ function Cursos() {
           ))}
         </div>
       )}
-      <Modal open={!!edit} onClose={() => setEdit(null)} title={edit === "new" ? "Novo curso" : "Dados do curso"} w={780}>
-        <div className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value, slug: f.slug || e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") })} /></Field>
-            <Field label="Slug (URL)" req><TIn value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} placeholder="meu-curso" /></Field>
-            <Field label="Subtítulo comercial"><TIn value={f.subtitle} onChange={(e) => setF({ ...f, subtitle: e.target.value })} /></Field>
-            <Field label="Categoria">
-              <TSel value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value })}>
-                {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                {cats.length === 0 && <option value="">crie em Configurações</option>}
-              </TSel>
-            </Field>
-            <Field label="Professor">
-              <TSel value={f.teacherId} onChange={(e) => setF({ ...f, teacherId: e.target.value })}>
-                <option value="">a definir</option>
-                {uniqT.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </TSel>
-            </Field>
-            <Field label="Carga horária"><TIn type="number" value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })} /></Field>
-            <Field label="Nível"><TSel value={f.level} onChange={(e) => setF({ ...f, level: e.target.value })}><option>Iniciante</option><option>Intermediário</option><option>Avançado</option><option>Iniciante ao Intermediário</option></TSel></Field>
-            <Field label="Preço (R$)"><TIn type="number" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} /></Field>
-            <Field label="Preço promocional (0 = sem oferta)"><TIn type="number" value={f.promoPrice} onChange={(e) => setF({ ...f, promoPrice: e.target.value })} /></Field>
-            <Field label="Parcelas máx."><TIn type="number" value={f.installments} onChange={(e) => setF({ ...f, installments: e.target.value })} /></Field>
-            <Field label="Oferta ativa"><TSel value={String(!!f.promoActive)} onChange={(e) => setF({ ...f, promoActive: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel></Field>
-          </div>
-          <div className="border border-cy-700/50 rounded-lg p-4 bg-cy-900/20">
-            <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-3 flex items-center gap-2"><I n="wallet" s={14} /> Modelo de cobrança</div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <Field label="Tipo de venda">
-                <TSel value={f.pricingModel} onChange={(e) => setF({ ...f, pricingModel: e.target.value })}>
-                  <option value="one_time">Pagamento único</option>
-                  <option value="subscription">Mensalidade (assinatura)</option>
-                </TSel>
-              </Field>
-              {f.pricingModel === "subscription" && (
-                <>
-                  <Field label="Valor da mensalidade (R$)" hint="cobrada a cada ciclo via Mercado Pago"><TIn type="number" value={f.monthlyPrice} onChange={(e) => setF({ ...f, monthlyPrice: e.target.value })} /></Field>
-                  <Field label="Nº de mensalidades (plano)" hint="ex.: 6 = plano semestral"><TIn type="number" value={f.planMonths} onChange={(e) => setF({ ...f, planMonths: e.target.value })} /></Field>
-                </>
-              )}
-              <Field label="Rematrícula grátis" hint="após concluir, o aluno reativa o acesso sem pagar">
-                <TSel value={String(!!f.freeReenroll)} onChange={(e) => setF({ ...f, freeReenroll: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel>
-              </Field>
+      <Modal open={!!edit} onClose={() => setEdit(null)} title={edit === "new" ? "Novo curso" : "Dados do curso"} w={820}>
+        <div className="space-y-5">
+          {/* ÁREA 1 — INFORMAÇÕES DO CURSO */}
+          <div className="border border-cy-600/40 rounded-xl overflow-hidden">
+            <div className="px-5 py-3 bg-cy-900/40 border-b border-cy-700/40 flex items-center gap-2.5">
+              <I n="cap" s={18} c="text-cy-300" />
+              <div>
+                <div className="font-display font-semibold text-[13.5px] text-cy-300">① Informações do Curso</div>
+                <div className="font-mono text-[10px] text-dim">conteúdo acadêmico — usado no SIA, no AVA e no histórico</div>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value, slug: f.slug || e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") })} /></Field>
+                <Field label="Slug (URL)" req><TIn value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} placeholder="meu-curso" /></Field>
+                <Field label="Categoria">
+                  <TSel value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value })}>
+                    {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {cats.length === 0 && <option value="">crie em Configurações</option>}
+                  </TSel>
+                </Field>
+                <Field label="Professor">
+                  <TSel value={f.teacherId} onChange={(e) => setF({ ...f, teacherId: e.target.value })}>
+                    <option value="">a definir</option>
+                    {uniqT.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </TSel>
+                </Field>
+                <Field label="Carga horária"><TIn type="number" value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })} /></Field>
+                <Field label="Nível"><TSel value={f.level} onChange={(e) => setF({ ...f, level: e.target.value })}><option>Iniciante</option><option>Intermediário</option><option>Avançado</option><option>Iniciante ao Intermediário</option></TSel></Field>
+              </div>
+              <div className="grid md:grid-cols-[260px_1fr] gap-4 items-start">
+                <Field label="Imagem do curso" hint="Envie um arquivo PNG ou JPEG — a capa do catálogo e da página do curso.">
+                  <FileDrop max={900} value={f.image} label="Enviar capa (PNG/JPEG)" onChange={(d) => setF({ ...f, image: d })} />
+                </Field>
+                <Field label="Grade curricular" hint="Estrutura do programa: módulos, etapas e carga por fase. Aparece na página do curso e no AVA.">
+                  <TArea rows={6} value={f.curriculum} onChange={(e) => setF({ ...f, curriculum: e.target.value })}
+                    placeholder={"Ex.:\nFase 1 — Fundamentos (20h)\nFase 2 — Prática guiada (30h)\nFase 3 — Projeto final + certificação (10h)"} />
+                </Field>
+              </div>
+              <Field label="Descrição do curso"><TArea rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Field label="Objetivos (um por linha)"><TArea rows={4} value={f.objectives} onChange={(e) => setF({ ...f, objectives: e.target.value })} /></Field>
+                <Field label="Público-alvo (um por linha)"><TArea rows={4} value={f.audience} onChange={(e) => setF({ ...f, audience: e.target.value })} /></Field>
+                <Field label="Pré-requisitos (um por linha)"><TArea rows={3} value={f.prerequisites} onChange={(e) => setF({ ...f, prerequisites: e.target.value })} /></Field>
+                <Field label="Benefícios (um por linha)"><TArea rows={3} value={f.benefits} onChange={(e) => setF({ ...f, benefits: e.target.value })} /></Field>
+                <Field label="Metodologia"><TArea rows={3} value={f.methodology} onChange={(e) => setF({ ...f, methodology: e.target.value })} /></Field>
+                <Field label="Projeto final"><TArea rows={3} value={f.finalProject} onChange={(e) => setF({ ...f, finalProject: e.target.value })} /></Field>
+              </div>
             </div>
           </div>
-          <div className="grid md:grid-cols-[280px_1fr] gap-4 items-start">
-            <Field label="Imagem do curso" hint="Envie um arquivo PNG ou JPEG — a capa do catálogo e da página comercial.">
-              <FileDrop max={900} value={f.image} label="Enviar capa (PNG/JPEG)" onChange={(d) => setF({ ...f, image: d })} />
-            </Field>
-            <Field label="Grade curricular" hint="Estrutura geral do programa: módulos, etapas e carga por fase. Aparece na página do curso e no AVA.">
-              <TArea rows={6} value={f.curriculum} onChange={(e) => setF({ ...f, curriculum: e.target.value })}
-                placeholder={"Ex.:\nFase 1 — Fundamentos (20h)\nFase 2 — Prática guiada (30h)\nFase 3 — Projeto final + certificação (10h)"} />
-            </Field>
+
+          {/* ÁREA 2 — PÁGINA DO SITE */}
+          <div className="border border-ember/40 rounded-xl overflow-hidden">
+            <div className="px-5 py-3 border-b border-ember/30 flex items-center gap-2.5" style={{ background: "rgba(245,184,75,.07)" }}>
+              <I n="globe" s={18} c="text-ember" />
+              <div>
+                <div className="font-display font-semibold text-[13.5px] text-ember">② Página do Site (vitrine comercial)</div>
+                <div className="font-mono text-[10px] text-dim">como o curso aparece no site público, com preço e o botão de inscrição</div>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
+              <Field label="Subtítulo comercial" hint="frase de venda exibida sob o título no site"><TIn value={f.subtitle} onChange={(e) => setF({ ...f, subtitle: e.target.value })} /></Field>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <Field label="Preço (R$)"><TIn type="number" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} /></Field>
+                <Field label="Preço promocional (0 = sem oferta)"><TIn type="number" value={f.promoPrice} onChange={(e) => setF({ ...f, promoPrice: e.target.value })} /></Field>
+                <Field label="Parcelas máx."><TIn type="number" value={f.installments} onChange={(e) => setF({ ...f, installments: e.target.value })} /></Field>
+                <Field label="Oferta ativa"><TSel value={String(!!f.promoActive)} onChange={(e) => setF({ ...f, promoActive: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel></Field>
+              </div>
+              <div className="border border-cy-700/50 rounded-lg p-4 bg-cy-900/20">
+                <div className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-400 mb-3 flex items-center gap-2"><I n="wallet" s={14} /> Modelo de cobrança</div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <Field label="Tipo de venda">
+                    <TSel value={f.pricingModel} onChange={(e) => setF({ ...f, pricingModel: e.target.value })}>
+                      <option value="one_time">Pagamento único</option>
+                      <option value="subscription">Mensalidade (assinatura)</option>
+                    </TSel>
+                  </Field>
+                  {f.pricingModel === "subscription" && (
+                    <>
+                      <Field label="Valor da mensalidade (R$)" hint="cobrada a cada ciclo via Mercado Pago"><TIn type="number" value={f.monthlyPrice} onChange={(e) => setF({ ...f, monthlyPrice: e.target.value })} /></Field>
+                      <Field label="Nº de mensalidades (plano)" hint="ex.: 6 = plano semestral"><TIn type="number" value={f.planMonths} onChange={(e) => setF({ ...f, planMonths: e.target.value })} /></Field>
+                    </>
+                  )}
+                  <Field label="Rematrícula grátis" hint="após concluir, o aluno reativa o acesso sem pagar">
+                    <TSel value={String(!!f.freeReenroll)} onChange={(e) => setF({ ...f, freeReenroll: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel>
+                  </Field>
+                </div>
+              </div>
+              <div className="cy-card p-3.5 border-cy-700 text-[12px] text-fog flex items-center gap-2.5">
+                <I n="cap" s={16} c="text-ember shrink-0" />
+                No site, este curso exibirá o botão <strong className="text-ember">“Inscrever-se”</strong>, que leva o visitante ao cadastro e ao pagamento via Mercado Pago.
+              </div>
+            </div>
           </div>
-          <Field label="Descrição (página comercial)"><TArea rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="Objetivos (um por linha)"><TArea rows={4} value={f.objectives} onChange={(e) => setF({ ...f, objectives: e.target.value })} /></Field>
-            <Field label="Público-alvo (um por linha)"><TArea rows={4} value={f.audience} onChange={(e) => setF({ ...f, audience: e.target.value })} /></Field>
-            <Field label="Pré-requisitos (um por linha)"><TArea rows={3} value={f.prerequisites} onChange={(e) => setF({ ...f, prerequisites: e.target.value })} /></Field>
-            <Field label="Benefícios (um por linha)"><TArea rows={3} value={f.benefits} onChange={(e) => setF({ ...f, benefits: e.target.value })} /></Field>
-            <Field label="Metodologia"><TArea rows={3} value={f.methodology} onChange={(e) => setF({ ...f, methodology: e.target.value })} /></Field>
-            <Field label="Projeto final"><TArea rows={3} value={f.finalProject} onChange={(e) => setF({ ...f, finalProject: e.target.value })} /></Field>
-          </div>
+
           <div className="flex justify-end gap-2"><Btn v="x" onClick={() => setEdit(null)}>Cancelar</Btn><Btn v="e" onClick={save}>Salvar curso</Btn></div>
         </div>
       </Modal>

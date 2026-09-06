@@ -15,6 +15,7 @@ export const TABLES = [
   "activities", "assessments", "questions", "assessment_questions",
   "attempts", "grades", "projects", "submissions",
   "orders", "payments", "payment_transactions", "installments",
+  "employees", "departments", "expenses", "calls", "quick_replies",
   "certificates", "certificate_validations",
   "notifications", "support_tickets", "ticket_messages",
   "audit_logs", "emails", "posts", "faqs", "files",

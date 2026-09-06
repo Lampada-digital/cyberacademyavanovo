@@ -33,6 +33,15 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  /* proteção de conteúdo: bloqueia seleção/cópia (campos de formulário continuam editáveis) */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+input, textarea, select, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
 }
 ::selection { background: rgba(3,166,166,.45); color: #EAFBF8; }
 * { scrollbar-width: thin; scrollbar-color: #0E5F5F #031019; }
