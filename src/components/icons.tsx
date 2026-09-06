@@ -66,6 +66,7 @@ const P: Record<string, React.ReactNode> = {
   csv: <><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4" /><path d="m9.5 12 5 5M14.5 12l-5 5" /></>,
   pix: <><path d="m12 3 9 9-9 9-9-9z" /><rect x="9" y="9" width="6" height="6" transform="rotate(45 12 12)" /></>,
   card: <><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19M6 15h4" /></>,
+  info: <><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M12 11v5" /></>,
 };
 
 export function I({ n, s = 18, c = "" }: { n: string; s?: number; c?: string }) {

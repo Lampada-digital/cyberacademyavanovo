@@ -186,6 +186,19 @@ export function CoursePage({ slug }: { slug: string }) {
             <h2 className="font-display font-semibold text-[20px] text-cy-300 mb-3 flex items-center gap-2.5"><I n="term" s={18} /> Sobre o curso</h2>
             <p className="text-[14.5px] text-fog leading-[1.8] whitespace-pre-line">{c.description}</p>
           </section>
+          {c.curriculum && (
+            <section className="rv">
+              <h2 className="font-display font-semibold text-[20px] text-cy-300 mb-3 flex items-center gap-2.5"><I n="layers" s={18} /> Grade curricular</h2>
+              <Card className="p-6 border-cy-700">
+                <p className="text-[13.5px] text-fog leading-[1.9] whitespace-pre-line font-mono">{c.curriculum}</p>
+                <div className="mt-4 pt-4 border-t border-line flex flex-wrap gap-x-6 gap-y-1.5 font-mono text-[11px] text-dim">
+                  <span className="flex items-center gap-1.5"><I n="clock" s={13} c="text-cy-400" /> carga total {c.hours}h</span>
+                  <span className="flex items-center gap-1.5"><I n="layers" s={13} c="text-cy-400" /> {modules.length} módulos</span>
+                  <span className="flex items-center gap-1.5"><I n="video" s={13} c="text-cy-400" /> {lessons.length} aulas</span>
+                </div>
+              </Card>
+            </section>
+          )}
           <section className="rv grid md:grid-cols-2 gap-6">
             <div>
               <h3 className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-500 mb-3">O que você vai dominar</h3>

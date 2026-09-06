@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { I } from "../components/icons";
 import { AppShell, type NavItem } from "../components/layout";
-import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg } from "../components/ui";
+import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg, FileDrop } from "../components/ui";
 import { useApp, navigate } from "../state";
 import { CourseContent } from "./teacher";
 import { TicketsConsole, AdminSystem, SiteCMS } from "./admin2";
@@ -484,7 +484,7 @@ function Cursos() {
   const [edit, setEdit] = useState<Row | null | "new">(null);
   const [del, setDel] = useState<Row | null>(null);
   const empty = {
-    slug: "", title: "", subtitle: "", image: "", categoryId: "", teacherId: "", hours: 60, level: "Iniciante",
+    slug: "", title: "", subtitle: "", image: "", curriculum: "", categoryId: "", teacherId: "", hours: 60, level: "Iniciante",
     description: "", objectives: "", audience: "", prerequisites: "", benefits: "", methodology: "", finalProject: "",
     certificateText: "concluiu o programa", price: 499, promoPrice: 0, promoActive: false, installments: 6, published: false,
     pricingModel: "one_time", monthlyPrice: 89, planMonths: 6, freeReenroll: true,
@@ -561,7 +561,6 @@ function Cursos() {
             <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value, slug: f.slug || e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") })} /></Field>
             <Field label="Slug (URL)" req><TIn value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} placeholder="meu-curso" /></Field>
             <Field label="Subtítulo comercial"><TIn value={f.subtitle} onChange={(e) => setF({ ...f, subtitle: e.target.value })} /></Field>
-            <Field label="Imagem (URL)"><TIn value={f.image} onChange={(e) => setF({ ...f, image: e.target.value })} placeholder="https://… (vazio = capa gerada)" /></Field>
             <Field label="Categoria">
               <TSel value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value })}>
                 {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -600,6 +599,15 @@ function Cursos() {
                 <TSel value={String(!!f.freeReenroll)} onChange={(e) => setF({ ...f, freeReenroll: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel>
               </Field>
             </div>
+          </div>
+          <div className="grid md:grid-cols-[280px_1fr] gap-4 items-start">
+            <Field label="Imagem do curso" hint="Envie um arquivo PNG ou JPEG — a capa do catálogo e da página comercial.">
+              <FileDrop max={900} value={f.image} label="Enviar capa (PNG/JPEG)" onChange={(d) => setF({ ...f, image: d })} />
+            </Field>
+            <Field label="Grade curricular" hint="Estrutura geral do programa: módulos, etapas e carga por fase. Aparece na página do curso e no AVA.">
+              <TArea rows={6} value={f.curriculum} onChange={(e) => setF({ ...f, curriculum: e.target.value })}
+                placeholder={"Ex.:\nFase 1 — Fundamentos (20h)\nFase 2 — Prática guiada (30h)\nFase 3 — Projeto final + certificação (10h)"} />
+            </Field>
           </div>
           <Field label="Descrição (página comercial)"><TArea rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
           <div className="grid sm:grid-cols-2 gap-3">

@@ -340,6 +340,13 @@ function AvaCourse({ courseId }: { courseId: string }) {
         </div>
         <div className="font-mono text-[10.5px] text-dim mt-2">{p.done} de {p.total} aulas concluídas · progresso registrado automaticamente no SIA</div>
       </Card>
+      {c.curriculum && (
+        <Card className="p-5 mb-6 border-cy-700">
+          <h3 className="font-display font-semibold text-[14.5px] text-cy-300 mb-3 flex items-center gap-2"><I n="layers" s={16} /> Grade curricular</h3>
+          <p className="text-[12.5px] text-fog leading-[1.9] whitespace-pre-line font-mono">{c.curriculum}</p>
+          <div className="mt-3 pt-3 border-t border-line font-mono text-[10.5px] text-dim">carga total {c.hours}h · nível {c.level}</div>
+        </Card>
+      )}
       <div className="space-y-5">
         {modules.map((m, mi) => (
           <Card key={m.id} className="overflow-hidden">

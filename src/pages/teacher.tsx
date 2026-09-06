@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { I } from "../components/icons";
 import { AppShell, type NavItem } from "../components/layout";
-import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, Bar } from "../components/ui";
+import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, Bar, FileDrop } from "../components/ui";
 import { useApp } from "../state";
 import {
   teacherCourses, teacherClasses, canTeacherAccess, gradeAttempt, reviewSubmission,
@@ -250,6 +250,47 @@ function MinhasAulas({ myCourses }: { myCourses: Row[] }) {
 }
 
 /* ================= GESTOR DE CONTEÚDO (compartilhado com admin) ================= */
+/* ================= DADOS DO CURSO (grade curricular + imagem) ================= */
+function CourseDataTab({ courseId, actor }: { courseId: string; actor: Row }) {
+  const { refresh } = useApp();
+  const toast = useToast();
+  const c = find("courses", courseId);
+  const [f, setF] = useState<Row>({ title: c?.title || "", subtitle: c?.subtitle || "", hours: c?.hours || 0, curriculum: c?.curriculum || "", image: c?.image || "", description: c?.description || "" });
+  if (!c) return null;
+  const save = () => {
+    update("courses", courseId, { title: f.title, subtitle: f.subtitle, hours: Number(f.hours) || c.hours, curriculum: f.curriculum, image: f.image, description: f.description });
+    audit(actor, "UPDATE", "courses", courseId, `Dados/grade curricular de "${f.title}"`);
+    toast("Dados do curso atualizados — o site já reflete a mudança.", "ok");
+    refresh();
+  };
+  return (
+    <div className="max-w-[880px] space-y-5">
+      <Card className="p-6">
+        <h3 className="font-display font-semibold text-[15px] text-mist mb-4 flex items-center gap-2"><I n="layers" s={16} c="text-cy-400" /> Grade curricular & apresentação</h3>
+        <div className="grid md:grid-cols-[260px_1fr] gap-5 items-start">
+          <Field label="Imagem do curso" hint="Capa do catálogo e da página comercial — envie PNG ou JPEG.">
+            <FileDrop max={900} value={f.image} label="Enviar capa (PNG/JPEG)" onChange={(d) => setF({ ...f, image: d })} />
+          </Field>
+          <div className="space-y-4">
+            <div className="grid sm:grid-cols-[1fr_110px] gap-3">
+              <Field label="Título"><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
+              <Field label="Carga (h)"><TIn type="number" value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })} /></Field>
+            </div>
+            <Field label="Subtítulo comercial"><TIn value={f.subtitle} onChange={(e) => setF({ ...f, subtitle: e.target.value })} /></Field>
+            <Field label="Grade curricular" hint="Estrutura do programa em fases/módulos — exibida na página do curso e no AVA.">
+              <TArea rows={6} value={f.curriculum} onChange={(e) => setF({ ...f, curriculum: e.target.value })}
+                placeholder={"Fase 1 — Fundamentos (20h)\nFase 2 — Prática guiada (30h)\nFase 3 — Projeto final + certificação (10h)"} />
+            </Field>
+          </div>
+        </div>
+        <Field label="Descrição (página comercial)"><TArea rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+        <div className="flex justify-end mt-4"><Btn v="e" onClick={save}><I n="check" s={15} /> Salvar dados do curso</Btn></div>
+      </Card>
+      <p className="font-mono text-[10.5px] text-dim flex items-center gap-2"><I n="info" s={13} c="text-cy-600" /> Preço, professor e publicação são definidos pela administração — aqui você cuida da grade e da apresentação pedagógica.</p>
+    </div>
+  );
+}
+
 export function CourseContent({ courseId, actor }: { courseId: string; actor: Row }) {
   const toast = useToast();
   const c = find("courses", courseId);
@@ -286,10 +327,13 @@ export function CourseContent({ courseId, actor }: { courseId: string; actor: Ro
         <Badge s={c.published ? "published" : "unpublished"} />
       </div>
       <div className="flex gap-1 border-b border-line mb-6 overflow-x-auto">
-        {[["estrutura", "Módulos & Aulas"], ["midia", "Mídia & Arquivos"], ["atividades", "Atividades"], ["avaliacoes", "Avaliações"], ["projetos", "Projetos"]].map(([k, l]) => (
+        {[["dados", "Dados do curso"], ["estrutura", "Módulos & Aulas"], ["midia", "Mídia & Arquivos"], ["atividades", "Atividades"], ["avaliacoes", "Avaliações"], ["projetos", "Projetos"]].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 font-display text-[12.5px] uppercase tracking-wide whitespace-nowrap border-b-2 -mb-px transition-colors ${tab === k ? "text-cy-300 border-cy-500" : "text-fog border-transparent hover:text-mist"}`}>{l}</button>
         ))}
       </div>
+
+      {/* ------- DADOS DO CURSO ------- */}
+      {tab === "dados" && <CourseDataTab courseId={courseId} actor={actor} />}
 
       {/* ------- ESTRUTURA ------- */}
       {tab === "estrutura" && (
