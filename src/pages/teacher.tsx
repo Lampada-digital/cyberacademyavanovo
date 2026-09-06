@@ -11,6 +11,7 @@ import {
 
 const NAV: NavItem[] = [
   { to: "/professor", icon: "home", label: "Início" },
+  { to: "/professor/aulas", icon: "video", label: "Dar aulas" },
   { to: "/professor/cursos", icon: "layers", label: "Conteúdo dos cursos" },
   { to: "/professor/correcoes", icon: "file", label: "Correções" },
   { to: "/professor/projetos", icon: "git", label: "Projetos" },
@@ -30,6 +31,7 @@ export default function TeacherArea({ path, segs }: { path: string; segs: string
   switch (sub) {
     case "": page = <TDash myCourses={myCourses} myTeacherIds={myTeacherIds} />; break;
     case "cursos": page = segs[2] ? <ContentGuard courseId={segs[2]} myCourses={myCourses} /> : <TCursos myCourses={myCourses} />; break;
+    case "aulas": page = <MinhasAulas myCourses={myCourses} />; break;
     case "correcoes": page = <Correcoes myCourses={myCourses} />; break;
     case "projetos": page = <ProjetosProf myCourses={myCourses} />; break;
     case "notas": page = <NotasProf myCourses={myCourses} />; break;
@@ -76,6 +78,20 @@ function TDash({ myCourses, myTeacherIds }: { myCourses: Row[]; myTeacherIds: st
           <a href="#/professor/correcoes" className="cy-btn cy-btn-e px-4 py-2 text-[12px]">Corrigir agora</a>
         </Card>
       )}
+      <Card className="p-5 border-cy-600/50 relative overflow-hidden anim-fade-up">
+        <div className="absolute -right-14 -top-14 w-48 h-48 rounded-full border border-cy-700/40" />
+        <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full border border-cy-700/60" />
+        <div className="flex flex-wrap items-center gap-5 relative">
+          <span className="w-12 h-12 rounded-xl grid place-items-center bg-cy-500/15 border border-cy-500/50 text-cy-300 shrink-0"><I n="video" s={22} /></span>
+          <div className="flex-1 min-w-[240px]">
+            <h3 className="font-display font-semibold text-[15.5px] text-mist">Vai dar aula hoje?</h3>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 font-mono text-[10.5px] text-dim">
+              <span className="text-cy-300">criar aula</span> → <span className="text-ember">enviar vídeo</span> → <span className="text-cy-300">anexar materiais</span> → <span className="text-cy-300">publicar</span>
+            </div>
+          </div>
+          <a href="#/professor/aulas" className="cy-btn cy-btn-p px-5 py-2.5 text-[12.5px]"><I n="plus" s={14} /> Nova aula com vídeo</a>
+        </div>
+      </Card>
       <div className="grid md:grid-cols-2 gap-4">
         {myCourses.map((c) => {
           const ens = where("enrollments", (e) => e.courseId === c.id && e.status !== "CANCELLED");
@@ -111,6 +127,124 @@ function TCursos({ myCourses }: { myCourses: Row[] }) {
           </a>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ================= DAR AULAS (criar aula → vídeo → materiais → publicar) ================= */
+function MinhasAulas({ myCourses }: { myCourses: Row[] }) {
+  const { user, refresh } = useApp();
+  const toast = useToast();
+  const [courseId, setCourseId] = useState(myCourses[0]?.id || "");
+  const [lesModal, setLesModal] = useState<Row | null>(null);
+  const [matModal, setMatModal] = useState<Row | null>(null);
+  const [del, setDel] = useState<Row | null>(null);
+  if (myCourses.length === 0) return <Empty icon="video" title="Nenhum curso atribuído" desc="A administração precisa vincular você a um curso para que possa ministrar aulas." />;
+  const course = find("courses", courseId) || myCourses[0];
+  const modules = where("course_modules", (m) => m.courseId === course.id).sort((a, b) => a.order - b.order);
+  const lessons = where("lessons", (l) => l.courseId === course.id).sort((a, b) => {
+    const ma = modules.findIndex((m) => m.id === a.moduleId), mb = modules.findIndex((m) => m.id === b.moduleId);
+    return ma !== mb ? ma - mb : a.order - b.order;
+  });
+  const videos = lessons.filter((l) => l.videoUrl).length;
+  const mats = where("lesson_materials", (m) => m.courseId === course.id).length;
+  const published = lessons.filter((l) => l.published).length;
+
+  const bump = (id: string, dir: number) => {
+    const arr = lessons.filter((l) => l.moduleId === find("lessons", id)?.moduleId);
+    const i = arr.findIndex((x) => x.id === id);
+    const j = i + dir;
+    if (j < 0 || j >= arr.length) return;
+    update("lessons", arr[i].id, { order: arr[j].order });
+    update("lessons", arr[j].id, { order: arr[i].order });
+    refresh();
+  };
+  const publishToggle = (l: Row) => {
+    update("lessons", l.id, { published: !l.published });
+    audit(user, l.published ? "UNPUBLISH" : "PUBLISH", "lessons", l.id, `Aula "${l.title}"`);
+    if (!l.published) where("enrollments", (e) => e.courseId === course.id && e.status === "ACTIVE").forEach((e) => notify(e.studentId, "Nova aula disponível", `"${l.title}" foi publicada no curso ${course.title}.`, "info"));
+    toast(l.published ? "Aula retirada do AVA." : "Aula publicada — alunos matriculados notificados!", "ok");
+    refresh();
+  };
+  const videoBadge = (l: Row) =>
+    l.videoUrl?.startsWith("data:video") ? <Tag>upload · {l.videoSize || "vídeo"}</Tag>
+      : l.videoUrl && /(youtube|youtu\.be|vimeo)/.test(l.videoUrl) ? <Tag tone="amber">embed</Tag>
+      : l.videoUrl ? <Tag>mp4</Tag>
+      : <Tag tone="mist">player integrado</Tag>;
+
+  return (
+    <div>
+      <PageHead kicker="ÁREA DO PROFESSOR · dar aulas" title="Minhas aulas" desc="Crie a aula, envie o vídeo, anexe os materiais e publique para os alunos — tudo registrado no SIA." />
+
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <div className="min-w-[240px]"><TSel value={course.id} onChange={(e) => setCourseId(e.target.value)}>{myCourses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}</TSel></div>
+        <Btn v="e" onClick={() => {
+          if (modules.length === 0) { toast("Crie um módulo primeiro (Conteúdo dos cursos → Novo módulo).", "err"); return; }
+          setLesModal({ ...({} as Row), moduleId: modules[0].id, _new: true });
+        }}><I n="plus" s={15} /> Nova aula com vídeo</Btn>
+        <a href={`#/professor/cursos/${course.id}`} className="cy-btn cy-btn-x px-4 py-2.5 text-[12px]"><I n="layers" s={14} /> Gerenciar curso completo</a>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <Stat icon="video" label="Aulas criadas" value={lessons.length} />
+        <Stat icon="checkc" label="Publicadas no AVA" value={published} />
+        <Stat icon="upload" label="Vídeos enviados" value={videos} tone="amber" />
+        <Stat icon="file" label="Materiais anexados" value={mats} />
+      </div>
+
+      {modules.length === 0 ? (
+        <Empty icon="layers" title="Este curso ainda não tem módulos" desc="Os módulos organizam as aulas no AVA. Crie o primeiro pelo gestor de conteúdo.">
+          <a href={`#/professor/cursos/${course.id}`} className="cy-btn cy-btn-p px-5 py-2.5 text-[12.5px]">Criar módulo</a>
+        </Empty>
+      ) : lessons.length === 0 ? (
+        <Empty icon="video" title="Nenhuma aula neste curso" desc="Crie a primeira aula: envie a videoaula (upload ou link), anexe PDFs e materiais e publique para os alunos.">
+          <Btn v="e" onClick={() => setLesModal({ ...({} as Row), moduleId: modules[0].id, _new: true })}><I n="plus" s={14} /> Criar primeira aula</Btn>
+        </Empty>
+      ) : (
+        <div className="space-y-5">
+          {modules.map((m, mi) => {
+            const ls = lessons.filter((l) => l.moduleId === m.id);
+            if (ls.length === 0) return null;
+            return (
+              <Card key={m.id} className="overflow-hidden">
+                <div className="px-5 py-3.5 flex items-center gap-3 border-b border-line bg-cy-900/30">
+                  <span className="font-display font-bold text-[15px] text-cy-600">{String(mi + 1).padStart(2, "0")}</span>
+                  <span className="font-display font-semibold text-[13.5px] text-mist flex-1">{m.title}</span>
+                  <span className="font-mono text-[10.5px] text-dim">{ls.length} aula(s)</span>
+                  <Btn v="g" sm onClick={() => setLesModal({ ...({} as Row), moduleId: m.id, _new: true })}><I n="plus" s={12} /> aula</Btn>
+                </div>
+                {ls.map((l, li) => (
+                  <div key={l.id} className="flex items-center gap-3 px-5 py-3 border-b border-line/40 last:border-0 hover:bg-cy-500/5 transition-colors flex-wrap">
+                    <span className="font-mono text-[11px] text-dim w-5">{li + 1}</span>
+                    <I n={l.videoUrl ? "video" : "playc"} s={16} c={l.videoUrl ? "text-ember" : "text-cy-400"} />
+                    <div className="flex-1 min-w-[180px]">
+                      <span className="text-[13.5px] text-mist">{l.title}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        {videoBadge(l)}
+                        <span className="font-mono text-[10px] text-dim">{l.durationMin}min · {where("lesson_materials", (mt) => mt.lessonId === l.id).length} materiais</span>
+                      </div>
+                    </div>
+                    <Badge s={l.published ? "published" : "unpublished"} />
+                    <div className="flex gap-1">
+                      <Btn v="x" sm onClick={() => bump(l.id, -1)} title="Subir"><I n="chevD" s={12} c="rotate-180" /></Btn>
+                      <Btn v="x" sm onClick={() => bump(l.id, 1)} title="Descer"><I n="chevD" s={12} /></Btn>
+                      <Btn v="x" sm onClick={() => setMatModal(l)} title="Materiais"><I n="file" s={13} /></Btn>
+                      <Btn v="x" sm onClick={() => setLesModal(l)} title="Editar aula/vídeo"><I n="edit" s={13} /></Btn>
+                      <Btn v={l.published ? "g" : "x"} sm onClick={() => publishToggle(l)} title={l.published ? "Retirar do AVA" : "Publicar no AVA"}><I n={l.published ? "eye" : "lock"} s={13} /></Btn>
+                      <Btn v="x" sm onClick={() => setDel(l)} title="Excluir"><I n="trash" s={13} /></Btn>
+                    </div>
+                  </div>
+                ))}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <LessonModal state={lesModal} onClose={() => setLesModal(null)} courseId={course.id} actor={user!} onSaved={(l: Row) => setMatModal(l)} />
+      <MaterialModal lesson={matModal} onClose={() => setMatModal(null)} courseId={course.id} actor={user!} />
+      <Confirm open={!!del} onClose={() => setDel(null)} title="Excluir aula?" desc={`"${del?.title}" e seus materiais serão removidos do AVA. A ação fica registrada em auditoria.`}
+        onYes={() => { if (del) { where("lesson_materials", (m) => m.lessonId === del.id).forEach((m) => remove("lesson_materials", m.id)); remove("lessons", del.id); audit(user, "DELETE", "lessons", del.id, del.title); toast("Aula removida.", "ok"); refresh(); } }} />
     </div>
   );
 }
@@ -152,7 +286,7 @@ export function CourseContent({ courseId, actor }: { courseId: string; actor: Ro
         <Badge s={c.published ? "published" : "unpublished"} />
       </div>
       <div className="flex gap-1 border-b border-line mb-6 overflow-x-auto">
-        {[["estrutura", "Módulos & Aulas"], ["atividades", "Atividades"], ["avaliacoes", "Avaliações"], ["projetos", "Projetos"]].map(([k, l]) => (
+        {[["estrutura", "Módulos & Aulas"], ["midia", "Mídia & Arquivos"], ["atividades", "Atividades"], ["avaliacoes", "Avaliações"], ["projetos", "Projetos"]].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 font-display text-[12.5px] uppercase tracking-wide whitespace-nowrap border-b-2 -mb-px transition-colors ${tab === k ? "text-cy-300 border-cy-500" : "text-fog border-transparent hover:text-mist"}`}>{l}</button>
         ))}
       </div>
@@ -207,6 +341,9 @@ export function CourseContent({ courseId, actor }: { courseId: string; actor: Ro
         </div>
       )}
 
+      {/* ------- MÍDIA & ARQUIVOS (biblioteca do curso) ------- */}
+      {tab === "midia" && <MediaLibrary courseId={courseId} actor={actor} onEditLesson={(l) => setLesModal(l)} onMats={(l) => setMatModal(l)} />}
+
       {/* ------- ATIVIDADES / AVALIAÇÕES ------- */}
       {(tab === "atividades" || tab === "avaliacoes") && (() => {
         const kind = tab === "atividades" ? "activity" : "assessment";
@@ -242,11 +379,88 @@ export function CourseContent({ courseId, actor }: { courseId: string; actor: Ro
 
       {/* ------- MODAIS ------- */}
       <ModuleModal open={!!modModal} onClose={() => setModModal(null)} courseId={courseId} mod={modModal === "new" ? null : modModal} actor={actor} />
-      <LessonModal state={lesModal} onClose={() => setLesModal(null)} courseId={courseId} actor={actor} />
+      <LessonModal state={lesModal} onClose={() => setLesModal(null)} courseId={courseId} actor={actor} onSaved={(l: Row) => setMatModal(l)} />
       <MaterialModal lesson={matModal} onClose={() => setMatModal(null)} courseId={courseId} actor={actor} />
       {itemModal && <ItemModal kind={itemModal.kind} item={itemModal.item} courseId={courseId} onClose={() => setItemModal(null)} actor={actor} />}
       <Confirm open={!!del} onClose={() => setDel(null)} title="Excluir registro?" desc={`"${del?.label}" será removido permanentemente do SIA. A ação fica registrada em auditoria.`}
         onYes={() => { if (del) { remove(del.t, del.id); audit(actor, "DELETE", del.t, del.id, del.label); toast("Removido.", "ok"); } }} />
+    </div>
+  );
+}
+
+/* ================= BIBLIOTECA DE MÍDIA DO CURSO ================= */
+function MediaLibrary({ courseId, actor, onEditLesson, onMats }: { courseId: string; actor: Row; onEditLesson: (l: Row) => void; onMats: (l: Row) => void }) {
+  const toast = useToast();
+  const [filter, setFilter] = useState("all");
+  const lessons = where("lessons", (l) => l.courseId === courseId);
+  const videos = lessons.filter((l) => l.videoUrl);
+  const mats = where("lesson_materials", (m) => m.courseId === courseId);
+  const files = mats.filter((m) => m.kind !== "link");
+  const links = mats.filter((m) => m.kind === "link");
+  const lessonTitle = (id: string) => find("lessons", id)?.title || "—";
+  const delMat = (m: Row) => { remove("lesson_materials", m.id); audit(actor, "FILE_DELETE", "lesson_materials", m.id, m.name); toast("Arquivo removido do storage.", "ok"); };
+  const delVideo = (l: Row) => { update("lessons", l.id, { videoUrl: "", videoName: "", videoSize: "", videoType: "simulated" }); audit(actor, "FILE_DELETE", "lessons", l.id, `Vídeo removido de "${l.title}"`); toast("Vídeo removido.", "ok"); };
+  const groups: [string, string, Row[]][] = [["videos", `Videoaulas (${videos.length})`, videos], ["files", `Arquivos (${files.length})`, files], ["links", `Links externos (${links.length})`, links]];
+  const cur = groups.find((g) => g[0] === filter) || groups[0];
+  return (
+    <div>
+      <div className="grid sm:grid-cols-3 gap-3 mb-5">
+        {groups.map(([k, label, arr]) => (
+          <button key={k} onClick={() => setFilter(k)} className={`cy-card p-4 text-left transition-all ${filter === k ? "border-cy-500 shadow-[0_0_0_1px_rgba(3,166,166,.4)]" : "hover:border-cy-700"}`}>
+            <div className="flex items-center gap-2.5">
+              <I n={k === "videos" ? "video" : k === "files" ? "file" : "ext"} s={18} c={filter === k ? "text-cy-300" : "text-dim"} />
+              <span className="font-display font-semibold text-[13px] text-mist">{label}</span>
+            </div>
+            <div className="font-mono text-[10px] text-dim mt-1.5">{k === "videos" ? "mp4 · webm · embed" : k === "files" ? "pdf · doc · zip · imagens · código" : "referências e docs online"}</div>
+          </button>
+        ))}
+      </div>
+
+      {cur[2].length === 0 ? (
+        <Empty icon={cur[0] === "videos" ? "video" : "file"} title={`Nenhum item em ${cur[0] === "videos" ? "videoaulas" : cur[0] === "files" ? "arquivos" : "links"}`}
+          desc={cur[0] === "videos" ? "Crie uma aula e envie o vídeo pelo editor — o arquivo fica registrado no storage com tamanho, formato e status." : cur[0] === "files" ? "Anexe PDFs, slides, planilhas ou códigos diretamente em cada aula." : "Adicione links externos de referência em cada aula."} />
+      ) : cur[0] === "videos" ? (
+        <div className="grid md:grid-cols-2 gap-4">
+          {videos.map((l) => (
+            <Card key={l.id} className="overflow-hidden">
+              <div className="relative h-[130px] bg-[#020C12] grid place-items-center border-b border-line">
+                {l.videoUrl.startsWith("data:video") || /\.mp4($|\?)/.test(l.videoUrl || "") ? (
+                  <video src={l.videoUrl} className="w-full h-full object-cover" muted />
+                ) : (
+                  <div className="text-center"><I n="video" s={30} c="text-cy-600" /><div className="font-mono text-[10px] text-dim mt-1.5">{/(youtube|youtu\.be|vimeo)/.test(l.videoUrl) ? "embed externo" : "player integrado"}</div></div>
+                )}
+                <span className="absolute top-2 right-2"><Badge s={l.published ? "published" : "unpublished"} /></span>
+              </div>
+              <div className="p-4">
+                <div className="text-[13.5px] font-semibold text-mist truncate">{l.title}</div>
+                <div className="font-mono text-[10.5px] text-dim mt-1 truncate">{l.videoName ? `${l.videoName} · ${l.videoSize}` : `${l.durationMin}min`} · {where("lesson_materials", (m) => m.lessonId === l.id).length} materiais</div>
+                <div className="flex gap-1.5 mt-3 flex-wrap">
+                  <Btn v="g" sm onClick={() => onEditLesson(l)}><I n="video" s={12} /> Vídeo</Btn>
+                  <Btn v="x" sm onClick={() => onMats(l)}><I n="file" s={12} /> Materiais</Btn>
+                  <Btn v="x" sm onClick={() => delVideo(l)}><I n="trash" s={12} /></Btn>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="overflow-x-auto">
+          <table className="cy-tbl">
+            <thead><tr><th>{cur[0] === "files" ? "Arquivo" : "Link"}</th><th>Aula</th><th>Tipo</th><th>{cur[0] === "files" ? "Tamanho" : "URL"}</th><th></th></tr></thead>
+            <tbody>
+              {cur[2].map((m) => (
+                <tr key={m.id}>
+                  <td className="text-mist font-semibold">{m.name}</td>
+                  <td className="text-[12.5px]">{lessonTitle(m.lessonId)}</td>
+                  <td><Tag tone="mist">{m.fileType}</Tag></td>
+                  <td className="font-mono text-[11px] text-dim max-w-[200px] truncate">{cur[0] === "files" ? m.size : m.url}</td>
+                  <td className="text-right"><Btn v="x" sm onClick={() => delMat(m)}><I n="trash" s={13} /></Btn></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
     </div>
   );
 }
@@ -276,62 +490,112 @@ function ModuleModal({ open, onClose, courseId, mod, actor }: { open: boolean; o
   );
 }
 
-function LessonModal({ state, onClose, courseId, actor }: { state: Row | null; onClose: () => void; courseId: string; actor: Row }) {
+function LessonModal({ state, onClose, courseId, actor, onSaved }: { state: Row | null; onClose: () => void; courseId: string; actor: Row; onSaved?: (l: Row) => void }) {
   const toast = useToast();
   const isNew = !!state && (state._new || !state.id);
-  const [f, setF] = useState({ title: "", description: "", durationMin: 30, videoUrl: "", videoName: "", published: false });
+  const [f, setF] = useState({ title: "", description: "", durationMin: 30, videoUrl: "", videoName: "", videoSize: "", published: false });
   const [uploading, setUploading] = useState(false);
+  const [drag, setDrag] = useState(false);
   React.useEffect(() => {
-    if (state) setF({ title: state.title || "", description: state.description || "", durationMin: state.durationMin || 30, videoUrl: state.videoUrl || "", videoName: state.videoName || "", published: !!state.published });
+    if (state) setF({ title: state.title || "", description: state.description || "", durationMin: state.durationMin || 30, videoUrl: state.videoUrl || "", videoName: state.videoName || "", videoSize: state.videoSize || "", published: !!state.published });
+    else setF({ title: "", description: "", durationMin: 30, videoUrl: "", videoName: "", videoSize: "", published: false });
   }, [state]);
   if (!state) return null;
-  const onVideoFile = (file: File | undefined) => {
+  const onVideoFile = (file: File | undefined | null) => {
     if (!file) return;
-    if (!file.type.startsWith("video/")) { toast("Selecione um arquivo de vídeo (mp4/webm).", "err"); return; }
-    if (file.size > 4e6) { toast("Arquivo acima de 4MB — em produção o vídeo vai para o storage S3 (aqui é demonstração local).", "err"); return; }
+    if (!file.type.startsWith("video/")) { toast("Selecione um arquivo de vídeo (mp4/webm/mov).", "err"); return; }
+    if (file.size > 4e6) { toast("Arquivo acima de 4MB. Em produção o upload vai direto para o storage S3 — aqui é armazenamento local de demonstração.", "err"); return; }
     setUploading(true);
     const r = new FileReader();
-    r.onload = () => { setF((p) => ({ ...p, videoUrl: String(r.result), videoName: file.name })); setUploading(false); toast(`Vídeo "${file.name}" carregado (${(file.size / 1024 / 1024).toFixed(1)}MB).`, "ok"); };
+    r.onload = () => {
+      setF((p) => ({ ...p, videoUrl: String(r.result), videoName: file.name, videoSize: `${(file.size / 1024 / 1024).toFixed(1)}MB` }));
+      setUploading(false);
+      toast(`Vídeo "${file.name}" enviado para o storage (${(file.size / 1024 / 1024).toFixed(1)}MB).`, "ok");
+    };
     r.onerror = () => { setUploading(false); toast("Falha ao ler o arquivo.", "err"); };
     r.readAsDataURL(file);
   };
-  const save = () => {
+  const save = (thenMaterials: boolean) => {
     if (!f.title) { toast("Informe o título da aula.", "err"); return; }
     const isUpload = f.videoUrl.startsWith("data:video");
     const payload = {
       ...f, durationMin: Number(f.durationMin) || 30,
       videoType: isUpload ? "uploaded" : /youtube|youtu\.be|vimeo/.test(f.videoUrl) ? "embed" : /\.mp4/.test(f.videoUrl) ? "mp4" : "simulated",
     };
+    let rec: Row;
     if (isNew) {
       const order = where("lessons", (l) => l.moduleId === state.moduleId).length + 1;
-      const l = insert("lessons", { ...payload, moduleId: state.moduleId, courseId, order });
-      audit(actor, isUpload ? "FILE_UPLOAD" : "CREATE", "lessons", l.id, f.title);
-    } else { update("lessons", state.id, payload); audit(actor, isUpload ? "FILE_UPLOAD" : "UPDATE", "lessons", state.id, f.title); }
-    toast("Aula salva.", "ok"); onClose();
+      rec = insert("lessons", { ...payload, moduleId: state.moduleId, courseId, order });
+      audit(actor, isUpload ? "FILE_UPLOAD" : "CREATE", "lessons", rec.id, f.title);
+    } else { update("lessons", state.id, payload); rec = find("lessons", state.id)!; audit(actor, isUpload ? "FILE_UPLOAD" : "UPDATE", "lessons", state.id, f.title); }
+    toast(thenMaterials ? "Aula criada! Agora anexe os materiais." : "Aula salva.", "ok");
+    onClose();
+    if (thenMaterials && onSaved) onSaved(rec);
   };
+  const hasVideo = !!f.videoUrl;
   return (
-    <Modal open onClose={onClose} title={isNew ? "Nova aula" : "Editar aula"}>
+    <Modal open onClose={onClose} title={isNew ? "Nova aula" : "Editar aula"} w={620}>
       <div className="space-y-4">
         <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Ex.: React na prática" /></Field>
-        <Field label="Descrição / roteiro"><TArea rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+        <Field label="Descrição / roteiro"><TArea rows={2} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder="O que o aluno vai aprender nesta aula…" /></Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Duração (min)"><TIn type="number" value={f.durationMin} onChange={(e) => setF({ ...f, durationMin: Number(e.target.value) })} /></Field>
           <Field label="Publicada">
             <TSel value={String(f.published)} onChange={(e) => setF({ ...f, published: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel>
           </Field>
         </div>
-        <Field label="Videoaula" hint="Envie um arquivo de vídeo, cole um link do YouTube/Vimeo, ou deixe vazio para o player integrado com trilha da aula.">
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="cy-btn cy-btn-g px-3.5 py-2 text-[12px] cursor-pointer">
-              <I n="video" s={14} /> {uploading ? "Carregando…" : f.videoName ? "Trocar vídeo" : "Enviar vídeo"}
-              <input type="file" accept="video/*" className="hidden" onChange={(e) => onVideoFile(e.target.files?.[0])} />
-            </label>
-            {f.videoName && <span className="font-mono text-[10.5px] text-cy-300 max-w-[200px] truncate">{f.videoName}</span>}
-            {f.videoName && <Btn v="x" sm onClick={() => setF({ ...f, videoUrl: "", videoName: "" })}><I n="trash" s={12} /></Btn>}
-          </div>
-          <TIn className="mt-2" value={f.videoUrl.startsWith("data:") ? "" : f.videoUrl} onChange={(e) => setF({ ...f, videoUrl: e.target.value, videoName: "" })} placeholder="https://youtube.com/… (opcional)" />
-        </Field>
-        <div className="flex justify-end gap-2"><Btn v="x" onClick={onClose}>Cancelar</Btn><Btn v="e" onClick={save}>Salvar aula</Btn></div>
+
+        {/* VIDEOAULA — dropzone */}
+        <div>
+          <span className="block font-mono text-[10.5px] tracking-[.16em] uppercase text-fog mb-1.5">Videoaula <span className="text-cy-400">*</span></span>
+          {hasVideo && f.videoUrl.startsWith("data:video") ? (
+            <div className="rounded-lg border border-cy-600/60 overflow-hidden bg-[#020C12]">
+              <video src={f.videoUrl} controls className="w-full max-h-[190px]" />
+              <div className="px-3.5 py-2.5 flex items-center gap-2.5 bg-cy-900/40">
+                <I n="video" s={15} c="text-cy-300" />
+                <span className="text-[12px] text-mist flex-1 truncate">{f.videoName}</span>
+                <span className="font-mono text-[10px] text-dim">{f.videoSize} · {(f.videoUrl.slice(5, 15) || "video").split(";")[0].replace("data:", "").toUpperCase()}</span>
+                <Btn v="x" sm onClick={() => setF({ ...f, videoUrl: "", videoName: "", videoSize: "" })} title="Remover vídeo"><I n="trash" s={13} /></Btn>
+              </div>
+            </div>
+          ) : (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => { e.preventDefault(); setDrag(false); onVideoFile(e.dataTransfer.files?.[0]); }}
+              className={`rounded-lg border border-dashed p-5 text-center cursor-pointer transition-all ${drag ? "border-cy-300 bg-cy-500/15 scale-[1.01]" : "border-cy-700 bg-[#041821] hover:border-cy-500"}`}>
+              <input id="les-video-drop" type="file" accept="video/*" className="hidden" onChange={(e) => { onVideoFile(e.target.files?.[0]); e.target.value = ""; }} />
+              {uploading ? (
+                <div className="py-3"><span className="inline-block w-8 h-8 border-2 border-cy-400 border-t-transparent rounded-full spin-slow" style={{ animationDuration: ".9s" }} /><p className="font-mono text-[11px] text-cy-300 mt-3">enviando para o storage…</p></div>
+              ) : (
+                <>
+                  <I n="upload" s={26} c={`mx-auto ${drag ? "text-cy-200" : "text-cy-500"}`} />
+                  <p className="text-[13px] text-mist font-semibold mt-2.5">Arraste o vídeo da aula aqui</p>
+                  <p className="font-mono text-[10.5px] text-dim mt-1">MP4 · WEBM · MOV · até 4MB (demo) · storage S3 em produção</p>
+                  <label htmlFor="les-video-drop" className="cy-btn cy-btn-g px-4 py-2 text-[12px] mt-3 cursor-pointer"><I n="video" s={13} /> Escolher arquivo</label>
+                </>
+              )}
+            </div>
+          )}
+          {!hasVideo && (
+            <div className="mt-2">
+              <TIn value={f.videoUrl} onChange={(e) => setF({ ...f, videoUrl: e.target.value, videoName: "", videoSize: "" })} placeholder="…ou cole um link do YouTube/Vimeo/MP4 (opcional)" />
+              <p className="font-mono text-[10px] text-dim mt-1.5">Sem vídeo? O aluno usa o player integrado da plataforma — o progresso é registrado do mesmo jeito.</p>
+            </div>
+          )}
+          {hasVideo && !f.videoUrl.startsWith("data:video") && (
+            <div className="mt-2 flex items-center gap-2">
+              <TIn value={f.videoUrl} onChange={(e) => setF({ ...f, videoUrl: e.target.value })} />
+              <Btn v="x" sm onClick={() => setF({ ...f, videoUrl: "", videoName: "", videoSize: "" })}><I n="trash" s={13} /></Btn>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-wrap justify-end gap-2">
+          <Btn v="x" onClick={onClose}>Cancelar</Btn>
+          <Btn v="g" onClick={() => save(false)}><I n="check" s={14} /> Salvar aula</Btn>
+          <Btn v="e" onClick={() => save(true)}><I n="file" s={14} /> Salvar e adicionar materiais</Btn>
+        </div>
       </div>
     </Modal>
   );
@@ -340,6 +604,7 @@ function LessonModal({ state, onClose, courseId, actor }: { state: Row | null; o
 function MaterialModal({ lesson, onClose, courseId, actor }: { lesson: Row | null; onClose: () => void; courseId: string; actor: Row }) {
   const toast = useToast();
   const [f, setF] = useState({ name: "", kind: "link", url: "", fileType: "PDF" });
+  const [drag, setDrag] = useState(false);
   const mats = lesson ? where("lesson_materials", (m) => m.lessonId === lesson.id) : [];
   if (!lesson) return null;
   const addLink = () => {
@@ -358,6 +623,7 @@ function MaterialModal({ lesson, onClose, courseId, actor }: { lesson: Row | nul
     };
     r.readAsDataURL(file);
   };
+  const addFiles = (files: FileList | null) => { if (files) Array.from(files).forEach(addFile); };
   return (
     <Modal open onClose={onClose} title={`Materiais — ${lesson.title}`} w={620}>
       <div className="space-y-2 mb-5">
@@ -370,16 +636,26 @@ function MaterialModal({ lesson, onClose, courseId, actor }: { lesson: Row | nul
           </div>
         ))}
       </div>
-      <div className="border-t border-line pt-4 grid sm:grid-cols-[1fr_auto] gap-2">
-        <TIn placeholder="Nome do material" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files); }}
+        className={`border-t border-line pt-4`}>
+        <div className={`rounded-lg border-2 border-dashed p-4 text-center transition-all ${drag ? "border-cy-400 bg-cy-500/10" : "border-line hover:border-cy-600"}`}>
+          <input id={`mat-drop-${lesson.id}`} type="file" multiple className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+          <I n="upload" s={22} c={`mx-auto ${drag ? "text-cy-300" : "text-cy-500"}`} />
+          <p className="text-[12.5px] text-mist font-semibold mt-2">{drag ? "Solte para enviar!" : "Arraste arquivos aqui ou"}</p>
+          <label htmlFor={`mat-drop-${lesson.id}`} className="cy-btn cy-btn-g px-3.5 py-1.5 text-[11.5px] mt-2 cursor-pointer"><I n="file" s={13} /> Selecionar arquivos</label>
+          <p className="font-mono text-[10px] text-dim mt-2">PDF · DOC · PPT · XLS · ZIP · imagens · código · até 1,4MB cada</p>
+        </div>
+      </div>
+      <div className="border-t border-line mt-4 pt-4 grid sm:grid-cols-[1fr_auto] gap-2">
+        <TIn placeholder="Nome do material (link)" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
         <TIn placeholder="https://link-externo" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} />
       </div>
       <div className="flex flex-wrap gap-2 mt-3 items-center">
-        <Btn v="p" sm onClick={addLink}><I n="link" s={13} /> Adicionar link</Btn>
-        <label className="cy-btn cy-btn-g px-3 py-1.5 text-[12px] cursor-pointer"><I n="upload" s={13} /> Enviar arquivo
-          <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && addFile(e.target.files[0])} />
-        </label>
-        <span className="font-mono text-[10px] text-dim">PDF, DOC, PPT, XLS, ZIP, imagens, código…</span>
+        <Btn v="p" sm onClick={addLink}><I n="link" s={13} /> Adicionar link externo</Btn>
+        <span className="font-mono text-[10px] text-dim">Links abrem em nova aba · arquivos baixam direto</span>
       </div>
     </Modal>
   );
