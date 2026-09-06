@@ -41,7 +41,7 @@ export async function login(email: string, pass: string): Promise<Row> {
   }
   u.loginFails = 0; save();
   const token = uid() + uid();
-  insert("sessions", { userId: u.id, token, exp: Date.now() + 8 * 3600e3 });
+  insert("sessions", { userId: u.id, token, exp: Date.now() + 8 * 3600e3, device: (navigator.userAgent || "navegador").slice(0, 90), createdAt: now(), ip: "local" });
   localStorage.setItem(SKEY, JSON.stringify({ userId: u.id, token, exp: Date.now() + 8 * 3600e3 }));
   audit(u, "LOGIN", "users", u.id, "Autenticação via JWT");
   return u;
@@ -236,9 +236,11 @@ export function markLesson(studentId: string, lesson: Row, percent: number, comp
   const existing = lessonState(studentId, lesson.id);
   if (existing) update("lesson_progress", existing.id, { percent: Math.max(existing.percent || 0, pct), completed: done || existing.completed, updatedAt: now() });
   else insert("lesson_progress", { studentId, lessonId: lesson.id, courseId: lesson.courseId, moduleId: lesson.moduleId, percent: pct, completed: done });
+  const wasDone = existing?.completed;
   if (done) {
     const u = find("users", studentId);
     if (u) audit(u, "UPDATE", "lesson_progress", lesson.id, `Aula "${lesson.title}" concluída`);
+    if (!wasDone) awardXp(studentId, 15, `Aula concluída: ${lesson.title}`);
   }
   checkCompletionFor(studentId, lesson.courseId);
 }
@@ -318,6 +320,7 @@ export function submitAttempt(kind: "activity" | "assessment", itemId: string, s
     where("teachers", (t) => t.courseIds?.includes(item.courseId)).forEach((t) => t.userId && notify(t.userId, "Correção pendente", `"${item.title}" aguarda correção de questões dissertativas.`, "grade"));
   }
   checkCompletionFor(student.id, item.courseId);
+  awardXp(student.id, kind === "activity" ? 25 : 40, `${kind === "activity" ? "Atividade" : "Avaliação"} enviada: ${item.title}`);
   return at;
 }
 
@@ -476,6 +479,236 @@ export function canTeacherAccess(teacherId: string, courseId: string): boolean {
   return where("classes", (k) => k.courseId === courseId && k.teacherId === teacherId).length > 0;
 }
 
+/* ================= XP · NÍVEIS · STREAK ================= */
+import { XP_LEVELS } from "./db";
+
+export function levelInfo(xp: number) {
+  let idx = 0;
+  XP_LEVELS.forEach(([, min], i) => { if (xp >= min) idx = i; });
+  const [name, min] = XP_LEVELS[idx];
+  const next = XP_LEVELS[idx + 1];
+  const pct = next ? Math.round(((xp - min) / (next[1] - min)) * 100) : 100;
+  return { name, idx, xp, min, nextName: next?.[0] || null, nextMin: next?.[1] || min, pct };
+}
+
+export function awardXp(userId: string, amount: number, reason: string) {
+  const u = find("users", userId);
+  if (!u) return;
+  const today = now().slice(0, 10);
+  let streak = u.streak || 0;
+  if (u.lastXpDay !== today) {
+    const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+    streak = u.lastXpDay === yesterday ? streak + 1 : 1;
+  }
+  update("users", userId, { xp: (u.xp || 0) + amount, lastXpDay: today, streak });
+  insert("xp_events", { userId, amount, reason, at: now() });
+  const lv = levelInfo((u.xp || 0) + amount);
+  const prev = levelInfo(u.xp || 0);
+  if (lv.idx > prev.idx) notify(userId, "Nível alcançado!", `Você subiu para ${lv.name} (${lv.xp} XP). Continue assim!`, "xp");
+}
+
+export function streakDays(userId: string) {
+  const u = find("users", userId);
+  if (!u?.lastXpDay) return 0;
+  const today = now().slice(0, 10);
+  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  return u.lastXpDay === today || u.lastXpDay === yesterday ? (u.streak || 0) : 0;
+}
+
+/* ================= PERFIL + FOTO ================= */
+export function updateProfile(user: Row, data: Record<string, any>) {
+  if (data.email && one("users", (x) => x.email.toLowerCase() === String(data.email).toLowerCase() && x.id !== user.id))
+    throw new Error("Este e-mail já está em uso.");
+  update("users", user.id, data);
+  audit(user, "UPDATE", "users", user.id, "Dados do perfil atualizados");
+  return find("users", user.id)!;
+}
+
+export function passwordScore(pw: string): { score: number; label: string; tone: "coral" | "amber" | "green" } {
+  let s = 0;
+  if (pw.length >= 6) s++;
+  if (pw.length >= 10) s++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+  if (/\d/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  if (pw.length < 6) return { score: 0, label: "muito fraca", tone: "coral" };
+  if (s <= 2) return { score: 1, label: "fraca", tone: "coral" };
+  if (s === 3) return { score: 2, label: "razoável", tone: "amber" };
+  if (s === 4) return { score: 3, label: "forte", tone: "green" };
+  return { score: 4, label: "excelente", tone: "green" };
+}
+
+/* ================= DOCUMENTOS + FOTO + CARTEIRINHA ================= */
+export function myDocuments(userId: string): Row[] {
+  return where("documents", (d) => d.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export function uploadDocument(user: Row, data: { kind: string; fileName: string; dataUrl: string; enrollmentId?: string; note?: string }) {
+  if (!data.dataUrl || !data.dataUrl.startsWith("data:image/")) throw new Error("Envie um arquivo de imagem (PNG/JPG).");
+  if (data.dataUrl.length > 1_500_000) throw new Error("Imagem muito grande (máx. ~1MB após compressão).");
+  const prev = myDocuments(user.id).filter((d) => d.kind === data.kind && d.status !== "REJECTED");
+  const doc = insert("documents", {
+    userId: user.id, kind: data.kind, fileName: data.fileName, dataUrl: data.dataUrl,
+    enrollmentId: data.enrollmentId || null, note: data.note || "",
+    status: "PENDING_REVIEW", version: prev.length + 1,
+    createdAt: now(), reviewedBy: null, reviewNote: "",
+  });
+  audit(user, "FILE_UPLOAD", "documents", doc.id, `Documento enviado: ${data.kind} v${doc.version}`);
+  where("users", (u) => u.role === "admin").forEach((a) => notify(a.id, "Documento para análise", `${user.name} enviou ${data.kind} (v${doc.version}).`, "document"));
+  return doc;
+}
+
+export function reviewDocument(admin: Row, docId: string, approve: boolean, note: string) {
+  const d = find("documents", docId);
+  if (!d) return;
+  update("documents", docId, { status: approve ? "APPROVED" : "REJECTED", reviewedBy: admin.id, reviewNote: note, reviewedAt: now() });
+  audit(admin, "UPDATE", "documents", docId, `Documento ${approve ? "aprovado" : "rejeitado"}${note ? ` — ${note}` : ""}`);
+  notify(d.userId, approve ? "Documento aprovado" : "Documento rejeitado",
+    approve ? `Seu documento (${d.kind}) foi validado pela secretaria.` : `Seu documento (${d.kind}) foi rejeitado. ${note || "Envie uma nova versão."}`, "document");
+}
+
+export function issueStudentCard(user: Row, enrollmentId: string): Row {
+  const en = find("enrollments", enrollmentId);
+  if (!en) throw new Error("Matrícula não encontrada.");
+  if (!user.photo) throw new Error("Envie sua foto 3x4 no perfil antes de emitir a carteirinha.");
+  const year = new Date().getFullYear();
+  const seq = String(where("documents", (d) => d.kind === "CARTEIRINHA").length + 1).padStart(6, "0");
+  const number = `CA-ID-${year}-${seq}`;
+  const doc = insert("documents", {
+    userId: user.id, kind: "CARTEIRINHA", fileName: `carteirinha-${number}.png`, dataUrl: "",
+    enrollmentId, status: "APPROVED", version: 1, createdAt: now(),
+    cardNumber: number, validUntil: new Date(Date.now() + 365 * 864e5).toISOString(),
+    reviewedBy: "system", reviewNote: "Emissão automática via SIA",
+  });
+  audit(user, "CREATE", "documents", doc.id, `Carteirinha de estudante emitida: ${number}`);
+  notify(user.id, "Carteirinha emitida", `Sua carteirinha digital ${number} está disponível em Documentos.`, "document");
+  return doc;
+}
+
+export function validateStudentCard(code: string) {
+  const d = one("documents", (x) => x.kind === "CARTEIRINHA" && x.cardNumber === code?.trim());
+  if (!d) return { valid: false };
+  const u = find("users", d.userId);
+  const en = find("enrollments", d.enrollmentId);
+  const c = en && find("courses", en.courseId);
+  const expired = new Date(d.validUntil) < new Date();
+  return { valid: !expired, expired, doc: d, user: u, enrollment: en, course: c };
+}
+
+/* ================= 2FA (TOTP) ================= */
+function totpCode(secret: string, slot: number): string {
+  let h = 0;
+  const s = secret + ":" + slot;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return String(h % 1000000).padStart(6, "0");
+}
+export function currentTotp(secret: string): { code: string; remaining: number } {
+  const slot = Math.floor(Date.now() / 30000);
+  return { code: totpCode(secret, slot), remaining: 30 - Math.floor((Date.now() % 30000) / 1000) };
+}
+export function enable2FA(user: Row): string {
+  const secret = uid().slice(0, 12).toUpperCase();
+  update("users", user.id, { totpSecret: secret, twoFactor: "pending" });
+  audit(user, "UPDATE", "users", user.id, "2FA: segredo gerado (ativação pendente)");
+  return secret;
+}
+export function confirm2FA(user: Row, code: string) {
+  const u = find("users", user.id)!;
+  if (!u.totpSecret) throw new Error("Inicie a ativação do 2FA primeiro.");
+  const slot = Math.floor(Date.now() / 30000);
+  if (code !== totpCode(u.totpSecret, slot) && code !== totpCode(u.totpSecret, slot - 1))
+    throw new Error("Código inválido. Verifique o autenticador.");
+  update("users", user.id, { twoFactor: "on" });
+  audit(user, "UPDATE", "users", user.id, "2FA ativado (TOTP)");
+  sendEmail(u.email, "Segurança — 2FA ativado", "A verificação em duas etapas foi ativada na sua conta Cyber Academy.");
+}
+export function disable2FA(user: Row, code: string) {
+  const u = find("users", user.id)!;
+  const slot = Math.floor(Date.now() / 30000);
+  if (code !== totpCode(u.totpSecret || "", slot) && code !== totpCode(u.totpSecret || "", slot - 1))
+    throw new Error("Código inválido.");
+  update("users", user.id, { twoFactor: "off", totpSecret: "" });
+  audit(user, "UPDATE", "users", user.id, "2FA desativado");
+}
+
+/* ================= SESSÕES ================= */
+export function mySessions(userId: string): Row[] {
+  const raw = localStorage.getItem(SKEY);
+  const cur = raw ? JSON.parse(raw).token : "";
+  return where("sessions", (s) => s.userId === userId && (s.exp || 0) > Date.now())
+    .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
+    .map((s) => ({ ...s, current: s.token === cur }));
+}
+export function revokeSession(user: Row, sessionId: string) {
+  const s = find("sessions", sessionId);
+  if (!s || s.userId !== user.id) throw new Error("Sessão não encontrada.");
+  update("sessions", sessionId, { exp: 0, revoked: true });
+  audit(user, "UPDATE", "sessions", sessionId, `Sessão revogada (${s.device || "dispositivo"})`);
+}
+
+/* ================= FÓRUM DA TURMA ================= */
+export function forumPosts(courseId: string): Row[] {
+  return where("forum_posts", (p) => p.courseId === courseId && !p.parentId)
+    .sort((a, b) => b.at.localeCompare(a.at))
+    .map((p) => ({ ...p, replies: where("forum_posts", (r) => r.parentId === p.id).sort((a, b) => a.at.localeCompare(b.at)) }));
+}
+export function createForumPost(user: Row, courseId: string, parentId: string | null, body: string) {
+  if (!body.trim()) throw new Error("Escreva sua mensagem.");
+  const isTeacher = canTeacherAccess(user.id, courseId) || user.role === "teacher";
+  const p = insert("forum_posts", {
+    courseId, parentId: parentId || null, authorId: user.id, authorName: user.name,
+    authorRole: isTeacher ? "teacher" : "student", body: body.trim(), at: now(),
+  });
+  audit(user, "CREATE", "forum_posts", p.id, parentId ? "Resposta no fórum" : "Novo tópico no fórum");
+  if (!parentId) {
+    where("enrollments", (e) => e.courseId === courseId && e.status === "ACTIVE" && e.studentId !== user.id)
+      .forEach((e) => notify(e.studentId, "Novo tópico no fórum", `${user.name} abriu "${body.trim().slice(0, 60)}…"`, "forum"));
+  }
+  awardXp(user.id, 5, "Participação no fórum");
+  return p;
+}
+export function deleteForumPost(user: Row, postId: string) {
+  const p = find("forum_posts", postId);
+  if (!p) return;
+  if (p.authorId !== user.id && user.role !== "admin") throw new Error("Sem permissão para excluir.");
+  where("forum_posts", (r) => r.parentId === postId).forEach((r) => remove("forum_posts", r.id));
+  remove("forum_posts", postId);
+  audit(user, "DELETE", "forum_posts", postId, "Post removido do fórum");
+}
+
+/* ================= ANOTAÇÕES DE AULA ================= */
+export function lessonNote(userId: string, lessonId: string): Row | undefined {
+  return one("lesson_notes", (n) => n.userId === userId && n.lessonId === lessonId);
+}
+export function saveLessonNote(userId: string, lessonId: string, courseId: string, text: string) {
+  const ex = lessonNote(userId, lessonId);
+  if (ex) update("lesson_notes", ex.id, { text, updatedAt: now() });
+  else insert("lesson_notes", { userId, lessonId, courseId, text, updatedAt: now() });
+}
+
+/* ================= RETOMADA / PRÓXIMA AULA ================= */
+export function resumeLesson(studentId: string, courseId: string): Row | undefined {
+  const lessons = publishedLessons(courseId);
+  const states = new Map(where("lesson_progress", (p) => p.studentId === studentId).map((s) => [s.lessonId, s]));
+  const started = lessons.find((l) => { const s = states.get(l.id); return s && !s.completed; });
+  if (started) return started;
+  return lessons.find((l) => !states.get(l.id)?.completed);
+}
+
+/* ================= SESSÃO EXPIRADA (segurança) ================= */
+export function sessionExpired(): boolean {
+  const raw = localStorage.getItem(SKEY);
+  if (!raw) return false;
+  try {
+    const s = JSON.parse(raw);
+    if (s.exp < Date.now()) { localStorage.removeItem(SKEY); return true; }
+    const ses = one("sessions", (x) => x.token === s.token);
+    if (ses && (ses.revoked || (ses.exp || 0) < Date.now())) { localStorage.removeItem(SKEY); return true; }
+  } catch { localStorage.removeItem(SKEY); }
+  return false;
+}
+
 export { all, one, where, find, insert, update, remove, uid, now, audit, notify, sendEmail, wipeDB, save, getSettings, hashPw };
 export { fmtBRL, fmtDate, fmtDT, timeAgo, nextOrderNumber, nextEnrollmentNumber, nextCertCode, setSettings, statusBadge } from "./db";
+export { DOC_KINDS } from "./db";
 export type { Row } from "./db";

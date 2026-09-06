@@ -8,8 +8,76 @@ import { TicketsConsole, AdminSystem } from "./admin2";
 import { seedDemo, hasData, IMG } from "../lib/seed";
 import {
   refundPayment, all, one, where, find, insert, update, remove, audit, notify,
-  fmtBRL, fmtDate, fmtDT, type Row, effectivePrice, nextEnrollmentNumber,
+  fmtBRL, fmtDate, fmtDT, type Row, effectivePrice, nextEnrollmentNumber, reviewDocument,
 } from "../lib/api";
+import { DOC_KINDS } from "../lib/db";
+
+/* ================= REVISÃO DE DOCUMENTOS (secretaria) ================= */
+function DocumentReview() {
+  const { user, refresh } = useApp();
+  const toast = useToast();
+  const [status, setStatus] = useState("PENDING_REVIEW");
+  const [note, setNote] = useState("");
+  const [preview, setPreview] = useState<Row | null>(null);
+  const docs = where("documents", (d) => d.status === status && d.kind !== "CARTEIRINHA").sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const pending = where("documents", (d) => d.status === "PENDING_REVIEW" && d.kind !== "CARTEIRINHA").length;
+  const decide = (d: Row, approve: boolean) => {
+    reviewDocument(user!, d.id, approve, note);
+    setNote(""); setPreview(null);
+    toast(approve ? "Documento aprovado." : "Documento rejeitado.", approve ? "ok" : "info");
+    refresh();
+  };
+  return (
+    <div>
+      <PageHead kicker="SIA · secretaria" title="Documentos dos alunos" desc={`Fila de validação de documentos enviados pelos alunos. ${pending} aguardando análise.`} />
+      <div className="flex gap-2 mb-4">
+        {["PENDING_REVIEW", "APPROVED", "REJECTED"].map((s) => (
+          <button key={s} onClick={() => setStatus(s)} className={`cy-btn px-4 py-2 text-[12px] ${status === s ? "cy-btn-p" : "cy-btn-g"}`}>
+            {s === "PENDING_REVIEW" ? `Pendentes (${pending})` : s === "APPROVED" ? "Aprovados" : "Rejeitados"}
+          </button>
+        ))}
+      </div>
+      {docs.length === 0 ? (
+        <Empty icon="file" title={status === "PENDING_REVIEW" ? "Nenhum documento pendente" : "Nada aqui"} desc="Quando um aluno enviar ou renovar um documento, ele aparece nesta fila para análise da secretaria." />
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {docs.map((d) => {
+            const owner = find("users", d.userId);
+            return (
+              <Card key={d.id} hover className="p-4">
+                <button onClick={() => setPreview(d)} className="w-full h-[130px] rounded-lg overflow-hidden border border-line hover:border-cy-500 transition-colors mb-3">
+                  <img src={d.dataUrl} alt={d.fileName} className="w-full h-full object-cover" />
+                </button>
+                <div className="text-[13px] font-semibold text-mist">{DOC_KINDS[d.kind] || d.kind} <span className="font-mono text-[10px] text-dim">v{d.version}</span></div>
+                <div className="font-mono text-[10.5px] text-dim mt-0.5">{owner?.name} · {fmtDate(d.createdAt)}</div>
+                <div className="mt-2"><Badge s={d.status} />{d.status !== "PENDING_REVIEW" && d.reviewNote && <span className="block text-[11px] text-fog mt-1">{d.reviewNote}</span>}</div>
+                {status === "PENDING_REVIEW" && (
+                  <div className="flex gap-2 mt-3">
+                    <Btn v="p" sm className="flex-1" onClick={() => decide(d, true)}><I n="check" s={13} /> Aprovar</Btn>
+                    <Btn v="d" sm className="flex-1" onClick={() => setPreview(d)}><I n="x" s={13} /> Rejeitar</Btn>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+      <Modal open={!!preview} onClose={() => { setPreview(null); setNote(""); }} title={DOC_KINDS[preview?.kind || ""] || "Documento"} w={640}>
+        {preview && (
+          <div>
+            <img src={preview.dataUrl} alt={preview.fileName} className="w-full rounded-lg border border-line mb-4" />
+            <div className="font-mono text-[11px] text-dim mb-3">{find("users", preview.userId)?.name} · {preview.fileName} · v{preview.version}</div>
+            <Field label="Parecer da secretaria (opcional, exibido ao aluno)"><TArea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex.: imagem ilegível, envie novamente em melhor resolução." /></Field>
+            <div className="flex justify-end gap-2 mt-4">
+              <Btn v="d" onClick={() => decide(preview, false)}><I n="x" s={14} /> Rejeitar</Btn>
+              <Btn v="p" onClick={() => decide(preview, true)}><I n="check" s={14} /> Aprovar documento</Btn>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
 
 export const NAV_ADMIN: NavItem[] = [
   { to: "/admin", icon: "home", label: "Dashboard" },
@@ -18,6 +86,7 @@ export const NAV_ADMIN: NavItem[] = [
   { to: "/admin/cursos", icon: "layers", label: "Cursos" },
   { to: "/admin/turmas", icon: "cal", label: "Turmas" },
   { to: "/admin/matriculas", icon: "award", label: "Matrículas" },
+  { to: "/admin/documentos", icon: "file", label: "Documentos" },
   { to: "/admin/financeiro", icon: "wallet", label: "Financeiro" },
   { to: "/admin/relatorios", icon: "chart", label: "Relatórios" },
   { to: "/admin/suporte", icon: "msg", label: "Suporte" },
@@ -39,6 +108,7 @@ export default function AdminArea({ path, segs }: { path: string; segs: string[]
     case "cursos": page = segs[2] ? <CourseContent courseId={segs[2]} actor={user!} /> : <Cursos />; break;
     case "turmas": page = <Turmas />; break;
     case "matriculas": page = <Matriculas />; break;
+    case "documentos": page = <DocumentReview />; break;
     case "financeiro": page = <Financeiro />; break;
     case "relatorios": page = <AdminSystem kind="relatorios" />; break;
     case "suporte": page = <TicketsConsole />; break;

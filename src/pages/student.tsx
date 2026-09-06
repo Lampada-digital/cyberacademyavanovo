@@ -1,15 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { I } from "../components/icons";
 import { AppShell, Avatar, type NavItem } from "../components/layout";
-import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg } from "../components/ui";
+import { Btn, Card, Badge, Bar, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, CoverImg, FileDrop, Strength, TotpCode } from "../components/ui";
 import { QRMatrix } from "../components/fx";
 import { useApp, navigate } from "../state";
 import {
   myEnrollments, courseTree, courseProgress, lessonState, markLesson, weightedAvg,
   submitAttempt, submitSubmission, createTicket, replyTicket, changePassword,
-  autoScore, canTeacherAccess,
+  autoScore, canTeacherAccess, levelInfo, streakDays, awardXp, resumeLesson,
+  myDocuments, uploadDocument, issueStudentCard, enable2FA, confirm2FA, disable2FA,
+  mySessions, revokeSession, forumPosts, createForumPost, deleteForumPost,
+  lessonNote, saveLessonNote, passwordScore, updateProfile, currentTotp,
   all, one, where, find, update, fmtBRL, fmtDate, fmtDT, timeAgo, type Row, audit, getSettings,
 } from "../lib/api";
+import { DOC_KINDS } from "../lib/db";
 
 const NAV: NavItem[] = [
   { to: "/aluno", icon: "home", label: "Início" },
@@ -95,6 +99,52 @@ function Dashboard() {
         <Stat icon="chart" label="Progresso médio" value={`${ens.length ? Math.round(ens.reduce((s, e) => s + (courseProgress(user!.id, e.courseId).percent), 0) / ens.length) : 0}%`} tone="amber" />
         <Stat icon="target" label="Pendências" value={pendingActs.length} sub="atividades e avaliações" />
         <Stat icon="award" label="Certificados" value={where("certificates", (c) => c.studentId === user!.id).length} />
+      </div>
+
+      <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4">
+        {(() => {
+          const lv = levelInfo(user!.xp || 0);
+          return (
+            <Card className="p-5 flex flex-wrap items-center gap-5">
+              <span className="w-12 h-12 rounded-xl grid place-items-center bg-ember/10 border border-ember/40 text-ember"><I n="zap" s={22} /></span>
+              <div className="flex-1 min-w-[200px]">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-display font-semibold text-[14.5px] text-mist">Nível: <span className="text-ember">{lv.name}</span></span>
+                  <span className="font-mono text-[11.5px] text-cy-300 tnum">{lv.xp} XP</span>
+                </div>
+                <div className="mt-2"><Bar v={lv.pct} tone="amber" /></div>
+                <div className="font-mono text-[10.5px] text-dim mt-1.5">{lv.nextName ? `${lv.nextMin - lv.xp} XP para ${lv.nextName}` : "nível máximo alcançado"} · aulas +15 · atividades +25 · avaliações +40 · fórum +5</div>
+              </div>
+              <div className="flex items-center gap-2 cy-card px-4 py-2.5 border-ember/30">
+                <I n="flame" s={20} c={streakDays(user!.id) > 0 ? "text-ember" : "text-dim"} />
+                <div>
+                  <div className="font-display font-bold text-[17px] text-mist leading-none tnum">{streakDays(user!.id)}</div>
+                  <div className="font-mono text-[9.5px] text-dim uppercase tracking-wider mt-0.5">dias seguidos</div>
+                </div>
+              </div>
+            </Card>
+          );
+        })()}
+        {(() => {
+          const en = active[0];
+          const rl = en && resumeLesson(user!.id, en.courseId);
+          const c = en && find("courses", en.courseId);
+          return rl && c ? (
+            <a href={`#/aluno/aula/${rl.id}`} className="cy-card cy-card-h p-5 flex items-center gap-4 group">
+              <span className="w-12 h-12 rounded-xl grid place-items-center bg-cy-500/12 border border-cy-600/50 text-cy-300 group-hover:scale-105 transition-transform"><I n="playc" s={22} /></span>
+              <div className="min-w-0">
+                <div className="cy-chip text-cy-500">CONTINUE DE ONDE PAROU</div>
+                <div className="text-[13.5px] font-semibold text-mist mt-1 truncate">{rl.title}</div>
+                <div className="font-mono text-[10.5px] text-dim mt-0.5 truncate">{c.title}</div>
+              </div>
+              <I n="arrowR" s={18} c="text-cy-400 ml-auto shrink-0" />
+            </a>
+          ) : (
+            <Card className="p-5 grid place-items-center text-center">
+              <p className="text-[12.5px] text-dim">Matricule-se em um curso para começar sua trilha de estudos.</p>
+            </Card>
+          );
+        })()}
       </div>
 
       <div className="grid lg:grid-cols-[1.5fr_1fr] gap-6">
@@ -426,10 +476,7 @@ function LessonPlayer({ lessonId }: { lessonId: string }) {
             {next && <a href={`#/aluno/aula/${next.id}`} className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]">Próxima aula <I n="chevR" s={14} /></a>}
             {!next && <a href={`#/aluno/avacurso/${lesson.courseId}`} className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]">Voltar ao curso</a>}
           </div>
-          <Card className="p-5 mt-5">
-            <h3 className="font-mono text-[11px] tracking-[.16em] uppercase text-cy-500 mb-2">Sobre esta aula</h3>
-            <p className="text-[13.5px] text-fog leading-relaxed">{lesson.description}</p>
-          </Card>
+          <LessonTabs lesson={lesson} user={user!} />
         </div>
         <div className="space-y-4">
           <Card className="p-5">
@@ -469,6 +516,102 @@ function LessonPlayer({ lessonId }: { lessonId: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ================= ABAS DA AULA (sobre · anotações · fórum) ================= */
+function LessonTabs({ lesson, user }: { lesson: Row; user: Row }) {
+  const { refresh } = useApp();
+  const toast = useToast();
+  const [tab, setTab] = useState<"sobre" | "notas" | "forum">("sobre");
+  const note = lessonNote(user.id, lesson.id);
+  const [text, setText] = useState(note?.text || "");
+  const [savedAt, setSavedAt] = useState(note?.updatedAt || "");
+  const [newPost, setNewPost] = useState("");
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  useEffect(() => { const n = lessonNote(user.id, lesson.id); setText(n?.text || ""); setSavedAt(n?.updatedAt || ""); }, [lesson.id]);
+  const posts = forumPosts(lesson.courseId);
+
+  const saveNote = () => {
+    saveLessonNote(user.id, lesson.id, lesson.courseId, text);
+    setSavedAt(new Date().toISOString());
+    toast("Anotação salva — ela é pessoal e sincronizada com o SIA.", "ok");
+    refresh();
+  };
+  const post = (parentId: string | null, body: string, clear: () => void) => {
+    try { createForumPost(user, lesson.courseId, parentId, body); clear(); refresh(); }
+    catch (e: any) { toast(e.message, "err"); }
+  };
+  const del = (id: string) => { try { deleteForumPost(user, id); refresh(); } catch (e: any) { toast(e.message, "err"); } };
+
+  return (
+    <Card className="mt-5 overflow-hidden">
+      <div className="flex border-b border-line">
+        {([["sobre", "Sobre a aula", "book"], ["notas", "Minhas anotações", "pen"], ["forum", "Fórum da turma", "msg"]] as [string, string, string][]).map(([k, l, ic]) => (
+          <button key={k} onClick={() => setTab(k as any)}
+            className={`px-4 py-3 font-display text-[12px] tracking-wider uppercase flex items-center gap-2 border-b-2 -mb-px transition-colors ${tab === k ? "text-cy-300 border-cy-500" : "text-fog border-transparent hover:text-mist"}`}>
+            <I n={ic} s={14} /> {l}
+          </button>
+        ))}
+      </div>
+      <div className="p-5">
+        {tab === "sobre" && <p className="text-[13.5px] text-fog leading-relaxed">{lesson.description}</p>}
+        {tab === "notas" && (
+          <div>
+            <TArea rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder="Suas anotações pessoais desta aula… (visíveis apenas para você)" />
+            <div className="flex items-center justify-between mt-3">
+              <span className="font-mono text-[10.5px] text-dim">{savedAt ? `salvo ${timeAgo(savedAt)}` : "nenhuma anotação ainda"} · +2 XP ao salvar pela primeira vez</span>
+              <Btn v="p" sm onClick={saveNote}><I n="check" s={13} /> Salvar anotação</Btn>
+            </div>
+          </div>
+        )}
+        {tab === "forum" && (
+          <div className="space-y-4">
+            <div className="flex gap-2.5">
+              <TIn value={newPost} onChange={(e) => setNewPost(e.target.value)} placeholder="Pergunte ou comente com a turma e o professor… (+5 XP)" onKeyDown={(e) => e.key === "Enter" && post(null, newPost, () => setNewPost(""))} />
+              <Btn v="e" sm className="shrink-0 px-4" onClick={() => post(null, newPost, () => setNewPost(""))}>Postar</Btn>
+            </div>
+            {posts.length === 0 && <p className="text-[12.5px] text-dim text-center py-4">Seja o primeiro a abrir um tópico neste curso.</p>}
+            {posts.map((p) => (
+              <div key={p.id} className="cy-card p-4">
+                <div className="flex items-center gap-2.5">
+                  <Avatar name={p.authorName} s={30} />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[13px] font-semibold text-mist">{p.authorName}</span>
+                    {p.authorRole === "teacher" && <span className="cy-badge b-amber ml-2">professor</span>}
+                  </div>
+                  <span className="font-mono text-[10px] text-dim">{timeAgo(p.at)}</span>
+                  {p.authorId === user.id && <button className="text-dim hover:text-coral transition-colors" onClick={() => del(p.id)} title="Excluir"><I n="x" s={14} /></button>}
+                </div>
+                <p className="text-[13px] text-fog leading-relaxed mt-2.5 whitespace-pre-wrap">{p.body}</p>
+                <div className="mt-3 space-y-2">
+                  {p.replies.map((r: Row) => (
+                    <div key={r.id} className="ml-6 pl-3 border-l-2 border-line py-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px] font-semibold text-mist">{r.authorName}</span>
+                        {r.authorRole === "teacher" && <span className="cy-badge b-amber">professor</span>}
+                        <span className="font-mono text-[10px] text-dim">{timeAgo(r.at)}</span>
+                        {r.authorId === user.id && <button className="text-dim hover:text-coral" onClick={() => del(r.id)}><I n="x" s={12} /></button>}
+                      </div>
+                      <p className="text-[12.5px] text-fog mt-1 whitespace-pre-wrap">{r.body}</p>
+                    </div>
+                  ))}
+                  {replyTo === p.id ? (
+                    <div className="ml-6 flex gap-2">
+                      <TIn autoFocus value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Sua resposta…" onKeyDown={(e) => { if (e.key === "Enter") post(p.id, replyText, () => { setReplyText(""); setReplyTo(null); }); }} />
+                      <Btn v="g" sm onClick={() => post(p.id, replyText, () => { setReplyText(""); setReplyTo(null); })}>Responder</Btn>
+                    </div>
+                  ) : (
+                    <button className="ml-6 text-[11.5px] text-cy-300 hover:underline" onClick={() => setReplyTo(p.id)}>↩ responder</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }
 
@@ -843,16 +986,148 @@ function Historico() {
 
 /* ================= DOCUMENTOS ================= */
 function Documentos() {
-  const { user } = useApp();
+  const { user, refresh } = useApp();
+  const toast = useToast();
   const accepts = where("terms_acceptances", (t) => t.userId === user!.id);
   const consents = where("consents", (t) => t.userId === user!.id);
-  const ens = myEnrollments(user!.id);
+  const ens = myEnrollments(user!.id).filter((e) => ["ACTIVE", "COMPLETED"].includes(e.status));
+  const docs = myDocuments(user!.id).filter((d) => d.kind !== "CARTEIRINHA");
+  const cards = myDocuments(user!.id).filter((d) => d.kind === "CARTEIRINHA");
   const [decl, setDecl] = useState<Row | null>(null);
+  const [up, setUp] = useState(false);
+  const [nf, setNf] = useState({ kind: "id_doc", enrollmentId: ens[0]?.id || "", dataUrl: "", fileName: "" });
+  const [viewDoc, setViewDoc] = useState<Row | null>(null);
+  const [flip, setFlip] = useState(false);
+
+  const submitDoc = () => {
+    try {
+      const d = uploadDocument(user!, nf);
+      setUp(false);
+      setNf({ kind: "id_doc", enrollmentId: ens[0]?.id || "", dataUrl: "", fileName: "" });
+      toast(`Documento enviado (v${d.version}) — aguardando validação da secretaria.`, "ok");
+      refresh();
+    } catch (e: any) { toast(e.message, "err"); }
+  };
+  const renew = (d: Row) => { setNf({ kind: d.kind, enrollmentId: d.enrollmentId || ens[0]?.id || "", dataUrl: "", fileName: "" }); setUp(true); };
+  const issueCard = (enId: string) => {
+    try { const c = issueStudentCard(user!, enId); toast(`Carteirinha ${c.cardNumber} emitida!`, "ok"); refresh(); }
+    catch (e: any) { toast(e.message, "err"); }
+  };
+
   return (
     <div>
-      <PageHead kicker="SIA · documentos" title="Documentos" desc="Declarações de matrícula, certificados e registros de consentimento LGPD." />
+      <PageHead kicker="SIA · documentos" title="Central de documentos" desc="Foto de matrícula, carteirinha digital, envio/renovação de documentos com validação da secretaria, declarações e registros LGPD."
+        right={<Btn v="e" onClick={() => setUp(true)}><I n="cam" s={15} /> Enviar / renovar documento</Btn>} />
+
+      {/* CARTEIRINHA */}
+      <div className="grid lg:grid-cols-[1.15fr_1fr] gap-6 items-start mb-8">
+        <div>
+          <h2 className="font-display font-semibold text-[15px] text-cy-300 flex items-center gap-2 mb-3"><I n="idcard" s={17} /> Carteirinha de estudante</h2>
+          {cards.length === 0 ? (
+            <Card className="p-6">
+              <p className="text-[13px] text-fog leading-relaxed">Emita sua carteirinha digital com foto, QR Code de validação e validade de 12 meses. Necessário: <strong className="text-mist">foto 3x4 enviada</strong> (no perfil) e matrícula ativa.</p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {ens.filter((e) => e.status === "ACTIVE").map((e) => (
+                  <Btn key={e.id} v="p" sm onClick={() => issueCard(e.id)}><I n="idcard" s={14} /> Emitir para {find("courses", e.courseId)?.title.slice(0, 24)}</Btn>
+                ))}
+                {ens.filter((e) => e.status === "ACTIVE").length === 0 && <span className="text-[12px] text-dim">Nenhuma matrícula ativa disponível.</span>}
+              </div>
+              {!user!.photo && <p className="font-mono text-[10.5px] text-ember mt-3">⚠ Envie sua foto 3x4 em “Meu perfil” antes de emitir.</p>}
+            </Card>
+          ) : (
+            <div>
+              <div className="relative h-[220px] max-w-[430px] cursor-pointer" style={{ perspective: "1200px" }} onClick={() => setFlip(!flip)} title="Clique para virar">
+                <div className="absolute inset-0 transition-transform duration-700" style={{ transformStyle: "preserve-3d", transform: flip ? "rotateY(180deg)" : "none" }}>
+                  {/* frente */}
+                  <div className="absolute inset-0 rounded-xl overflow-hidden border border-cy-600/60 p-5 flex gap-4" style={{ backfaceVisibility: "hidden", background: "linear-gradient(135deg,#05202B,#0A3E41 55%,#0E5F5F)" }}>
+                    <div className="absolute -right-10 -top-16 w-48 h-48 rounded-full border border-cy-500/20" />
+                    <div className="absolute -right-2 -top-8 w-28 h-28 rounded-full border border-cy-500/30" />
+                    <div className="flex flex-col">
+                      <div className="cy-chip text-cy-300">CYBER ACADEMY · {new Date().getFullYear()}</div>
+                      <div className="font-display font-bold text-[13px] text-mist mt-0.5">CARTEIRA DE ESTUDANTE</div>
+                      <div className="mt-auto">
+                        <div className="text-[15px] font-display font-bold text-mist leading-tight">{user!.name}</div>
+                        <div className="font-mono text-[10px] text-cy-300 mt-1">{find("courses", cards[0].enrollmentId && find("enrollments", cards[0].enrollmentId)?.courseId)?.title}</div>
+                        <div className="font-mono text-[9.5px] text-dim mt-1">matrícula {find("enrollments", cards[0].enrollmentId)?.number}</div>
+                      </div>
+                    </div>
+                    <div className="ml-auto flex flex-col items-end justify-between">
+                      {user!.photo ? <img src={user!.photo} alt="foto" className="w-[86px] h-[104px] object-cover rounded-lg border border-cy-500/50" /> : <span className="w-[86px] h-[104px] rounded-lg border border-line grid place-items-center text-dim"><I n="cam" s={22} /></span>}
+                      <div className="text-right">
+                        <div className="font-mono text-[10px] text-cy-300">{cards[0].cardNumber}</div>
+                        <div className="font-mono text-[9px] text-dim">válida até {fmtDate(cards[0].validUntil)}</div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* verso */}
+                  <div className="absolute inset-0 rounded-xl overflow-hidden border border-cy-600/60 p-5 flex items-center justify-between gap-5" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "linear-gradient(135deg,#0A3E41,#05202B 60%,#031019)" }}>
+                    <div>
+                      <div className="cy-chip text-cy-400 mb-2">VALIDAÇÃO DIGITAL</div>
+                      <p className="text-[11px] text-fog leading-relaxed max-w-[210px]">Documento digital emitido pelo SIA. Autenticidade verificável por QR Code ou código único.</p>
+                      <div className="font-mono text-[10px] text-dim mt-3">emissão {fmtDate(cards[0].createdAt)}</div>
+                      <div className="font-mono text-[10px] text-dim">assinado digitalmente · SIA v2.6</div>
+                    </div>
+                    <div className="bg-[#EAFBF8] p-2.5 rounded-lg"><QRMatrix code={cards[0].cardNumber} size={110} /></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <Btn v="g" sm onClick={() => setViewDoc(cards[0])}><I n="eye" s={14} /> Ampliar</Btn>
+                <Btn v="x" sm onClick={() => { setFlip(false); setTimeout(() => window.print(), 150); }}><I n="print" s={14} /> Imprimir</Btn>
+                <span className="font-mono text-[10.5px] text-dim self-center ml-1">clique no cartão para virar · versão {cards.length}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* FOTO 3x4 */}
+        <div>
+          <h2 className="font-display font-semibold text-[15px] text-cy-300 flex items-center gap-2 mb-3"><I n="cam" s={17} /> Foto de matrícula (3x4)</h2>
+          <Card className="p-5">
+            <div className="flex items-center gap-4">
+              {user!.photo ? <img src={user!.photo} alt="foto" className="w-[76px] h-[92px] object-cover rounded-lg border border-cy-600" /> : <span className="w-[76px] h-[92px] rounded-lg border border-dashed border-cy-700 grid place-items-center text-dim"><I n="cam" s={24} /></span>}
+              <div className="flex-1">
+                <p className="text-[12.5px] text-fog leading-relaxed">{user!.photo ? "Foto cadastrada — usada na carteirinha e nas declarações." : "Sem foto. Envie uma foto 3x4 para emitir sua carteirinha."}</p>
+                <div className="mt-3 max-w-[260px]"><FileDrop max={420} value={user!.photo} label="Enviar foto 3x4" onChange={(d) => { updateProfile(user!, { photo: d }); toast("Foto atualizada no SIA.", "ok"); refresh(); }} /></div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* DOCUMENTOS ENVIADOS */}
+      <h2 className="font-display font-semibold text-[15px] text-cy-300 flex items-center gap-2 mb-3"><I n="file" s={16} /> Meus documentos ({docs.length})</h2>
+      {docs.length === 0 ? (
+        <Empty icon="file" title="Nenhum documento enviado" desc="Envie identidade, comprovante de residência ou outros documentos — a secretaria valida cada versão e você é notificado.">
+          <Btn v="e" onClick={() => setUp(true)}><I n="cam" s={14} /> Enviar documento</Btn>
+        </Empty>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-3">
+          {docs.map((d) => (
+            <Card key={d.id} className="p-4 flex items-center gap-3.5">
+              <button onClick={() => setViewDoc(d)} className="w-[54px] h-[54px] rounded-lg overflow-hidden border border-line shrink-0 hover:border-cy-500 transition-colors">
+                <img src={d.dataUrl} alt={d.fileName} className="w-full h-full object-cover" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold text-mist truncate">{DOC_KINDS[d.kind] || d.kind} <span className="font-mono text-[10px] text-dim">v{d.version}</span></div>
+                <div className="font-mono text-[10px] text-dim truncate mt-0.5">{d.fileName} · {fmtDate(d.createdAt)}</div>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <Badge s={d.status} />
+                  {d.status === "REJECTED" && d.reviewNote && <span className="text-[11px] text-coral truncate">{d.reviewNote}</span>}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <Btn v="x" sm onClick={() => renew(d)} title="Enviar nova versão"><I n="refresh" s={13} /> Renovar</Btn>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* DECLARAÇÕES + LGPD + CERTIFICADOS */}
+      <h2 className="font-display font-semibold text-[15px] text-cy-300 flex items-center gap-2 mb-3 mt-8"><I n="book" s={16} /> Declarações e registros</h2>
       <div className="grid md:grid-cols-2 gap-4">
-        {ens.filter((e) => ["ACTIVE", "COMPLETED"].includes(e.status)).map((e) => (
+        {ens.map((e) => (
           <Card key={e.id} className="p-5 flex items-center gap-4">
             <span className="w-11 h-11 rounded-lg grid place-items-center bg-cy-500/10 border border-cy-700 text-cy-400"><I n="file" s={20} /></span>
             <div className="flex-1">
@@ -878,19 +1153,75 @@ function Documentos() {
           <I n="chevR" s={16} c="text-dim" />
         </a>
       </div>
+
+      {/* MODAL ENVIO */}
+      <Modal open={up} onClose={() => setUp(false)} title="Enviar / renovar documento" w={520}>
+        <div className="space-y-4">
+          <Field label="Tipo de documento" req>
+            <TSel value={nf.kind} onChange={(e) => setNf({ ...nf, kind: e.target.value })}>
+              {Object.entries(DOC_KINDS).filter(([k]) => k !== "CARTEIRINHA").map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </TSel>
+          </Field>
+          <Field label="Matrícula vinculada">
+            <TSel value={nf.enrollmentId} onChange={(e) => setNf({ ...nf, enrollmentId: e.target.value })}>
+              {ens.map((e) => <option key={e.id} value={e.id}>{e.number} — {find("courses", e.courseId)?.title.slice(0, 32)}</option>)}
+            </TSel>
+          </Field>
+          <Field label="Imagem do documento" req hint="A imagem é comprimida localmente antes de ser registrada no storage do SIA.">
+            <FileDrop max={900} value={nf.dataUrl} label="Anexar arquivo (PNG/JPG)" onChange={(d, n) => setNf({ ...nf, dataUrl: d, fileName: n })} />
+          </Field>
+          <div className="flex justify-end gap-2"><Btn v="x" onClick={() => setUp(false)}>Cancelar</Btn><Btn v="e" disabled={!nf.dataUrl} onClick={submitDoc}><I n="check" s={14} /> Enviar para análise</Btn></div>
+        </div>
+      </Modal>
+
+      {/* MODAL DECLARAÇÃO */}
       {decl && (
         <Modal open onClose={() => setDecl(null)} title="Declaração de matrícula" w={640}>
-          <div className="cy-card p-7 border-cy-700">
+          <div className="print-area cy-card p-7 border-cy-700">
             <div className="font-mono text-[10px] tracking-[.2em] uppercase text-cy-500 text-center">Declaração de Matrícula</div>
-            <p className="text-[13.5px] text-fog leading-[1.9] mt-5">
-              Declaramos, para os devidos fins, que <strong className="text-mist">{user!.name}</strong>, portador(a) do e-mail {user!.email},
-              encontra-se matriculado(a) no curso <strong className="text-cy-300">{find("courses", decl.courseId)?.title}</strong> desta instituição,
-              sob a matrícula nº <strong className="font-mono text-cy-300">{decl.number}</strong>, com situação <strong className="text-mist">{decl.status === "ACTIVE" ? "ATIVA" : "CONCLUÍDA"}</strong>,
-              com início em {fmtDate(decl.startDate)}.
-            </p>
+            <div className="flex gap-5 mt-5">
+              {user!.photo && <img src={user!.photo} alt="foto" className="w-[84px] h-[102px] object-cover rounded-lg border border-cy-700 shrink-0" />}
+              <p className="text-[13.5px] text-fog leading-[1.9]">
+                Declaramos, para os devidos fins, que <strong className="text-mist">{user!.name}</strong>, portador(a) do e-mail {user!.email}{user!.cpf ? `, CPF ${user!.cpf}` : ""},
+                encontra-se matriculado(a) no curso <strong className="text-cy-300">{find("courses", decl.courseId)?.title}</strong> desta instituição,
+                sob a matrícula nº <strong className="font-mono text-cy-300">{decl.number}</strong>, com situação <strong className="text-mist">{decl.status === "ACTIVE" ? "ATIVA" : "CONCLUÍDA"}</strong>,
+                com início em {fmtDate(decl.startDate)}.
+              </p>
+            </div>
             <div className="text-right font-mono text-[11px] text-dim mt-6">{fmtDate(new Date().toISOString())} · SIA Cyber Academy</div>
           </div>
           <div className="flex justify-end gap-2 mt-4"><Btn v="g" onClick={() => window.print()}><I n="print" s={14} /> Imprimir</Btn><Btn v="x" onClick={() => setDecl(null)}>Fechar</Btn></div>
+        </Modal>
+      )}
+
+      {/* MODAL VISUALIZAÇÃO */}
+      {viewDoc && (
+        <Modal open onClose={() => setViewDoc(null)} title={viewDoc.kind === "CARTEIRINHA" ? `Carteirinha ${viewDoc.cardNumber}` : (DOC_KINDS[viewDoc.kind] || viewDoc.fileName)} w={viewDoc.kind === "CARTEIRINHA" ? 720 : 620}>
+          {viewDoc.kind === "CARTEIRINHA" ? (
+            <div className="print-area grid md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-cy-600/60 p-5 flex flex-col gap-4" style={{ background: "linear-gradient(135deg,#05202B,#0A3E41 55%,#0E5F5F)" }}>
+                <div className="cy-chip text-cy-300">CYBER ACADEMY · FRENTE</div>
+                <div className="flex gap-4 items-start">
+                  {user!.photo && <img src={user!.photo} alt="foto" className="w-[92px] h-[112px] object-cover rounded-lg border border-cy-500/50" />}
+                  <div>
+                    <div className="font-display font-bold text-[16px] text-mist">{user!.name}</div>
+                    <div className="font-mono text-[10.5px] text-cy-300 mt-1.5">{viewDoc.cardNumber}</div>
+                    <div className="font-mono text-[10px] text-dim mt-0.5">válida até {fmtDate(viewDoc.validUntil)}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-cy-600/60 p-5 flex flex-col items-center justify-center gap-3" style={{ background: "linear-gradient(135deg,#0A3E41,#05202B 60%,#031019)" }}>
+                <div className="bg-[#EAFBF8] p-3 rounded-lg"><QRMatrix code={viewDoc.cardNumber} size={150} /></div>
+                <div className="font-mono text-[10.5px] text-fog">validação: /#/validar-carteirinha/{viewDoc.cardNumber}</div>
+              </div>
+            </div>
+          ) : (
+            <img src={viewDoc.dataUrl} alt={viewDoc.fileName} className="w-full rounded-lg border border-line" />
+          )}
+          <div className="flex justify-end gap-2 mt-4">
+            {viewDoc.kind !== "CARTEIRINHA" && <Btn v="g" onClick={() => renew(viewDoc)}><I n="refresh" s={14} /> Renovar</Btn>}
+            <Btn v="x" onClick={() => setViewDoc(null)}>Fechar</Btn>
+          </div>
         </Modal>
       )}
     </div>
@@ -1091,14 +1422,25 @@ function Suporte() {
 function Perfil() {
   const { user, refresh, setUser } = useApp();
   const toast = useToast();
-  const [f, setF] = useState({ name: user!.name, phone: user!.phone || "", cpf: user!.cpf || "" });
+  const [f, setF] = useState({ name: user!.name, email: user!.email, phone: user!.phone || "", cpf: user!.cpf || "", rg: user!.rg || "", birthDate: user!.birthDate || "", address: user!.address || "" });
   const [pw, setPw] = useState({ cur: "", next: "" });
   const [del, setDel] = useState(false);
-  const saveProfile = () => { update("users", user!.id, f); audit(user, "UPDATE", "users", user!.id, "Dados do perfil atualizados"); refresh(); toast("Perfil atualizado.", "ok"); };
+  const [tfa, setTfa] = useState<null | { secret: string; step: "scan" | "confirm" }>(null);
+  const [tfaCode, setTfaCode] = useState("");
+  const [tick, setTick] = useState(0);
+  useEffect(() => { const t = setInterval(() => setTick((x) => x + 1), 1000); return () => clearInterval(t); }, []);
+  const pwScore = passwordScore(pw.next);
+  const saveProfile = () => {
+    try { updateProfile(user!, f); refresh(); toast("Perfil atualizado no SIA.", "ok"); }
+    catch (e: any) { toast(e.message, "err"); }
+  };
   const savePw = async () => {
     try { await changePassword(user!.id, pw.cur, pw.next); setPw({ cur: "", next: "" }); toast("Senha alterada com sucesso.", "ok"); }
     catch (e: any) { toast(e.message, "err"); }
   };
+  const start2FA = () => { const s = enable2FA(user!); refresh(); setTfa({ secret: s, step: "scan" }); setTfaCode(""); };
+  const ok2FA = () => { try { confirm2FA(user!, tfaCode); refresh(); setTfa(null); toast("Verificação em duas etapas ativada!", "ok"); } catch (e: any) { toast(e.message, "err"); } };
+  const off2FA = () => { try { disable2FA(user!, tfaCode); refresh(); setTfa(null); setTfaCode(""); toast("2FA desativado.", "info"); } catch (e: any) { toast(e.message, "err"); } };
   const erase = () => {
     update("users", user!.id, { name: "Usuário removido (LGPD)", email: `anon-${user!.id.slice(0, 8)}@removed.local`, passHash: "x", status: "inactive", cpf: "", phone: "" });
     audit(null, "DELETE", "users", user!.id, "Conta anonimizada a pedido do titular (LGPD)");
@@ -1111,21 +1453,74 @@ function Perfil() {
       <PageHead kicker="SIA · conta" title="Meu perfil" desc="Dados cadastrais, segurança e consentimentos LGPD." />
       <div className="space-y-5">
         <Card className="p-6">
-          <div className="flex items-center gap-4 mb-5"><Avatar name={user!.name} s={52} /><div><div className="font-display font-semibold text-[16px] text-mist">{user!.name}</div><div className="font-mono text-[11.5px] text-dim">{user!.email} · papel: {user!.role}</div></div></div>
+          <div className="flex items-center gap-4 mb-5">
+            {user!.photo ? <img src={user!.photo} alt="foto" className="w-[52px] h-[52px] object-cover rounded-xl border border-cy-600" /> : <Avatar name={user!.name} s={52} />}
+            <div>
+              <div className="font-display font-semibold text-[16px] text-mist">{user!.name}</div>
+              <div className="font-mono text-[11.5px] text-dim">{user!.email} · papel: {user!.role}</div>
+            </div>
+            <div className="ml-auto hidden sm:block"><span className={`cy-badge ${user!.twoFactor === "on" ? "b-green" : "b-mist"}`}><I n="shield" s={11} /> 2FA {user!.twoFactor === "on" ? "ativo" : "inativo"}</span></div>
+          </div>
+          <div className="mb-5 max-w-[340px]">
+            <Field label="Foto 3x4 (usada na carteirinha e declarações)">
+              <FileDrop max={420} value={user!.photo} label="Enviar / trocar foto" onChange={(d) => { updateProfile(user!, { photo: d }); toast("Foto atualizada.", "ok"); refresh(); }} />
+            </Field>
+          </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Nome completo"><TIn value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
+            <Field label="E-mail" hint="Alterar o e-mail exige que ele esteja disponível"><TIn value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></Field>
             <Field label="Telefone"><TIn value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
             <Field label="CPF"><TIn value={f.cpf} onChange={(e) => setF({ ...f, cpf: e.target.value })} /></Field>
+            <Field label="RG"><TIn value={f.rg} onChange={(e) => setF({ ...f, rg: e.target.value })} /></Field>
+            <Field label="Data de nascimento"><TIn type="date" value={f.birthDate} onChange={(e) => setF({ ...f, birthDate: e.target.value })} /></Field>
+            <div className="sm:col-span-2"><Field label="Endereço"><TIn value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} placeholder="Rua, número, bairro, cidade/UF" /></Field></div>
           </div>
-          <Btn v="p" className="mt-5" onClick={saveProfile}>Salvar alterações</Btn>
+          <Btn v="p" className="mt-5" onClick={saveProfile}><I n="check" s={15} /> Salvar alterações</Btn>
         </Card>
+
+        {/* SEGURANÇA */}
         <Card className="p-6">
-          <h3 className="font-display font-semibold text-[15px] text-mist mb-4 flex items-center gap-2"><I n="lock" s={16} c="text-cy-400" /> Alterar senha</h3>
+          <h3 className="font-display font-semibold text-[15px] text-mist mb-4 flex items-center gap-2"><I n="shield" s={16} c="text-ember" /> Segurança da conta</h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Senha atual"><TIn type="password" value={pw.cur} onChange={(e) => setPw({ ...pw, cur: e.target.value })} /></Field>
-            <Field label="Nova senha"><TIn type="password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></Field>
+            <div>
+              <Field label="Senha atual"><TIn type="password" value={pw.cur} onChange={(e) => setPw({ ...pw, cur: e.target.value })} /></Field>
+            </div>
+            <div>
+              <Field label="Nova senha" hint="10+ caracteres, maiúsculas, números e símbolos = excelente">
+                <TIn type="password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
+                {pw.next && <Strength {...pwScore} />}
+              </Field>
+            </div>
           </div>
-          <Btn v="g" className="mt-5" onClick={savePw}>Redefinir senha</Btn>
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-line">
+            <div>
+              <div className="text-[13.5px] font-semibold text-mist flex items-center gap-2"><I n="lock" s={15} c="text-cy-400" /> Verificação em duas etapas (TOTP)</div>
+              <p className="text-[12px] text-fog mt-0.5">{user!.twoFactor === "on" ? "Ativada — códigos de 6 dígitos a cada login." : "Proteja sua conta com um autenticador (30s)."}</p>
+            </div>
+            {user!.twoFactor === "on" ? (
+              <Btn v="d" sm onClick={() => { setTfa({ secret: "", step: "confirm" }); setTfaCode(""); }}>Desativar 2FA</Btn>
+            ) : (
+              <Btn v="e" sm onClick={start2FA}><I n="shield" s={13} /> Ativar 2FA</Btn>
+            )}
+          </div>
+        </Card>
+
+        {/* SESSÕES */}
+        <Card className="p-6">
+          <h3 className="font-display font-semibold text-[15px] text-mist mb-1 flex items-center gap-2"><I n="term" s={16} c="text-cy-400" /> Sessões ativas</h3>
+          <p className="text-[12px] text-fog mb-4">Tokens JWT com expiração de 8h. Revogue dispositivos que não reconhece.</p>
+          <div className="space-y-2">
+            {mySessions(user!.id).map((s) => (
+              <div key={s.id} className="cy-card p-3.5 flex items-center gap-3">
+                <span className={`w-9 h-9 rounded-lg grid place-items-center border ${s.current ? "border-cy-500 text-cy-300 bg-cy-500/10" : "border-line text-dim"}`}><I n="globe" s={16} /></span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12.5px] text-mist font-semibold flex items-center gap-2">{s.device ? String(s.device).slice(0, 42) : "Navegador"} {s.current && <span className="cy-badge b-teal">este dispositivo</span>}</div>
+                  <div className="font-mono text-[10px] text-dim">criada {s.createdAt ? fmtDT(s.createdAt) : "—"} · expira {new Date(s.exp).toLocaleString("pt-BR")}</div>
+                </div>
+                {!s.current && <Btn v="d" sm onClick={() => { try { revokeSession(user!, s.id); refresh(); toast("Sessão revogada.", "ok"); } catch (e: any) { toast(e.message, "err"); } }}>Revogar</Btn>}
+              </div>
+            ))}
+          </div>
         </Card>
         <Card className="p-6">
           <h3 className="font-display font-semibold text-[15px] text-mist mb-3 flex items-center gap-2"><I n="shield" s={16} c="text-ember" /> Registros LGPD</h3>
@@ -1145,6 +1540,30 @@ function Perfil() {
         </Card>
       </div>
       <Confirm open={del} onClose={() => setDel(false)} onYes={erase} title="Anonimizar conta?" desc="Esta ação remove seus dados pessoais (nome, e-mail, CPF) e desativa a conta. Não é possível desfazer." />
+      <Modal open={!!tfa} onClose={() => setTfa(null)} title={user!.twoFactor === "on" ? "Desativar 2FA" : "Ativar verificação em duas etapas"} w={480}>
+        {tfa && user!.twoFactor !== "on" && (
+          <div className="space-y-4">
+            <p className="text-[13px] text-fog leading-relaxed">Cadastre o segredo abaixo em um app autenticador (Google Authenticator, 1Password etc.). <strong className="text-mist">Nesta build, o autenticador é simulado ao vivo:</strong></p>
+            <div className="cy-card p-4 border-cy-700 space-y-3">
+              <div className="font-mono text-[11px] text-dim uppercase tracking-widest">segredo (base32)</div>
+              <div className="font-mono text-[15px] text-cy-300 tracking-[.2em]">{tfa.secret}</div>
+              <div className="border-t border-line pt-3">
+                <div className="font-mono text-[11px] text-dim uppercase tracking-widest mb-2">autenticador simulado · código atual</div>
+                <TotpCode {...currentTotp(tfa.secret)} />
+              </div>
+            </div>
+            <Field label="Digite o código de 6 dígitos" req><TIn value={tfaCode} onChange={(e) => setTfaCode(e.target.value)} placeholder="000000" maxLength={6} /></Field>
+            <div className="flex justify-end gap-2"><Btn v="x" onClick={() => setTfa(null)}>Cancelar</Btn><Btn v="e" onClick={ok2FA}>Confirmar e ativar</Btn></div>
+          </div>
+        )}
+        {tfa && user!.twoFactor === "on" && (
+          <div className="space-y-4">
+            <p className="text-[13px] text-fog">Digite o código atual do seu autenticador para confirmar a desativação.</p>
+            <Field label="Código atual" req><TIn value={tfaCode} onChange={(e) => setTfaCode(e.target.value)} placeholder="000000" maxLength={6} /></Field>
+            <div className="flex justify-end gap-2"><Btn v="x" onClick={() => setTfa(null)}>Cancelar</Btn><Btn v="d" onClick={off2FA}>Desativar 2FA</Btn></div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
