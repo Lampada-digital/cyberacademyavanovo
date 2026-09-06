@@ -18,6 +18,21 @@ export const TABLES = [
   "certificates", "certificate_validations",
   "notifications", "support_tickets", "ticket_messages",
   "audit_logs", "emails", "posts", "faqs", "files",
+  "documents", "forum_posts", "lesson_notes", "xp_events",
+];
+
+export const DOC_KINDS: Record<string, string> = {
+  photo3x4: "Foto 3x4 (perfil)",
+  id_doc: "Documento de identidade (RG/CNH)",
+  address_proof: "Comprovante de residência",
+  transcript: "Histórico / comprovante escolar",
+  other: "Outro documento",
+  CARTEIRINHA: "Carteirinha de estudante",
+};
+
+export const XP_LEVELS: [string, number][] = [
+  ["Iniciante", 0], ["Explorador", 120], ["Praticante", 300],
+  ["Avançado", 600], ["Especialista", 1000], ["Mestre Cyber", 1600],
 ];
 
 export interface DB {
@@ -192,5 +207,7 @@ export const STATUS_LABEL: Record<string, [string, string]> = {
   auto_graded: ["Corrigida", "b-green"], review: ["Aguard. correção", "b-amber"], graded: ["Nota lançada", "b-green"],
   expired: ["Expirada", "b-coral"], published: ["Publicado", "b-green"], unpublished: ["Não publicado", "b-mist"],
   active: ["Ativo", "b-green"], inactive: ["Inativo", "b-mist"],
+  PENDING_REVIEW: ["Em análise", "b-amber"], APPROVED: ["Aprovado", "b-green"], REJECTED: ["Rejeitado", "b-coral"],
+  on: ["Ativado", "b-green"], off: ["Desativado", "b-mist"],
 };
 export function statusBadge(s: string): [string, string] { return STATUS_LABEL[s] || [s || "—", "b-mist"]; }

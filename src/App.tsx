@@ -5,7 +5,8 @@ import { I } from "./components/icons";
 import { SiteShell } from "./components/layout";
 import { all } from "./lib/db";
 import Home from "./pages/home";
-import { Catalog, CoursePage, About, Teachers, Blog, Faq, Contact, Terms, Privacy, Cookies, ValidateCert } from "./pages/site";
+import { Catalog, CoursePage, About, Teachers, Blog, Faq, Contact, Terms, Privacy, Cookies, ValidateCert, ValidateCard } from "./pages/site";
+import { sessionExpired } from "./lib/api";
 import { Setup, Login, Register, Recover, Checkout } from "./pages/auth";
 import StudentArea from "./pages/student";
 import TeacherArea from "./pages/teacher";
@@ -48,8 +49,14 @@ function SupportArea({ path }: { path: string }) {
 
 function Router() {
   const { path, query, segs } = useRoute();
-  const { user } = useApp();
+  const { user, setUser, refresh } = useApp();
   useEffect(() => { window.scrollTo(0, 0); }, [path]);
+  // segurança: expira a sessão quando o token JWT vence ou é revogado
+  useEffect(() => {
+    const check = () => { if (sessionExpired()) { setUser(null); refresh(); } };
+    const t = setInterval(check, 20000);
+    return () => clearInterval(t);
+  }, []);
   const s0 = segs[0] || "";
 
   // setup inicial obrigatório quando o banco está vazio

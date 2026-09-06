@@ -161,6 +161,83 @@ export function Kbd({ children }: { children: React.ReactNode }) {
   return <span className="font-mono text-[11px] px-1.5 py-0.5 rounded border border-line bg-abyss text-cy-300">{children}</span>;
 }
 
+/* ---------- Upload de imagem (com compressão canvas) ---------- */
+export function FileDrop({ value, onChange, label = "Clique ou arraste uma imagem", max = 480 }: {
+  value?: string; onChange: (dataUrl: string, fileName: string) => void; label?: string; max?: number;
+}) {
+  const [drag, setDrag] = useState(false);
+  const read = (file?: File | null) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const sc = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+        c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+        onChange(c.toDataURL("image/jpeg", 0.82), file.name);
+      };
+      img.src = String(r.result);
+    };
+    r.readAsDataURL(file);
+  };
+  return (
+    <div>
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); read(e.dataTransfer.files?.[0]); }}
+        onClick={() => document.getElementById("fd-" + label.length)?.click()}
+        className={`rounded-lg border border-dashed p-3 cursor-pointer transition-all flex items-center gap-3 ${drag ? "border-cy-400 bg-cy-500/10" : "border-cy-700 hover:border-cy-500 bg-[#041821]"}`}>
+        {value ? (
+          <img src={value} alt="preview" className="w-16 h-16 object-cover rounded-md border border-line" />
+        ) : (
+          <span className="w-16 h-16 rounded-md grid place-items-center border border-line text-cy-600 bg-abyss"><I n="cam" s={22} /></span>
+        )}
+        <div className="min-w-0">
+          <div className="text-[13px] text-mist font-semibold">{value ? "Trocar imagem" : label}</div>
+          <div className="font-mono text-[10.5px] text-dim mt-0.5">PNG/JPG · comprimida automaticamente · máx. {max}px</div>
+        </div>
+        <input id={"fd-" + label.length} type="file" accept="image/*" className="hidden" onChange={(e) => { read(e.target.files?.[0]); e.target.value = ""; }} />
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Força de senha ---------- */
+export function Strength({ score, label, tone }: { score: number; label: string; tone: "coral" | "amber" | "green" }) {
+  const color = tone === "green" ? "#7BE0A2" : tone === "amber" ? "#F5B84B" : "#F0705A";
+  return (
+    <div className="flex items-center gap-2 mt-1.5">
+      <div className="flex gap-1 flex-1">
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className="h-[4px] flex-1 rounded-full transition-all duration-300" style={{ background: i < score ? color : "rgba(14,59,64,.7)" }} />
+        ))}
+      </div>
+      <span className="font-mono text-[10px] tracking-wider uppercase" style={{ color }}>{label}</span>
+    </div>
+  );
+}
+
+/* ---------- Autenticador TOTP (simulado) ---------- */
+export function TotpCode({ code, remaining }: { code: string; remaining: number }) {
+  const pct = (remaining / 30) * 100;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="relative w-9 h-9 shrink-0">
+        <svg viewBox="0 0 36 36" className="w-9 h-9 -rotate-90">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(14,59,64,.7)" strokeWidth="3" />
+          <circle cx="18" cy="18" r="15" fill="none" stroke="#03A6A6" strokeWidth="3" strokeLinecap="round"
+            strokeDasharray={`${pct} 100`} style={{ transition: "stroke-dasharray 1s linear" }} />
+        </svg>
+        <span className="absolute inset-0 grid place-items-center font-mono text-[9px] text-cy-300">{remaining}</span>
+      </span>
+      <span className="font-mono text-[22px] font-bold tracking-[.3em] text-mist tnum">{code}</span>
+    </div>
+  );
+}
+
 export function PageHead({ kicker, title, desc, right }: { kicker: string; title: string; desc?: string; right?: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
