@@ -166,6 +166,7 @@ export function FileDrop({ value, onChange, label = "Clique ou arraste uma image
   value?: string; onChange: (dataUrl: string, fileName: string) => void; label?: string; max?: number;
 }) {
   const [drag, setDrag] = useState(false);
+  const idRef = useRef("fd" + Math.random().toString(36).slice(2, 8));
   const read = (file?: File | null) => {
     if (!file || !file.type.startsWith("image/")) return;
     const r = new FileReader();
@@ -188,7 +189,7 @@ export function FileDrop({ value, onChange, label = "Clique ou arraste uma image
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
         onDragLeave={() => setDrag(false)}
         onDrop={(e) => { e.preventDefault(); setDrag(false); read(e.dataTransfer.files?.[0]); }}
-        onClick={() => document.getElementById("fd-" + label.length)?.click()}
+        onClick={() => document.getElementById(idRef.current)?.click()}
         className={`rounded-lg border border-dashed p-3 cursor-pointer transition-all flex items-center gap-3 ${drag ? "border-cy-400 bg-cy-500/10" : "border-cy-700 hover:border-cy-500 bg-[#041821]"}`}>
         {value ? (
           <img src={value} alt="preview" className="w-16 h-16 object-cover rounded-md border border-line" />
@@ -199,7 +200,7 @@ export function FileDrop({ value, onChange, label = "Clique ou arraste uma image
           <div className="text-[13px] text-mist font-semibold">{value ? "Trocar imagem" : label}</div>
           <div className="font-mono text-[10.5px] text-dim mt-0.5">PNG/JPG · comprimida automaticamente · máx. {max}px</div>
         </div>
-        <input id={"fd-" + label.length} type="file" accept="image/*" className="hidden" onChange={(e) => { read(e.target.files?.[0]); e.target.value = ""; }} />
+        <input id={idRef.current} type="file" accept="image/*" className="hidden" onChange={(e) => { read(e.target.files?.[0]); e.target.value = ""; }} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { I } from "../components/icons";
-import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, PageHead, useToast, Confirm, Tag, CoverImg } from "../components/ui";
+import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, PageHead, useToast, Confirm, Tag, CoverImg, FileDrop } from "../components/ui";
 import { useApp, navigate } from "../state";
 import {
   replyTicket, downloadCSV, wipeDB, coursePricing, effectivePrice,
@@ -482,7 +482,6 @@ export function SiteCMS() {
               <Field label="Título" req><TIn value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></Field>
               <Field label="Slug (URL)"><TIn value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value })} /></Field>
               <Field label="Subtítulo comercial"><TIn value={edit.subtitle} onChange={(e) => setEdit({ ...edit, subtitle: e.target.value })} /></Field>
-              <Field label="Imagem (URL)"><TIn value={edit.image} onChange={(e) => setEdit({ ...edit, image: e.target.value })} placeholder="vazio = capa gerada" /></Field>
               <Field label="Carga horária (h)"><TIn type="number" value={edit.hours} onChange={(e) => setEdit({ ...edit, hours: e.target.value })} /></Field>
               <Field label="Nível"><TSel value={edit.level} onChange={(e) => setEdit({ ...edit, level: e.target.value })}><option>Iniciante</option><option>Intermediário</option><option>Avançado</option><option>Iniciante ao Intermediário</option></TSel></Field>
               <Field label="Modelo de cobrança"><TSel value={edit.pricingModel} onChange={(e) => setEdit({ ...edit, pricingModel: e.target.value })}><option value="one_time">Pagamento único</option><option value="subscription">Mensalidade</option></TSel></Field>
@@ -498,6 +497,14 @@ export function SiteCMS() {
                 </>
               )}
               <Field label="Rematrícula grátis"><TSel value={String(!!edit.freeReenroll)} onChange={(e) => setEdit({ ...edit, freeReenroll: e.target.value === "true" })}><option value="false">Não</option><option value="true">Sim</option></TSel></Field>
+            </div>
+            <div className="grid md:grid-cols-[240px_1fr] gap-4 items-start">
+              <Field label="Imagem do curso" hint="Capa do catálogo — PNG ou JPEG.">
+                <FileDrop max={900} value={edit.image} label="Enviar capa" onChange={(d) => setEdit({ ...edit, image: d })} />
+              </Field>
+              <Field label="Grade curricular" hint="Estrutura do programa em fases/módulos.">
+                <TArea rows={5} value={edit.curriculum || ""} onChange={(e) => setEdit({ ...edit, curriculum: e.target.value })} placeholder={"Fase 1 — Fundamentos (20h)\nFase 2 — Prática guiada (30h)"} />
+              </Field>
             </div>
             <Field label="Descrição (página comercial)"><TArea rows={3} value={edit.description} onChange={(e) => setEdit({ ...edit, description: e.target.value })} /></Field>
             <div className="flex justify-end gap-2"><Btn v="x" onClick={() => setEdit(null)}>Cancelar</Btn><Btn v="e" onClick={saveCourse}>Salvar e publicar</Btn></div>
