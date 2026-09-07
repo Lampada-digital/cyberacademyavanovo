@@ -10,6 +10,7 @@ import {
   fmtBRL, fmtDate, type Row,
 } from "../lib/api";
 import { FileUpload, FileDownload, FilePreview } from "../components/FileUpload";
+import { KaliTerminal, SQLPlayground, CodePlayground, DockerPlayground } from "../components/VirtualLab";
 import { saveFile, getFilesByContext, deleteFile, formatFileSize, type StoredFile } from "../lib/files";
 
 const NAV_PROF: NavItem[] = [
@@ -582,11 +583,21 @@ function Projetos() {
 function Laboratorios() {
   const { user } = useApp();
   const toast = useToast();
+  const [selectedLab, setSelectedLab] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ title: "", description: "", instructions: "", environment: "", duration: "", maxAttempts: "3" });
   const teacher = find("teachers", user!.id);
   const courses = where("courses", (c) => c.teacherId === teacher?.id);
   const labs = courses.flatMap((c) => where("virtual_labs", (l) => l.courseId === c.id));
+
+  const builtinLabs = [
+    { id: "kali", name: "Kali Linux Terminal", icon: "terminal", desc: "Terminal Linux completo para aulas de pentest e segurança", category: "Segurança" },
+    { id: "sql", name: "SQL Playground", icon: "db", desc: "Ambiente PostgreSQL para prática de queries SQL", category: "Banco de Dados" },
+    { id: "js", name: "JavaScript Playground", icon: "code", desc: "Editor e executor de código JavaScript", category: "Frontend" },
+    { id: "python", name: "Python Playground", icon: "code", desc: "Ambiente Python para scripts e automação", category: "Backend" },
+    { id: "html", name: "HTML/CSS Playground", icon: "globe", desc: "Editor HTML/CSS com preview em tempo real", category: "Frontend" },
+    { id: "docker", name: "Docker Playground", icon: "layers", desc: "Simulador de comandos Docker e containers", category: "DevOps" },
+  ];
 
   const save = () => {
     if (!f.title) { toast("Título obrigatório.", "err"); return; }
@@ -597,20 +608,73 @@ function Laboratorios() {
 
   return (
     <div>
-      <PageHead kicker="Professor" title="Laboratórios Virtuais" desc="Crie laboratórios práticos para seus alunos executarem em ambiente controlado." right={<Btn v="e" onClick={() => setOpen(true)}><I n="plus" s={15} /> Novo laboratório</Btn>} />
-      {labs.length === 0 ? <Empty icon="flask" title="Nenhum laboratório" desc="Crie seu primeiro laboratório virtual para práticas hands-on." /> : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {labs.map((l) => (
-            <Card key={l.id} className="p-5">
-              <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{l.title}</h3>
-              <p className="text-[12.5px] text-fog line-clamp-2">{l.description}</p>
-              <div className="flex gap-2 mt-3">
-                <Badge s={l.status} />
-                {l.duration && <Tag tone="mist">{l.duration}</Tag>}
-                {l.maxAttempts && <Tag tone="amber">{l.maxAttempts} tentativas</Tag>}
+      <PageHead kicker="Professor" title="Laboratórios Virtuais" desc="Ambientes completos para prática: Kali Linux, SQL, programação, Docker e mais." right={<Btn v="e" onClick={() => setOpen(true)}><I n="plus" s={15} /> Novo laboratório</Btn>} />
+      
+      {!selectedLab ? (
+        <>
+          {/* Laboratórios Integrados */}
+          <div className="mb-8">
+            <h3 className="font-display font-semibold text-[16px] text-cy-300 mb-4 flex items-center gap-2">
+              <I n="flask" s={18} /> Laboratórios Integrados
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {builtinLabs.map((lab) => (
+                <Card key={lab.id} className="p-5 cursor-pointer hover:border-cy-500 transition-all" onClick={() => setSelectedLab(lab.id)}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-12 h-12 rounded-lg bg-cy-500/10 border border-cy-600/50 grid place-items-center">
+                      <I n={lab.icon} s={24} c="text-cy-400" />
+                    </div>
+                    <Tag tone="mist">{lab.category}</Tag>
+                  </div>
+                  <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{lab.name}</h3>
+                  <p className="text-[12.5px] text-fog leading-relaxed">{lab.desc}</p>
+                  <Btn v="g" className="mt-4 w-full">
+                    <I n="playc" s={14} /> Abrir Laboratório
+                  </Btn>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Laboratórios Personalizados */}
+          {labs.length > 0 && (
+            <div>
+              <h3 className="font-display font-semibold text-[16px] text-mist mb-4 flex items-center gap-2">
+                <I n="target" s={18} /> Laboratórios Personalizados
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                {labs.map((l) => (
+                  <Card key={l.id} className="p-5">
+                    <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{l.title}</h3>
+                    <p className="text-[12.5px] text-fog line-clamp-2">{l.description}</p>
+                    <div className="flex gap-2 mt-3">
+                      <Badge s={l.status} />
+                      {l.duration && <Tag tone="mist">{l.duration}</Tag>}
+                      {l.maxAttempts && <Tag tone="amber">{l.maxAttempts} tentativas</Tag>}
+                    </div>
+                  </Card>
+                ))}
               </div>
-            </Card>
-          ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <Btn v="x" onClick={() => setSelectedLab(null)}>
+              <I n="chevL" s={16} /> Voltar
+            </Btn>
+            <h2 className="font-display font-semibold text-[20px] text-mist">
+              {builtinLabs.find(l => l.id === selectedLab)?.name}
+            </h2>
+          </div>
+
+          {selectedLab === "kali" && <KaliTerminal />}
+          {selectedLab === "sql" && <SQLPlayground />}
+          {selectedLab === "js" && <CodePlayground language="javascript" />}
+          {selectedLab === "python" && <CodePlayground language="python" />}
+          {selectedLab === "html" && <CodePlayground language="html" />}
+          {selectedLab === "docker" && <DockerPlayground />}
         </div>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title="Novo laboratório virtual" w={640}>

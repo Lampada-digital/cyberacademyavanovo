@@ -15,6 +15,7 @@ import {
 } from "../lib/api";
 import { DOC_KINDS } from "../lib/db";
 import { FileUpload, FileDownload, FilePreview } from "../components/FileUpload";
+import { KaliTerminal, SQLPlayground, CodePlayground, DockerPlayground } from "../components/VirtualLab";
 import { saveFile, getFilesByContext, getFilesByUser, deleteFile, formatFileSize, type StoredFile } from "../lib/files";
 
 const NAV: NavItem[] = [
@@ -22,6 +23,7 @@ const NAV: NavItem[] = [
   { to: "/aluno/matriculas", icon: "cap", label: "Minhas matrículas" },
   { to: "/aluno/cursos", icon: "layers", label: "Meus cursos" },
   { to: "/aluno/ava", icon: "playc", label: "AVA" },
+  { to: "/aluno/laboratorios", icon: "flask", label: "Laboratórios" },
   { to: "/aluno/atividades", icon: "target", label: "Atividades" },
   { to: "/aluno/avaliacoes", icon: "file", label: "Avaliações" },
   { to: "/aluno/notas", icon: "chart", label: "Notas" },
@@ -52,6 +54,7 @@ export default function StudentArea({ path, segs }: { path: string; segs: string
     case "cursos": case "ava": page = <MeusCursos />; break;
     case "aula": page = <LessonPlayer lessonId={segs[2]} />; break;
     case "avacurso": page = <AvaCourse courseId={segs[2]} />; break;
+    case "laboratorios": page = <Laboratorios />; break;
     case "atividades": page = <Atividades />; break;
     case "avaliacoes": page = <Avaliacoes />; break;
     case "runner": page = <Runner kind={segs[2] as any} itemId={segs[3]} />; break;
@@ -896,6 +899,65 @@ function Notas() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/* ================= LABORATÓRIOS ================= */
+function Laboratorios() {
+  const { user } = useApp();
+  const [selectedLab, setSelectedLab] = useState<string | null>(null);
+  
+  const labs = [
+    { id: "kali", name: "Kali Linux Terminal", icon: "terminal", desc: "Terminal Linux completo para prática de comandos e pentest", category: "Segurança" },
+    { id: "sql", name: "SQL Playground", icon: "db", desc: "Pratique queries SQL em banco de dados PostgreSQL", category: "Banco de Dados" },
+    { id: "js", name: "JavaScript Playground", icon: "code", desc: "Editor e executor de código JavaScript", category: "Programação" },
+    { id: "python", name: "Python Playground", icon: "code", desc: "Ambiente Python para scripts e automação", category: "Programação" },
+    { id: "html", name: "HTML/CSS Playground", icon: "globe", desc: "Editor HTML/CSS com preview em tempo real", category: "Frontend" },
+    { id: "docker", name: "Docker Playground", icon: "layers", desc: "Simulador de comandos Docker e containers", category: "DevOps" },
+  ];
+
+  return (
+    <div>
+      <PageHead kicker="AVA · Laboratórios" title="Laboratórios Virtuais" desc="Ambientes completos para prática: Kali Linux, SQL, programação, Docker e mais." />
+      
+      {!selectedLab ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {labs.map((lab) => (
+            <Card key={lab.id} className="p-5 cursor-pointer hover:border-cy-500 transition-all" onClick={() => setSelectedLab(lab.id)}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-12 h-12 rounded-lg bg-cy-500/10 border border-cy-600/50 grid place-items-center">
+                  <I n={lab.icon} s={24} c="text-cy-400" />
+                </div>
+                <Tag tone="mist">{lab.category}</Tag>
+              </div>
+              <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{lab.name}</h3>
+              <p className="text-[12.5px] text-fog leading-relaxed">{lab.desc}</p>
+              <Btn v="g" className="mt-4 w-full">
+                <I n="playc" s={14} /> Abrir Laboratório
+              </Btn>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <Btn v="x" onClick={() => setSelectedLab(null)}>
+              <I n="chevL" s={16} /> Voltar
+            </Btn>
+            <h2 className="font-display font-semibold text-[20px] text-mist">
+              {labs.find(l => l.id === selectedLab)?.name}
+            </h2>
+          </div>
+
+          {selectedLab === "kali" && <KaliTerminal />}
+          {selectedLab === "sql" && <SQLPlayground />}
+          {selectedLab === "js" && <CodePlayground language="javascript" />}
+          {selectedLab === "python" && <CodePlayground language="python" />}
+          {selectedLab === "html" && <CodePlayground language="html" />}
+          {selectedLab === "docker" && <DockerPlayground />}
+        </div>
+      )}
     </div>
   );
 }
