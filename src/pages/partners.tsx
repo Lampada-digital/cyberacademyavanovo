@@ -9,7 +9,7 @@ import {
 } from "../lib/api";
 
 export default function PartnerArea() {
-  const { user, refresh } = useApp();
+  const { user, refresh, setUser } = useApp();
   const toast = useToast();
   const [tab, setTab] = useState("visao");
   const [enroll, setEnroll] = useState(false);
@@ -66,7 +66,7 @@ export default function PartnerArea() {
             <div className="text-[12.5px] font-semibold text-mist leading-tight">{org?.[isNgo ? "name" : "schoolName"] || user.name}</div>
             <div className="font-mono text-[10px] text-dim">{user.email}</div>
           </div>
-          <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
+          <button onClick={() => { logout(); setUser(null); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
         </div>
       </header>
 
