@@ -5,7 +5,7 @@ import { logout, homeFor } from "../lib/api";
 import { where, timeAgo, type Row } from "../lib/db";
 
 export function SiteShell({ children, path }: { children: React.ReactNode; path: string }) {
-  const { user } = useApp();
+  const { user, setUser } = useApp();
   const [mob, setMob] = useState(false);
   const [cookie, setCookie] = useState(() => !localStorage.getItem("ca_cookie_ok"));
   const links: [string, string][] = [["/cursos", "Cursos"], ["/sobre", "Sobre"], ["/professores", "Professores"], ["/blog", "Blog"], ["/faq", "FAQ"], ["/contato", "Contato"]];
@@ -32,7 +32,7 @@ export function SiteShell({ children, path }: { children: React.ReactNode; path:
                 {(user.role !== "student" && user.role !== "teacher") && (
                   <a href="#/intranet" className="cy-btn cy-btn-e px-3.5 py-2 text-[12px]"><I n="lock" s={15} /> Intranet</a>
                 )}
-                <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
+                <button onClick={() => { logout(); setUser(null); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
               </>
             ) : (
               <>
@@ -130,7 +130,7 @@ export function SiteShell({ children, path }: { children: React.ReactNode; path:
 export interface NavItem { to: string; icon: string; label: string }
 
 export function AppShell({ title, nav, children, path }: { title: string; nav: NavItem[]; children: React.ReactNode; path: string }) {
-  const { user, refresh } = useApp();
+  const { user, refresh, setUser } = useApp();
   const [mob, setMob] = useState(false);
   const [bell, setBell] = useState(false);
   if (!user) return null;
@@ -156,7 +156,7 @@ export function AppShell({ title, nav, children, path }: { title: string; nav: N
       </nav>
       <div className="p-3 border-t border-line">
         <a href="#/" className="cy-side-link"><I n="globe" s={16} /> Site público</a>
-        <button className="cy-side-link w-full" onClick={() => { logout(); navigate("/"); }}><I n="out" s={16} /> Sair da conta</button>
+        <button className="cy-side-link w-full" onClick={() => { logout(); setUser(null); navigate("/"); }}><I n="out" s={16} /> Sair da conta</button>
       </div>
     </div>
   );

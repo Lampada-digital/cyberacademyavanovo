@@ -11,9 +11,11 @@ import {
   myDocuments, uploadDocument, issueStudentCard, enable2FA, confirm2FA, disable2FA,
   mySessions, revokeSession, forumPosts, createForumPost, deleteForumPost,
   lessonNote, saveLessonNote, passwordScore, updateProfile, currentTotp,
-  all, one, where, find, update, fmtBRL, fmtDate, fmtDT, timeAgo, type Row, audit, getSettings,
+  all, one, where, find, update, insert, now, fmtBRL, fmtDate, fmtDT, timeAgo, type Row, audit, getSettings,
 } from "../lib/api";
 import { DOC_KINDS } from "../lib/db";
+import { FileUpload, FileDownload, FilePreview } from "../components/FileUpload";
+import { saveFile, getFilesByContext, getFilesByUser, deleteFile, formatFileSize, type StoredFile } from "../lib/files";
 
 const NAV: NavItem[] = [
   { to: "/aluno", icon: "home", label: "Início" },
@@ -906,28 +908,71 @@ function Projetos() {
   const projects = where("projects", (p) => cids.includes(p.courseId));
   const [sel, setSel] = useState<Row | null>(null);
   const [f, setF] = useState({ url: "", github: "", description: "" });
+  const [uploadedFiles, setUploadedFiles] = useState<StoredFile[]>([]);
+  
+  // Carregar materiais do projeto selecionado
+  useEffect(() => {
+    if (sel) {
+      const materials = getFilesByContext("project", sel.id);
+      setUploadedFiles(materials);
+    }
+  }, [sel]);
+  
+  const handleFileUpload = (file: File, dataUrl: string) => {
+    if (!sel) return;
+    saveFile(file, dataUrl, user!.id, "submission", sel.id);
+    toast("Arquivo enviado com sucesso!", "ok");
+    // Recarregar arquivos
+    const materials = getFilesByContext("project", sel.id);
+    setUploadedFiles(materials);
+  };
+  
   const submit = () => {
     if (!sel) return;
-    if (!f.url && !f.github && !f.description) { toast("Informe ao menos uma URL ou a descrição da entrega.", "err"); return; }
+    if (!f.url && !f.github && !f.description && uploadedFiles.length === 0) { 
+      toast("Informe ao menos uma URL, descrição ou envie um arquivo.", "err"); 
+      return; 
+    }
     submitSubmission(user!, sel, f);
-    setSel(null); setF({ url: "", github: "", description: "" });
+    setSel(null); setF({ url: "", github: "", description: "" }); setUploadedFiles([]);
     refresh();
     toast("Projeto enviado ao professor!", "ok");
   };
   return (
     <div>
-      <PageHead kicker="AVA · projetos práticos" title="Projetos" desc="Entregue repositório, URL publicada e documentação. O professor avalia, comenta e aprova." />
+      <PageHead kicker="AVA · projetos práticos" title="Projetos" desc="Entregue repositório, URL publicada, arquivos e documentação. O professor avalia, comenta e aprova." />
       {projects.length === 0 ? <Empty icon="git" title="Nenhum projeto" desc="Os cursos publicam projetos práticos ao longo da trilha." /> : (
         <div className="grid md:grid-cols-2 gap-4">
           {projects.map((p) => {
             const s = one("submissions", (x) => x.projectId === p.id && x.studentId === user!.id);
             const c = find("courses", p.courseId);
+            const projectMaterials = getFilesByContext("project", p.id);
             return (
               <Card key={p.id} className="p-5">
                 <div className="flex items-center justify-between"><Tag tone="amber">PROJETO</Tag>{s ? <Badge s={s.status} /> : <span className="cy-badge b-mist">não enviado</span>}</div>
                 <h3 className="font-display font-semibold text-[15.5px] text-mist mt-3">{p.title}</h3>
                 <p className="text-[12.5px] text-fog mt-1.5 line-clamp-2 leading-relaxed">{p.description}</p>
                 <div className="font-mono text-[10.5px] text-dim mt-2">{c?.title.slice(0, 34)} · nota máxima {p.maxScore}</div>
+                
+                {/* Materiais do projeto */}
+                {projectMaterials.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-line">
+                    <div className="text-[11px] text-cy-400 font-semibold mb-2">MATERIAIS DO PROJETO</div>
+                    <div className="space-y-1.5">
+                      {projectMaterials.slice(0, 3).map((file) => (
+                        <div key={file.id} className="flex items-center gap-2 text-[11px]">
+                          <I n="file" s={12} c="text-cy-500" />
+                          <span className="text-fog truncate flex-1">{file.name}</span>
+                          <FileDownload fileName={file.name} fileData={file.data} label="" />
+                        </div>
+                      ))}
+                      {projectMaterials.length > 3 && (
+                        <div className="text-[10px] text-dim">+{projectMaterials.length - 3} arquivo(s)</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
                 {s && (
                   <div className="mt-3 space-y-2">
                     {s.url && <div className="text-[12px] text-fog flex items-center gap-2"><I n="ext" s={13} c="text-cy-400" />{s.url}</div>}
@@ -946,12 +991,58 @@ function Projetos() {
           })}
         </div>
       )}
-      <Modal open={!!sel} onClose={() => setSel(null)} title={`Entrega — ${sel?.title || ""}`} w={620}>
+      <Modal open={!!sel} onClose={() => { setSel(null); setUploadedFiles([]); }} title={`Entrega — ${sel?.title || ""}`} w={700}>
         <div className="space-y-4">
+          {/* Materiais do projeto para download */}
+          {uploadedFiles.filter(f => f.context === "project").length > 0 && (
+            <div>
+              <div className="text-[12px] text-cy-400 font-semibold mb-2">MATERIAIS DO PROJETO</div>
+              <div className="space-y-2">
+                {uploadedFiles.filter(f => f.context === "project").map((file) => (
+                  <div key={file.id} className="cy-card p-3 flex items-center gap-3">
+                    <I n="file" s={16} c="text-cy-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] text-mist font-semibold truncate">{file.name}</div>
+                      <div className="text-[10px] text-dim">{formatFileSize(file.size)}</div>
+                    </div>
+                    <FileDownload fileName={file.name} fileData={file.data} label="Baixar" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <Field label="URL publicada"><TIn value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} placeholder="https://meu-projeto.vercel.app" /></Field>
           <Field label="Repositório (GitHub)"><TIn value={f.github} onChange={(e) => setF({ ...f, github: e.target.value })} placeholder="https://github.com/usuario/repo" /></Field>
           <Field label="Descrição da entrega" req><TArea rows={5} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder="Decisões técnicas, como rodar, o que foi implementado…" /></Field>
-          <div className="flex justify-end gap-2"><Btn v="x" onClick={() => setSel(null)}>Cancelar</Btn><Btn v="e" onClick={submit}><I n="upload" s={15} /> Enviar ao professor</Btn></div>
+          
+          {/* Upload de arquivos */}
+          <div>
+            <div className="text-[12px] text-cy-400 font-semibold mb-2">ENVIAR ARQUIVOS</div>
+            <FileUpload
+              onUpload={handleFileUpload}
+              accept="*/*"
+              maxSize={50}
+              label="Enviar arquivos da entrega"
+              hint="Código, documentação, screenshots, etc."
+            />
+            {uploadedFiles.filter(f => f.context === "submission").length > 0 && (
+              <div className="mt-3 space-y-2">
+                {uploadedFiles.filter(f => f.context === "submission").map((file) => (
+                  <div key={file.id} className="cy-card p-3 flex items-center gap-3">
+                    <I n="file" s={16} c="text-ember" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] text-mist font-semibold truncate">{file.name}</div>
+                      <div className="text-[10px] text-dim">{formatFileSize(file.size)}</div>
+                    </div>
+                    <FileDownload fileName={file.name} fileData={file.data} label="Baixar" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-2"><Btn v="x" onClick={() => { setSel(null); setUploadedFiles([]); }}>Cancelar</Btn><Btn v="e" onClick={submit}><I n="upload" s={15} /> Enviar ao professor</Btn></div>
         </div>
       </Modal>
     </div>
