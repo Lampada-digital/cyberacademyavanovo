@@ -23,6 +23,26 @@ export const TABLES = [
   "partnerships", "partner_students", "course_contracts", "contract_acceptances",
   "service_requests", "career_sessions", "jobs", "cv_requests",
   "ngos", "ngo_courses", "lab_access",
+  // RH
+  "job_openings", "candidates", "interviews", "hiring_process",
+  "employee_contracts", "contract_addendums", "employee_documents",
+  "job_titles", "job_levels", "cost_centers",
+  "performance_reviews", "goals", "feedbacks", "pdi",
+  "trainings", "internal_courses", "skills", "career_plans",
+  "benefits", "commissions", "vacations", "absences",
+  "announcements", "notices", "bulletin_board",
+  // Financeiro
+  "accounts_receivable", "accounts_payable", "invoices",
+  "scholarships", "refunds", "bank_accounts", "pix_transactions",
+  "card_transactions", "budgets", "tax_documents",
+  // Call Center
+  "call_center_agents", "call_queues", "call_records", "call_campaigns",
+  "leads", "lead_history", "call_transfers", "call_recordings",
+  "supervisor_notes", "quality_evaluations",
+  // Professor
+  "teacher_formations", "teacher_specialties", "teacher_hours",
+  "content_production", "content_reviews", "teacher_payments",
+  "teacher_communications", "lab_exercises",
 ];
 
 export const DOC_KINDS: Record<string, string> = {
