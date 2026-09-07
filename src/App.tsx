@@ -15,6 +15,7 @@ import PartnerArea from "./pages/partners";
 import { RHArea } from "./pages/rh";
 import { FinanceArea } from "./pages/finance";
 import { AtendimentoArea } from "./pages/callcenter";
+import { ProfessorArea } from "./pages/professor";
 import { TicketsConsole } from "./pages/admin2";
 import { ManagementRouter, UsuariosAcessos } from "./pages/management";
 import { canAccessArea, isStaff, homeFor } from "./lib/api";
@@ -190,7 +191,11 @@ function Router() {
       page = <StudentArea path={path} segs={segs} />;
       break;
     }
-    case "professor": { const g = guard("teacher"); page = g || <TeacherArea path={path} segs={segs} />; break; }
+    case "professor": { 
+      const g = guard("teacher"); 
+      page = g || <ProfessorArea path={path} />; 
+      break; 
+    }
     case "admin": { const g = guard("admin"); page = g || <AdminArea path={path} segs={segs} />; break; }
     case "suporte": { const g = guard("support"); page = g || <SupportArea path={path} />; break; }
     default:

@@ -21,20 +21,22 @@ export function SiteShell({ children, path }: { children: React.ReactNode; path:
           </nav>
           <div className="hidden lg:flex items-center gap-3">
             {user ? (
-              user.role === "student" ? (
-                <>
-                  <a href="#/aluno" className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]"><I n="cap" s={15} /> Portal do Aluno</a>
-                  <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
-                </>
-              ) : (
-                <>
+              <>
+                {/* Acesso rápido baseado nas permissões */}
+                {user.role === "student" && (
+                  <a href="#/aluno" className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]"><I n="cap" s={15} /> AVA</a>
+                )}
+                {user.role === "teacher" && (
+                  <a href="#/professor" className="cy-btn cy-btn-g px-3.5 py-2 text-[12px]"><I n="book" s={15} /> Área do Professor</a>
+                )}
+                {(user.role !== "student" && user.role !== "teacher") && (
                   <a href="#/intranet" className="cy-btn cy-btn-e px-3.5 py-2 text-[12px]"><I n="lock" s={15} /> Intranet</a>
-                  <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
-                </>
-              )
+                )}
+                <button onClick={() => { logout(); navigate("/"); }} className="cy-btn cy-btn-x px-2.5 py-2" title="Sair"><I n="out" s={16} /></button>
+              </>
             ) : (
               <>
-                <a href="#/intranet" className="cy-btn cy-btn-x px-3.5 py-2 text-[12px]"><I n="lock" s={14} /> Intranet</a>
+                <a href="#/login" className="cy-btn cy-btn-x px-3.5 py-2 text-[12px]"><I n="lock" s={14} /> Entrar</a>
                 <a href="#/cursos" className="cy-btn cy-btn-p px-4 py-2 text-[12px]">Inscrever-se <I n="arrowR" s={15} /></a>
               </>
             )}
