@@ -6,9 +6,11 @@ import { useApp } from "../state";
 import {
   createTeacherWorkspace, createLessonPlan, createVirtualLab, createGradingRubric,
   registerTeacherHour, approveContent,
-  all, where, find, update, audit, notify,
+  all, where, find, update, insert, audit, notify, now,
   fmtBRL, fmtDate, type Row,
 } from "../lib/api";
+import { FileUpload, FileDownload, FilePreview } from "../components/FileUpload";
+import { saveFile, getFilesByContext, deleteFile, formatFileSize, type StoredFile } from "../lib/files";
 
 const NAV_PROF: NavItem[] = [
   { to: "/professor", icon: "home", label: "Dashboard" },
@@ -115,21 +117,49 @@ function Conteudo() {
   const [f, setF] = useState({ title: "", objectives: "", methodology: "", resources: "", evaluation: "", duration: "" });
   const teacher = find("teachers", user!.id);
   const plans = where("lesson_plans", (lp) => lp.teacherId === teacher?.id);
+  const [selectedPlan, setSelectedPlan] = useState<Row | null>(null);
+  const [materials, setMaterials] = useState<StoredFile[]>([]);
 
   const save = () => {
     if (!f.title) { toast("Título obrigatório.", "err"); return; }
-    createLessonPlan(user!, { ...f, teacherId: teacher?.id });
+    const plan = createLessonPlan(user!, { ...f, teacherId: teacher?.id });
     setOpen(false); setF({ title: "", objectives: "", methodology: "", resources: "", evaluation: "", duration: "" });
     toast("Plano de aula criado!", "ok");
+    setSelectedPlan(plan);
+    loadMaterials(plan.id);
+  };
+
+  const loadMaterials = (planId: string) => {
+    setMaterials(getFilesByContext("lesson_plan", planId));
+  };
+
+  const handleUpload = (file: File, dataUrl: string) => {
+    if (!selectedPlan) {
+      toast("Selecione um plano de aula primeiro.", "err");
+      return;
+    }
+    saveFile(file, dataUrl, user!.id, "lesson_plan", selectedPlan.id);
+    loadMaterials(selectedPlan.id);
+    toast("Material enviado com sucesso!", "ok");
+  };
+
+  const handleDelete = (fileId: string) => {
+    if (!selectedPlan) return;
+    deleteFile(fileId, user!.id);
+    loadMaterials(selectedPlan.id);
+    toast("Material removido.", "ok");
   };
 
   return (
     <div>
       <PageHead kicker="Professor" title="Conteúdo" desc="Minhas aulas, upload de vídeo, materiais, PDFs, slides e links." right={<Btn v="e" onClick={() => setOpen(true)}><I n="plus" s={15} /> Novo plano de aula</Btn>} />
-      {plans.length === 0 ? <Empty icon="layers" title="Nenhum plano de aula" desc="Crie seu primeiro plano de aula para organizar o conteúdo." /> : (
-        <div className="grid md:grid-cols-2 gap-4">
+      
+      {plans.length === 0 ? (
+        <Empty icon="layers" title="Nenhum plano de aula" desc="Crie seu primeiro plano de aula para organizar o conteúdo." />
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
           {plans.map((p) => (
-            <Card key={p.id} className="p-5">
+            <Card key={p.id} className="p-5 cursor-pointer hover:border-cy-500 transition-all" onClick={() => { setSelectedPlan(p); loadMaterials(p.id); }}>
               <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{p.title}</h3>
               <p className="text-[12.5px] text-fog line-clamp-2">{p.objectives}</p>
               <div className="flex gap-2 mt-3">
@@ -140,6 +170,46 @@ function Conteudo() {
           ))}
         </div>
       )}
+
+      {selectedPlan && (
+        <Card className="p-6 mb-6">
+          <h3 className="font-display font-semibold text-[16px] text-mist mb-4">Materiais de: {selectedPlan.title}</h3>
+          
+          <div className="mb-6">
+            <FileUpload
+              onUpload={handleUpload}
+              accept="*/*"
+              maxSize={50}
+              label="Enviar material didático"
+              hint="PDFs, slides, vídeos, imagens, documentos"
+            />
+          </div>
+
+          {materials.length > 0 && (
+            <div>
+              <h4 className="text-[14px] text-fog font-semibold mb-3">Materiais Enviados ({materials.length})</h4>
+              <div className="space-y-3">
+                {materials.map((file) => (
+                  <div key={file.id} className="cy-card p-4 flex items-center gap-4">
+                    <I n={file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "file"} s={24} c="text-cy-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] text-mist font-semibold truncate">{file.name}</div>
+                      <div className="text-[11px] text-dim">{formatFileSize(file.size)} · {file.type}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <FileDownload fileName={file.name} fileData={file.data} label="Baixar" />
+                      <Btn v="d" sm onClick={() => handleDelete(file.id)}>
+                        <I n="trash" s={14} />
+                      </Btn>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
       <Modal open={open} onClose={() => setOpen(false)} title="Novo plano de aula" w={640}>
         <div className="space-y-3">
           <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
@@ -156,10 +226,139 @@ function Conteudo() {
 }
 
 function Atividades() {
+  const { user } = useApp();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ title: "", description: "", type: "exercicio", dueDate: "", maxScore: "10" });
+  const teacher = find("teachers", user!.id);
+  const courses = where("courses", (c) => c.teacherId === teacher?.id);
+  const activities = courses.flatMap((c) => where("activities", (a) => a.courseId === c.id));
+  const [selectedActivity, setSelectedActivity] = useState<Row | null>(null);
+  const [materials, setMaterials] = useState<StoredFile[]>([]);
+
+  const save = () => {
+    if (!f.title || !f.description) { toast("Título e descrição obrigatórios.", "err"); return; }
+    if (courses.length === 0) { toast("Você não tem disciplinas atribuídas.", "err"); return; }
+    
+    const activity = insert("activities", {
+      courseId: courses[0].id,
+      title: f.title,
+      description: f.description,
+      type: f.type,
+      dueDate: f.dueDate,
+      maxScore: Number(f.maxScore),
+      createdAt: now(),
+    });
+    
+    audit(user!, "CREATE", "activities", activity.id, `Atividade criada: ${f.title}`);
+    setOpen(false);
+    setF({ title: "", description: "", type: "exercicio", dueDate: "", maxScore: "10" });
+    toast("Atividade criada!", "ok");
+    setSelectedActivity(activity);
+    loadMaterials(activity.id);
+  };
+
+  const loadMaterials = (activityId: string) => {
+    setMaterials(getFilesByContext("activity", activityId));
+  };
+
+  const handleUpload = (file: File, dataUrl: string) => {
+    if (!selectedActivity) {
+      toast("Selecione uma atividade primeiro.", "err");
+      return;
+    }
+    saveFile(file, dataUrl, user!.id, "activity", selectedActivity.id);
+    loadMaterials(selectedActivity.id);
+    toast("Material da atividade enviado!", "ok");
+  };
+
+  const handleDelete = (fileId: string) => {
+    if (!selectedActivity) return;
+    deleteFile(fileId, user!.id);
+    loadMaterials(selectedActivity.id);
+    toast("Material removido.", "ok");
+  };
+
   return (
     <div>
-      <PageHead kicker="Professor" title="Atividades" desc="Exercícios, trabalhos, projetos, desafios práticos e laboratórios." />
-      <Empty icon="check" title="Atividades" desc="Crie exercícios, trabalhos, projetos e desafios práticos para seus alunos." />
+      <PageHead kicker="Professor" title="Atividades" desc="Exercícios, trabalhos, projetos, desafios práticos e laboratórios." right={<Btn v="e" onClick={() => setOpen(true)}><I n="plus" s={15} /> Nova atividade</Btn>} />
+      
+      {activities.length === 0 ? (
+        <Empty icon="check" title="Nenhuma atividade" desc="Crie exercícios, trabalhos, projetos e desafios práticos para seus alunos." />
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          {activities.map((a) => (
+            <Card key={a.id} className="p-5 cursor-pointer hover:border-cy-500 transition-all" onClick={() => { setSelectedActivity(a); loadMaterials(a.id); }}>
+              <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{a.title}</h3>
+              <p className="text-[12.5px] text-fog line-clamp-2">{a.description}</p>
+              <div className="flex gap-2 mt-3">
+                <Tag>{a.type}</Tag>
+                {a.dueDate && <Tag tone="amber">Prazo: {fmtDate(a.dueDate)}</Tag>}
+                <Tag tone="mist">Nota máx: {a.maxScore}</Tag>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {selectedActivity && (
+        <Card className="p-6 mb-6">
+          <h3 className="font-display font-semibold text-[16px] text-mist mb-4">Materiais de: {selectedActivity.title}</h3>
+          
+          <div className="mb-6">
+            <FileUpload
+              onUpload={handleUpload}
+              accept="*/*"
+              maxSize={50}
+              label="Enviar material da atividade"
+              hint="Enunciados, gabaritos, arquivos de apoio"
+            />
+          </div>
+
+          {materials.length > 0 && (
+            <div>
+              <h4 className="text-[14px] text-fog font-semibold mb-3">Materiais Enviados ({materials.length})</h4>
+              <div className="space-y-3">
+                {materials.map((file) => (
+                  <div key={file.id} className="cy-card p-4 flex items-center gap-4">
+                    <I n={file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "file"} s={24} c="text-cy-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] text-mist font-semibold truncate">{file.name}</div>
+                      <div className="text-[11px] text-dim">{formatFileSize(file.size)} · {file.type}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <FileDownload fileName={file.name} fileData={file.data} label="Baixar" />
+                      <Btn v="d" sm onClick={() => handleDelete(file.id)}>
+                        <I n="trash" s={14} />
+                      </Btn>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      <Modal open={open} onClose={() => setOpen(false)} title="Nova atividade" w={640}>
+        <div className="space-y-3">
+          <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
+          <Field label="Descrição" req><TArea rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <Field label="Tipo">
+              <TSel value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}>
+                <option value="exercicio">Exercício</option>
+                <option value="trabalho">Trabalho</option>
+                <option value="projeto">Projeto</option>
+                <option value="desafio">Desafio</option>
+              </TSel>
+            </Field>
+            <Field label="Prazo"><TIn type="date" value={f.dueDate} onChange={(e) => setF({ ...f, dueDate: e.target.value })} /></Field>
+            <Field label="Nota máxima"><TIn type="number" value={f.maxScore} onChange={(e) => setF({ ...f, maxScore: e.target.value })} /></Field>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4"><Btn v="x" onClick={() => setOpen(false)}>Cancelar</Btn><Btn v="e" onClick={save}>Criar atividade</Btn></div>
+      </Modal>
     </div>
   );
 }
@@ -218,10 +417,164 @@ function Comunicacao() {
 }
 
 function Projetos() {
+  const { user } = useApp();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ title: "", description: "", requirements: "", dueDate: "", maxScore: "100" });
+  const teacher = find("teachers", user!.id);
+  const courses = where("courses", (c) => c.teacherId === teacher?.id);
+  const projects = courses.flatMap((c) => where("projects", (p) => p.courseId === c.id));
+  const [selectedProject, setSelectedProject] = useState<Row | null>(null);
+  const [materials, setMaterials] = useState<StoredFile[]>([]);
+  const [submissions, setSubmissions] = useState<Row[]>([]);
+
+  const save = () => {
+    if (!f.title || !f.description) { toast("Título e descrição obrigatórios.", "err"); return; }
+    if (courses.length === 0) { toast("Você não tem disciplinas atribuídas.", "err"); return; }
+    
+    const project = insert("projects", {
+      courseId: courses[0].id,
+      title: f.title,
+      description: f.description,
+      requirements: f.requirements,
+      dueDate: f.dueDate,
+      maxScore: Number(f.maxScore),
+      createdAt: now(),
+    });
+    
+    audit(user!, "CREATE", "projects", project.id, `Projeto criado: ${f.title}`);
+    setOpen(false);
+    setF({ title: "", description: "", requirements: "", dueDate: "", maxScore: "100" });
+    toast("Projeto criado!", "ok");
+    setSelectedProject(project);
+    loadMaterials(project.id);
+    loadSubmissions(project.id);
+  };
+
+  const loadMaterials = (projectId: string) => {
+    setMaterials(getFilesByContext("project", projectId));
+  };
+
+  const loadSubmissions = (projectId: string) => {
+    setSubmissions(where("submissions", (s) => s.projectId === projectId));
+  };
+
+  const handleUpload = (file: File, dataUrl: string) => {
+    if (!selectedProject) {
+      toast("Selecione um projeto primeiro.", "err");
+      return;
+    }
+    saveFile(file, dataUrl, user!.id, "project", selectedProject.id);
+    loadMaterials(selectedProject.id);
+    toast("Material do projeto enviado!", "ok");
+  };
+
+  const handleDelete = (fileId: string) => {
+    if (!selectedProject) return;
+    deleteFile(fileId, user!.id);
+    loadMaterials(selectedProject.id);
+    toast("Material removido.", "ok");
+  };
+
   return (
     <div>
-      <PageHead kicker="Professor" title="Projetos" desc="Projetos em andamento, entregas, correções e avaliação." />
-      <Empty icon="target" title="Projetos" desc="Gerencie projetos em andamento, receba entregas, corrija e avalie." />
+      <PageHead kicker="Professor" title="Projetos" desc="Projetos em andamento, entregas, correções e avaliação." right={<Btn v="e" onClick={() => setOpen(true)}><I n="plus" s={15} /> Novo projeto</Btn>} />
+      
+      {projects.length === 0 ? (
+        <Empty icon="target" title="Nenhum projeto" desc="Crie projetos para seus alunos desenvolverem." />
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          {projects.map((p) => (
+            <Card key={p.id} className="p-5 cursor-pointer hover:border-cy-500 transition-all" onClick={() => { setSelectedProject(p); loadMaterials(p.id); loadSubmissions(p.id); }}>
+              <h3 className="font-display font-semibold text-[15px] text-mist mb-2">{p.title}</h3>
+              <p className="text-[12.5px] text-fog line-clamp-2">{p.description}</p>
+              <div className="flex gap-2 mt-3">
+                {p.dueDate && <Tag tone="amber">Prazo: {fmtDate(p.dueDate)}</Tag>}
+                <Tag tone="mist">Nota máx: {p.maxScore}</Tag>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {selectedProject && (
+        <Card className="p-6 mb-6">
+          <h3 className="font-display font-semibold text-[16px] text-mist mb-4">Projeto: {selectedProject.title}</h3>
+          
+          <div className="mb-6">
+            <h4 className="text-[14px] text-fog font-semibold mb-3">Materiais do Projeto</h4>
+            <FileUpload
+              onUpload={handleUpload}
+              accept="*/*"
+              maxSize={50}
+              label="Enviar material do projeto"
+              hint="Enunciado, requisitos, exemplos, templates"
+            />
+          </div>
+
+          {materials.length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-[14px] text-fog font-semibold mb-3">Arquivos Enviados ({materials.length})</h4>
+              <div className="space-y-3">
+                {materials.map((file) => (
+                  <div key={file.id} className="cy-card p-4 flex items-center gap-4">
+                    <I n={file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "file"} s={24} c="text-cy-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] text-mist font-semibold truncate">{file.name}</div>
+                      <div className="text-[11px] text-dim">{formatFileSize(file.size)} · {file.type}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <FileDownload fileName={file.name} fileData={file.data} label="Baixar" />
+                      <Btn v="d" sm onClick={() => handleDelete(file.id)}>
+                        <I n="trash" s={14} />
+                      </Btn>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h4 className="text-[14px] text-fog font-semibold mb-3">Entregas dos Alunos ({submissions.length})</h4>
+            {submissions.length === 0 ? (
+              <p className="text-[12px] text-dim">Nenhuma entrega ainda.</p>
+            ) : (
+              <div className="space-y-3">
+                {submissions.map((sub) => {
+                  const student = find("users", sub.studentId);
+                  return (
+                    <div key={sub.id} className="cy-card p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <I n="user" s={16} c="text-cy-500" />
+                        <span className="text-[13px] text-mist font-semibold">{student?.name}</span>
+                        <Badge s={sub.status || "submitted"} />
+                      </div>
+                      <p className="text-[12px] text-fog mb-2">{sub.description}</p>
+                      {sub.fileUrl && (
+                        <FileDownload fileName="Entrega" fileData={sub.fileUrl} label="Baixar entrega" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      <Modal open={open} onClose={() => setOpen(false)} title="Novo projeto" w={640}>
+        <div className="space-y-3">
+          <Field label="Título" req><TIn value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
+          <Field label="Descrição" req><TArea rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+          <Field label="Requisitos"><TArea rows={3} value={f.requirements} onChange={(e) => setF({ ...f, requirements: e.target.value })} /></Field>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Field label="Prazo"><TIn type="date" value={f.dueDate} onChange={(e) => setF({ ...f, dueDate: e.target.value })} /></Field>
+            <Field label="Nota máxima"><TIn type="number" value={f.maxScore} onChange={(e) => setF({ ...f, maxScore: e.target.value })} /></Field>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4"><Btn v="x" onClick={() => setOpen(false)}>Cancelar</Btn><Btn v="e" onClick={save}>Criar projeto</Btn></div>
+      </Modal>
     </div>
   );
 }
