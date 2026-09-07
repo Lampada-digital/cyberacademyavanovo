@@ -12,6 +12,9 @@ import StudentArea from "./pages/student";
 import TeacherArea from "./pages/teacher";
 import AdminArea from "./pages/admin";
 import PartnerArea from "./pages/partners";
+import { RHArea } from "./pages/rh";
+import { FinanceArea } from "./pages/finance";
+import { AtendimentoArea } from "./pages/callcenter";
 import { TicketsConsole } from "./pages/admin2";
 import { ManagementRouter, UsuariosAcessos } from "./pages/management";
 import { canAccessArea, isStaff, homeFor } from "./lib/api";
@@ -167,9 +170,9 @@ function Router() {
       break;
     }
     case "acessos": { const g = guard("admin"); page = g || <UsuariosAcessosPage />; break; }
-    case "rh": { const g = guardArea("rh"); page = g || <ManagementRouter area="rh" path={path} segs={segs} />; break; }
-    case "financeiro": { const g = guardArea("finance"); page = g || <ManagementRouter area="finance" path={path} segs={segs} />; break; }
-    case "atendimento": { const g = guardArea("atendimento"); page = g || <ManagementRouter area="atendimento" path={path} segs={segs} />; break; }
+    case "rh": { const g = guardArea("rh"); page = g || <RHArea path={path} />; break; }
+    case "financeiro": { const g = guardArea("finance"); page = g || <FinanceArea path={path} />; break; }
+    case "atendimento": { const g = guardArea("atendimento"); page = g || <AtendimentoArea path={path} />; break; }
     case "parceiros": {
       if (!user) { page = <Redirect to={`/login?next=${encodeURIComponent("/parceiros")}`} />; break; }
       page = user.role === "partner" || user.role === "ngo" || user.role === "admin" ? <PartnerArea /> : <Redirect to={homeFor(user.role)} />;

@@ -1015,6 +1015,147 @@ export function classDiary(courseId: string) {
   }).filter((d) => d.student);
 }
 
+/* ================= RH - GESTÃO DE PESSOAS ================= */
+export function createJobOpening(actor: Row, d: Record<string, any>): Row {
+  const o = insert("job_openings", {
+    title: d.title, department: d.department, level: d.level, description: d.description,
+    requirements: d.requirements, salary: Number(d.salary) || 0, status: "open", createdAt: now(), createdBy: actor.id,
+  });
+  audit(actor, "CREATE", "job_openings", o.id, `Vaga criada: ${d.title}`);
+  return o;
+}
+export function createCandidate(actor: Row, d: Record<string, any>): Row {
+  const c = insert("candidates", {
+    name: d.name, email: d.email, phone: d.phone, openingId: d.openingId,
+    resume: d.resume, status: "received", appliedAt: now(),
+  });
+  audit(actor, "CREATE", "candidates", c.id, `Candidato: ${d.name}`);
+  return c;
+}
+export function scheduleInterview(actor: Row, d: Record<string, any>): Row {
+  const i = insert("interviews", {
+    candidateId: d.candidateId, openingId: d.openingId, date: d.date,
+    interviewer: d.interviewer, type: d.type, notes: d.notes, status: "scheduled", createdAt: now(),
+  });
+  audit(actor, "CREATE", "interviews", i.id, `Entrevista agendada`);
+  return i;
+}
+export function createEmployeeContract(actor: Row, d: Record<string, any>): Row {
+  const c = insert("employee_contracts", {
+    userId: d.userId, type: d.type, startDate: d.startDate, endDate: d.endDate,
+    salary: Number(d.salary) || 0, benefits: d.benefits, status: "active", createdAt: now(),
+  });
+  audit(actor, "CREATE", "employee_contracts", c.id, `Contrato criado`);
+  return c;
+}
+export function createPerformanceReview(actor: Row, d: Record<string, any>): Row {
+  const r = insert("performance_reviews", {
+    userId: d.userId, reviewerId: d.reviewerId, period: d.period,
+    score: Number(d.score) || 0, strengths: d.strengths, improvements: d.improvements,
+    goals: d.goals, createdAt: now(),
+  });
+  audit(actor, "CREATE", "performance_reviews", r.id, `Avaliação de desempenho`);
+  return r;
+}
+export function requestVacation(actor: Row, d: Record<string, any>): Row {
+  const v = insert("vacations", {
+    userId: d.userId, startDate: d.startDate, endDate: d.endDate,
+    days: Number(d.days) || 0, status: "pending", requestedAt: now(),
+  });
+  audit(actor, "CREATE", "vacations", v.id, `Solicitação de férias`);
+  return v;
+}
+
+/* ================= FINANCEIRO ================= */
+export function createInvoice(actor: Row, d: Record<string, any>): Row {
+  const i = insert("invoices", {
+    userId: d.userId, courseId: d.courseId, amount: Number(d.amount) || 0,
+    dueDate: d.dueDate, status: "pending", type: d.type || "tuition", createdAt: now(),
+  });
+  audit(actor, "CREATE", "invoices", i.id, `Fatura criada: R$ ${d.amount}`);
+  return i;
+}
+export function createExpense(actor: Row, d: Record<string, any>): Row {
+  const e = insert("accounts_payable", {
+    description: d.description, category: d.category, amount: Number(d.amount) || 0,
+    dueDate: d.dueDate, supplier: d.supplier, status: "pending", createdAt: now(),
+  });
+  audit(actor, "CREATE", "accounts_payable", e.id, `Despesa: ${d.description}`);
+  return e;
+}
+export function payInvoice(actor: Row, invoiceId: string, method: string): Row {
+  const inv = find("invoices", invoiceId);
+  if (!inv) throw new Error("Fatura não encontrada.");
+  update("invoices", invoiceId, { status: "paid", paidAt: now(), paymentMethod: method });
+  audit(actor, "UPDATE", "invoices", invoiceId, `Fatura paga via ${method}`);
+  return find("invoices", invoiceId)!;
+}
+export function createBudget(actor: Row, d: Record<string, any>): Row {
+  const b = insert("budgets", {
+    department: d.department, category: d.category, year: Number(d.year) || new Date().getFullYear(),
+    month: Number(d.month) || new Date().getMonth() + 1, amount: Number(d.amount) || 0,
+    createdAt: now(),
+  });
+  audit(actor, "CREATE", "budgets", b.id, `Orçamento: ${d.department}`);
+  return b;
+}
+
+/* ================= CALL CENTER ================= */
+export function registerCall(actor: Row, d: Record<string, any>): Row {
+  const c = insert("call_records", {
+    agentId: d.agentId, leadId: d.leadId, phone: d.phone, direction: d.direction,
+    duration: Number(d.duration) || 0, outcome: d.outcome, notes: d.notes,
+    status: d.status || "completed", calledAt: now(),
+  });
+  audit(actor, "CREATE", "call_records", c.id, `Chamada registrada`);
+  return c;
+}
+export function createLead(actor: Row, d: Record<string, any>): Row {
+  const l = insert("leads", {
+    name: d.name, email: d.email, phone: d.phone, source: d.source,
+    interest: d.interest, status: "new", assignedTo: d.assignedTo || null, createdAt: now(),
+  });
+  audit(actor, "CREATE", "leads", l.id, `Lead: ${d.name}`);
+  return l;
+}
+export function updateLeadStatus(actor: Row, leadId: string, status: string, notes?: string): Row {
+  update("leads", leadId, { status, lastContact: now(), notes: notes || "" });
+  audit(actor, "UPDATE", "leads", leadId, `Lead → ${status}`);
+  return find("leads", leadId)!;
+}
+export function createCallCampaign(actor: Row, d: Record<string, any>): Row {
+  const c = insert("call_campaigns", {
+    name: d.name, description: d.description, startDate: d.startDate, endDate: d.endDate,
+    status: "active", createdAt: now(),
+  });
+  audit(actor, "CREATE", "call_campaigns", c.id, `Campanha: ${d.name}`);
+  return c;
+}
+
+/* ================= PROFESSOR - PRODUÇÃO E FINANCEIRO ================= */
+export function registerTeacherHour(actor: Row, d: Record<string, any>): Row {
+  const h = insert("teacher_hours", {
+    teacherId: d.teacherId, courseId: d.courseId, lessonId: d.lessonId,
+    hours: Number(d.hours) || 0, rate: Number(d.rate) || 0, status: "pending",
+    registeredAt: now(),
+  });
+  audit(actor, "CREATE", "teacher_hours", h.id, `Horas registradas: ${d.hours}h`);
+  return h;
+}
+export function approveContent(actor: Row, contentId: string, approved: boolean, notes?: string): Row {
+  update("content_production", contentId, { status: approved ? "approved" : "rejected", reviewNotes: notes || "", reviewedAt: now() });
+  audit(actor, "UPDATE", "content_production", contentId, approved ? "Conteúdo aprovado" : "Conteúdo reprovado");
+  return find("content_production", contentId)!;
+}
+export function createTeacherPayment(actor: Row, d: Record<string, any>): Row {
+  const p = insert("teacher_payments", {
+    teacherId: d.teacherId, period: d.period, hours: Number(d.hours) || 0,
+    rate: Number(d.rate) || 0, total: Number(d.total) || 0, status: "pending", createdAt: now(),
+  });
+  audit(actor, "CREATE", "teacher_payments", p.id, `Pagamento professor: R$ ${d.total}`);
+  return p;
+}
+
 export { all, one, where, find, insert, update, remove, uid, now, audit, notify, sendEmail, wipeDB, save, getSettings, hashPw };
 export { fmtBRL, fmtDate, fmtDT, timeAgo, nextOrderNumber, nextEnrollmentNumber, nextCertCode, setSettings, statusBadge } from "./db";
 export { DOC_KINDS } from "./db";
