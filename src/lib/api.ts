@@ -1156,6 +1156,113 @@ export function createTeacherPayment(actor: Row, d: Record<string, any>): Row {
   return p;
 }
 
+/* ================= PERMISSÕES GRANULARES ================= */
+export const ACCESS_AREAS = {
+  admin: "Administração Completa",
+  rh: "RH",
+  finance: "Financeiro",
+  atendimento: "Call Center",
+  teacher: "Área do Professor",
+  student: "AVA do Aluno",
+  partner: "Portal de Parceiros",
+  ngo: "Portal de ONGs",
+  support: "Suporte",
+};
+
+export function setUserPermissions(actor: Row, userId: string, areas: string[]): Row {
+  if (actor.role !== "admin") throw new Error("Somente administradores podem definir permissões.");
+  const user = find("users", userId);
+  if (!user) throw new Error("Usuário não encontrado.");
+  
+  // Remove permissões antigas
+  where("user_permissions", (p) => p.userId === userId).forEach((p) => remove("user_permissions", p.id));
+  
+  // Adiciona novas permissões
+  areas.forEach((area) => {
+    insert("user_permissions", { userId, area, grantedAt: now(), grantedBy: actor.id });
+  });
+  
+  audit(actor, "UPDATE", "user_permissions", userId, `Permissões atualizadas: ${areas.join(", ")}`);
+  notify(userId, "Permissões atualizadas", `Seu acesso foi atualizado. Áreas liberadas: ${areas.map((a) => ACCESS_AREAS[a as keyof typeof ACCESS_AREAS]).join(", ")}`, "info");
+  
+  return user;
+}
+
+export function getUserPermissions(userId: string): string[] {
+  return where("user_permissions", (p) => p.userId === userId).map((p) => p.area);
+}
+
+export function canAccess(user: Row | null, area: string): boolean {
+  if (!user) return false;
+  if (user.role === "admin") return true; // Admin acessa tudo
+  
+  // Verifica permissões explícitas
+  const perms = getUserPermissions(user.id);
+  if (perms.includes(area)) return true;
+  
+  // Fallback para role (compatibilidade)
+  if (user.role === area) return true;
+  if (area === "student" && user.role === "student") return true;
+  if (area === "teacher" && user.role === "teacher") return true;
+  
+  return false;
+}
+
+/* ================= AMBIENTE DO PROFESSOR ================= */
+export function createTeacherWorkspace(actor: Row, teacherId: string): Row {
+  const ws = insert("teacher_workspaces", {
+    teacherId, name: "Meu Espaço", description: "",
+    createdAt: now(), updatedAt: now(),
+  });
+  audit(actor, "CREATE", "teacher_workspaces", ws.id, `Workspace criado para professor ${teacherId}`);
+  return ws;
+}
+
+export function createLessonPlan(actor: Row, d: Record<string, any>): Row {
+  const lp = insert("lesson_plans", {
+    teacherId: d.teacherId, courseId: d.courseId, moduleId: d.moduleId,
+    title: d.title, objectives: d.objectives, methodology: d.methodology,
+    resources: d.resources, evaluation: d.evaluation, duration: d.duration,
+    status: "draft", createdAt: now(), updatedAt: now(),
+  });
+  audit(actor, "CREATE", "lesson_plans", lp.id, `Plano de aula: ${d.title}`);
+  return lp;
+}
+
+export function createVirtualLab(actor: Row, d: Record<string, any>): Row {
+  const lab = insert("virtual_labs", {
+    courseId: d.courseId, moduleId: d.moduleId, title: d.title,
+    description: d.description, instructions: d.instructions,
+    environment: d.environment, duration: d.duration, maxAttempts: d.maxAttempts || 3,
+    status: "draft", createdAt: now(),
+  });
+  audit(actor, "CREATE", "virtual_labs", lab.id, `Laboratório virtual: ${d.title}`);
+  return lab;
+}
+
+export function startLabSession(studentId: string, labId: string): Row {
+  const session = insert("lab_sessions", {
+    studentId, labId, startedAt: now(), status: "in_progress", attempt: 1,
+  });
+  return session;
+}
+
+export function completeLabSession(sessionId: string, results: any): Row {
+  update("lab_sessions", sessionId, {
+    completedAt: now(), status: "completed", results,
+  });
+  return find("lab_sessions", sessionId)!;
+}
+
+export function createGradingRubric(actor: Row, d: Record<string, any>): Row {
+  const rubric = insert("grading_rubrics", {
+    courseId: d.courseId, assessmentId: d.assessmentId, title: d.title,
+    criteria: d.criteria, maxScore: d.maxScore, createdAt: now(),
+  });
+  audit(actor, "CREATE", "grading_rubrics", rubric.id, `Rubrica: ${d.title}`);
+  return rubric;
+}
+
 export { all, one, where, find, insert, update, remove, uid, now, audit, notify, sendEmail, wipeDB, save, getSettings, hashPw };
 export { fmtBRL, fmtDate, fmtDT, timeAgo, nextOrderNumber, nextEnrollmentNumber, nextCertCode, setSettings, statusBadge } from "./db";
 export { DOC_KINDS } from "./db";

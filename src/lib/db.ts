@@ -43,6 +43,9 @@ export const TABLES = [
   "teacher_formations", "teacher_specialties", "teacher_hours",
   "content_production", "content_reviews", "teacher_payments",
   "teacher_communications", "lab_exercises",
+  // Permissões e Ambiente do Professor
+  "user_permissions", "virtual_labs", "lab_sessions", "lab_resources",
+  "teacher_workspaces", "lesson_plans", "grading_rubrics",
 ];
 
 export const DOC_KINDS: Record<string, string> = {

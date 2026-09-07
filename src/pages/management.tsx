@@ -4,7 +4,8 @@ import { AppShell, type NavItem } from "../components/layout";
 import { Btn, Card, Badge, Empty, Field, TIn, TArea, TSel, Modal, Stat, Tag, PageHead, useToast, Confirm, Bar } from "../components/ui";
 import { useApp } from "../state";
 import {
-  createStaffUser, setStaffRole, STAFF_AREAS, AREA_ROLES,
+  createStaffUser, setStaffRole, STAFF_AREAS, AREA_ROLES, ACCESS_AREAS,
+  setUserPermissions, getUserPermissions,
   createPartnership, createNgo, assignNgoCourse,
   all, one, where, find, insert, update, remove, audit, notify,
   fmtBRL, fmtDate, fmtDT, timeAgo, type Row, effectivePrice,
@@ -23,7 +24,7 @@ export function UsuariosAcessos() {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [del, setDel] = useState<Row | null>(null);
-  const [f, setF] = useState({ name: "", email: "", pass: "", role: "atendimento", cargo: "", dept: "", phone: "", salary: "", linkId: "" });
+  const [f, setF] = useState({ name: "", email: "", pass: "", role: "atendimento", cargo: "", dept: "", phone: "", salary: "", linkId: "", areas: [] as string[] });
   const users = all("users").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   const partnerships = all("partnerships");
   const ngos = all("ngos");
@@ -32,9 +33,13 @@ export function UsuariosAcessos() {
 
   const create = async () => {
     try {
-      await createStaffUser(user!, { ...f, salary: Number(f.salary) || 0 });
-      toast(`Usuário criado! ${f.name} já pode entrar pela Intranet na área ${STAFF_AREAS[f.role] || f.role}.`, "ok");
-      setOpen(false); setF({ name: "", email: "", pass: "", role: "atendimento", cargo: "", dept: "", phone: "", salary: "", linkId: "" });
+      const newUser = await createStaffUser(user!, { ...f, salary: Number(f.salary) || 0 });
+      // Define permissões de acesso
+      if (f.areas.length > 0) {
+        await setUserPermissions(user!, newUser.id, f.areas);
+      }
+      toast(`Usuário criado! ${f.name} já pode entrar pela Intranet${f.areas.length > 0 ? ` com acesso a: ${f.areas.map(a => ACCESS_AREAS[a as keyof typeof ACCESS_AREAS]).join(", ")}` : ""}.`, "ok");
+      setOpen(false); setF({ name: "", email: "", pass: "", role: "atendimento", cargo: "", dept: "", phone: "", salary: "", linkId: "", areas: [] });
       refresh();
     } catch (e: any) { toast(e.message, "err"); }
   };
@@ -126,6 +131,32 @@ export function UsuariosAcessos() {
               </Field>
             )}
           </div>
+          
+          {/* Permissões de acesso granulares */}
+          <div className="border-t border-line pt-4">
+            <Field label="Áreas de acesso" hint="Selecione quais áreas o usuário poderá acessar (deixe vazio para usar apenas a área de trabalho padrão)">
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {Object.entries(ACCESS_AREAS).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 text-[12px] text-fog cursor-pointer hover:text-mist transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={f.areas.includes(key)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setF({ ...f, areas: [...f.areas, key] });
+                        } else {
+                          setF({ ...f, areas: f.areas.filter(a => a !== key) });
+                        }
+                      }}
+                      className="accent-cy-500"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </Field>
+          </div>
+          
           <div className="cy-card p-3.5 border-cy-700 text-[12px] text-fog flex items-start gap-2.5">
             <I n="shield" s={16} c="text-cy-400 shrink-0 mt-0.5" />
             O usuário receberá acesso imediato à área escolhida e um e-mail de boas-vindas com as instruções da Intranet.
