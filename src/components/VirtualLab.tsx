@@ -2,15 +2,17 @@ import React, { useState, useRef, useEffect } from "react";
 import { I } from "./icons";
 import { Btn, Card, Field, TIn, TArea, Tag } from "./ui";
 
-/* ================= TERMINAL KALI LINUX ================= */
+/* ================= TERMINAL KALI LINUX - COMPLETO ================= */
 export function KaliTerminal({ onCommand }: { onCommand?: (cmd: string, output: string) => void }) {
   const [history, setHistory] = useState<string[]>([
     "┌──(kali㉿cyberacademy)-[~]",
-    "└─$ Welcome to Kali Linux Educational Terminal",
-    "Type 'help' for available commands",
+    "└─$ Kali Linux 2024.1 - Educational Environment",
+    "└─$ Tools: nmap, metasploit, burpsuite, wireshark, john, hydra, sqlmap, aircrack-ng",
+    "└─$ Type 'help' for all available commands",
     ""
   ]);
   const [input, setInput] = useState("");
+  const [currentDir, setCurrentDir] = useState("/home/kali");
   const terminalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,36 +33,141 @@ export function KaliTerminal({ onCommand }: { onCommand?: (cmd: string, output: 
     switch (command) {
       case "help":
         output = [
-          "Available commands:",
-          "  ls [dir]          - List directory contents",
-          "  cd [dir]          - Change directory",
-          "  pwd               - Print working directory",
-          "  cat [file]        - Display file contents",
-          "  echo [text]       - Display text",
-          "  whoami            - Display current user",
-          "  uname -a          - System information",
-          "  ifconfig          - Network configuration",
-          "  ping [host]       - Ping host",
-          "  nmap [target]     - Network scanner",
-          "  sqlmap [url]      - SQL injection tool",
-          "  hydra             - Password cracker",
-          "  john              - John the Ripper",
-          "  msfconsole        - Metasploit Framework",
-          "  clear             - Clear terminal",
-          "  exit              - Exit terminal"
+          "╔════════════════════════════════════════════════════════════╗",
+          "║           KALI LINUX - COMPLETE COMMAND REFERENCE          ║",
+          "╚════════════════════════════════════════════════════════════╝",
+          "",
+          "📁 FILE SYSTEM:",
+          "  ls, cd, pwd, mkdir, touch, rm, cp, mv, cat, echo, find, grep",
+          "",
+          "🌐 NETWORKING:",
+          "  ifconfig, ip, ping, traceroute, netstat, ss, dig, nslookup",
+          "  nmap, netcat (nc), tcpdump, wireshark, arp, route",
+          "",
+          "🔐 PASSWORD ATTACKS:",
+          "  john (John the Ripper), hydra, hashcat, crunch, maskprocessor",
+          "",
+          "🕷️ WEB APPLICATION:",
+          "  sqlmap, nikto, dirb, gobuster, burpsuite, whatweb, wpscan",
+          "",
+          "📡 WIRELESS:",
+          "  aircrack-ng, reaver, wifite, kismet, mdk3",
+          "",
+          "💥 EXPLOITATION:",
+          "  msfconsole (Metasploit), searchsploit, exploitdb",
+          "",
+          "🔍 FORENSICS:",
+          "  autopsy, binwalk, volatility, foremost, scalpel",
+          "",
+          "🎭 SOCIAL ENGINEERING:",
+          "  setoolkit, social-engineer-toolkit",
+          "",
+          "⚙️ SYSTEM:",
+          "  ps, top, htop, kill, chmod, chown, useradd, passwd, sudo"
         ];
         break;
 
       case "ls":
-        output = ["Documents  Downloads  Desktop  .bashrc  .ssh"];
+        const dir = args[0] || currentDir;
+        if (dir === "/home/kali" || dir === "~" || !args[0]) {
+          output = ["Documents  Downloads  Desktop  Tools  .bashrc  .ssh  .config"];
+        } else if (dir === "Tools") {
+          output = ["nmap  metasploit-framework  burpsuite  john  hydra  sqlmap  aircrack-ng"];
+        } else {
+          output = [`ls: cannot access '${dir}': No such file or directory`];
+        }
+        break;
+
+      case "cd":
+        if (!args[0] || args[0] === "~") {
+          setCurrentDir("/home/kali");
+          output = [];
+        } else if (args[0] === "..") {
+          setCurrentDir(currentDir.split("/").slice(0, -1).join("/") || "/");
+          output = [];
+        } else if (args[0] === "Tools") {
+          setCurrentDir(currentDir + "/Tools");
+          output = [];
+        } else {
+          output = [`cd: ${args[0]}: No such file or directory`];
+        }
         break;
 
       case "pwd":
-        output = ["/home/kali"];
+        output = [currentDir];
         break;
 
       case "whoami":
         output = ["kali"];
+        break;
+
+      case "mkdir":
+        if (args[0]) {
+          output = [`Directory '${args[0]}' created`];
+        } else {
+          output = ["mkdir: missing operand"];
+        }
+        break;
+
+      case "touch":
+        if (args[0]) {
+          output = [`File '${args[0]}' created`];
+        } else {
+          output = ["touch: missing file operand"];
+        }
+        break;
+
+      case "cat":
+        if (args[0]) {
+          if (args[0] === ".bashrc") {
+            output = ["# ~/.bashrc: executed by bash(1) for non-login shells", "# Kali Linux default configuration", "export PATH=$PATH:/usr/local/bin"];
+          } else {
+            output = [`Contents of ${args[0]}: [File content simulation]`];
+          }
+        } else {
+          output = ["cat: missing file operand"];
+        }
+        break;
+
+      case "grep":
+        if (args.length >= 2) {
+          output = [`Binary file ${args[1]} matches`, `Found pattern '${args[0]}' in ${args[1]}`];
+        } else {
+          output = ["Usage: grep [pattern] [file]"];
+        }
+        break;
+
+      case "find":
+        output = [
+          "/home/kali/Documents",
+          "/home/kali/Documents/report.pdf",
+          "/home/kali/Downloads",
+          "/home/kali/Desktop"
+        ];
+        break;
+
+      case "ps":
+        output = [
+          "  PID TTY          TIME CMD",
+          " 1234 pts/0    00:00:00 bash",
+          " 1567 pts/0    00:00:01 firefox",
+          " 1890 pts/0    00:00:00 nmap",
+          " 2123 pts/0    00:00:00 ps"
+        ];
+        break;
+
+      case "top":
+      case "htop":
+        output = [
+          "top - 14:23:45 up 2:34,  1 user,  load average: 0.52, 0.38, 0.42",
+          "Tasks: 142 total,   1 running, 141 sleeping,   0 stopped",
+          "%Cpu(s): 12.3 us,  3.4 sy,  0.0 ni, 83.8 id,  0.5 wa",
+          "MiB Mem :   7982.4 total,   3456.7 free,   2345.2 used,   2180.5 buff/cache",
+          "",
+          "  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND",
+          " 1567 kali      20   0 2345678 456789  12345 S  12.3   5.7   2:34.56 firefox",
+          " 1890 kali      20   0  123456  23456   5678 S   3.4   0.3   0:12.34 nmap"
+        ];
         break;
 
       case "uname":
@@ -95,23 +202,290 @@ export function KaliTerminal({ onCommand }: { onCommand?: (cmd: string, output: 
 
       case "nmap":
         if (args[0]) {
+          const target = args[0];
+          const flags = args.slice(1).join(" ");
           output = [
-            `Starting Nmap 7.92 ( https://nmap.org )`,
-            `Nmap scan report for ${args[0]}`,
+            `Starting Nmap 7.94 ( https://nmap.org ) at ${new Date().toISOString()}`,
+            `Nmap scan report for ${target}`,
             "Host is up (0.012s latency).",
-            "Not shown: 995 closed ports",
-            "PORT     STATE SERVICE",
-            "22/tcp   open  ssh",
-            "80/tcp   open  http",
-            "443/tcp  open  https",
-            "3306/tcp open  mysql",
-            "8080/tcp open  http-proxy",
+            "Not shown: 993 closed tcp ports (reset)",
+            "PORT      STATE SERVICE      VERSION",
+            "22/tcp    open  ssh          OpenSSH 8.9p1 Ubuntu 3",
+            "80/tcp    open  http         Apache httpd 2.4.52",
+            "443/tcp   open  ssl/http     Apache httpd 2.4.52",
+            "3306/tcp  open  mysql        MySQL 8.0.32",
+            "5432/tcp  open  postgresql   PostgreSQL DB 14.7",
+            "6379/tcp  open  redis        Redis key-value store 7.0.8",
+            "8080/tcp  open  http-proxy   Squid http proxy 5.7",
             "",
-            "Nmap done: 1 IP address (1 host up) scanned in 2.34 seconds"
+            "Service detection performed. Please report any incorrect results.",
+            `Nmap done: 1 IP address (1 host up) scanned in ${(Math.random() * 5 + 2).toFixed(2)} seconds`
+          ];
+          if (flags.includes("-sV")) {
+            output.splice(8, 0, "Service scan executed - versions detected");
+          }
+          if (flags.includes("-O")) {
+            output.splice(9, 0, "OS: Linux 5.15 (96% confidence)");
+          }
+        } else {
+          output = ["Usage: nmap [target] [options]", "Options: -sV (version), -O (OS), -p (ports), -A (aggressive)"];
+        }
+        break;
+
+      case "netcat":
+      case "nc":
+        if (args.length >= 2) {
+          output = [
+            `Connection to ${args[0]} ${args[1]} port [tcp/*] succeeded!`,
+            "Connection established",
+            "Type 'exit' to close connection"
           ];
         } else {
-          output = ["Usage: nmap [target]"];
+          output = ["Usage: nc [host] [port]", "Options: -l (listen), -p (port), -v (verbose)"];
         }
+        break;
+
+      case "tcpdump":
+        output = [
+          "tcpdump: verbose output suppressed, use -v or -vv for full protocol decode",
+          "listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes",
+          "14:23:45.123456 IP 192.168.1.100.45678 > 93.184.216.34.80: Flags [S], seq 1234567890",
+          "14:23:45.234567 IP 93.184.216.34.80 > 192.168.1.100.45678: Flags [S.], seq 9876543210",
+          "14:23:45.345678 IP 192.168.1.100.45678 > 93.184.216.34.80: Flags [.], ack 1",
+          "^C",
+          "3 packets captured",
+          "6 packets received by filter",
+          "0 packets dropped by kernel"
+        ];
+        break;
+
+      case "sqlmap":
+        if (args[0]) {
+          output = [
+            "        ___",
+            "       __H__",
+            " ___ ___[.]_____ ___ ___  {1.8.2#stable}",
+            "|_ -| . [\"]     | .'| . |",
+            "|___|_  [,]_|_|_|__,|  _|",
+            "      |_|V...       |_|   https://sqlmap.org",
+            "",
+            `[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal.`,
+            "",
+            `[${new Date().toLocaleTimeString()}] [INFO] testing connection to the target URL`,
+            `[${new Date().toLocaleTimeString()}] [INFO] checking if the target is protected by some kind of WAF/IPS`,
+            `[${new Date().toLocaleTimeString()}] [INFO] testing if the target URL content is stable`,
+            `[${new Date().toLocaleTimeString()}] [INFO] target URL content is stable`,
+            `[${new Date().toLocaleTimeString()}] [INFO] testing if GET parameter 'id' is dynamic`,
+            `[${new Date().toLocaleTimeString()}] [INFO] GET parameter 'id' appears to be dynamic`,
+            `[${new Date().toLocaleTimeString()}] [WARNING] heuristic (basic) test shows that GET parameter 'id' might be injectable`,
+            `[${new Date().toLocaleTimeString()}] [INFO] testing for SQL injection on GET parameter 'id'`,
+            "",
+            `GET parameter 'id' is vulnerable. Do you want to keep testing the others? [y/N] y`,
+            "",
+            `sqlmap identified the following injection point(s):`,
+            `---`,
+            `Parameter: id (GET)`,
+            `    Type: boolean-based blind`,
+            `    Title: AND boolean-based blind - WHERE or HAVING clause`,
+            `    Payload: id=1' AND 1=1--`,
+            ``,
+            `    Type: time-based blind`,
+            `    Title: MySQL >= 5.0.12 AND time-based blind (query SLEEP)`,
+            `    Payload: id=1' AND (SELECT 1 FROM (SELECT(SLEEP(5)))abc)--`,
+            ``,
+            `    Type: UNION query`,
+            `    Payload: id=1' UNION ALL SELECT NULL,NULL,CONCAT(0x716b,...),NULL--`,
+            `---`,
+            `[${new Date().toLocaleTimeString()}] [INFO] the back-end DBMS is MySQL`,
+            `[${new Date().toLocaleTimeString()}] [INFO] fetched data logged to text files under '/home/kali/.local/share/sqlmap/output/'`
+          ];
+        } else {
+          output = ["Usage: sqlmap -u [url]", "Example: sqlmap -u 'http://target.com/page?id=1' --dbs"];
+        }
+        break;
+
+      case "hydra":
+        output = [
+          "Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak",
+          "",
+          "[DATA] max 16 tasks per 1 server, overall 16 tasks",
+          "[DATA] attacking ssh://192.168.1.100:22/",
+          "[STATUS] 176.00 tries/min, 176 tries in 00:01h",
+          "[22][ssh] host: 192.168.1.100   login: admin   password: admin123",
+          "[22][ssh] host: 192.168.1.100   login: root   password: password",
+          "1 of 1 target successfully completed, 2 valid passwords found",
+          "Hydra will now exit"
+        ];
+        break;
+
+      case "john":
+        output = [
+          "Created directory: /home/kali/.john",
+          "Warning: detected hash type \"md5crypt\", but the string is also recognized as \"md5crypt-long\"",
+          "Warning: use \"--format=md5crypt-long\" instead",
+          "Loaded 1 password hash (md5crypt, crypt(3) $1$ (and variants) [MD5 32/64])",
+          "Will run 4 OpenMP threads",
+          "Press 'q' or Ctrl-C to abort, almost any other key for status",
+          "password123      (user1)",
+          "admin2024        (admin)",
+          "2g 0:00:00:05 DONE (2024-01-15 14:23)",
+          "2/3 0.38g/s 12345p/s 12345c/s 12345C/s test..password",
+          "Use the \"--show\" option to display all of the cracked passwords reliably",
+          "Session completed."
+        ];
+        break;
+
+      case "aircrack-ng":
+        output = [
+          "Opening capture file",
+          "Read 1234567 packets.",
+          "",
+          "   #  BSSID              ESSID                     Encryption",
+          "   1  AA:BB:CC:DD:EE:FF  HomeNetwork               WPA (0 handshake)",
+          "   2  11:22:33:44:55:66  OfficeWiFi                WPA2 PSK",
+          "",
+          "Targeting: 11:22:33:44:55:66 (ESSID: OfficeWiFi)",
+          "Running aircrack-ng with wordlist...",
+          "",
+          "                           [00:05:23] Tested: 123456 keys (got 98765 IVs)",
+          "   KB    depth   byte/vote  bit   prob",
+          "   123      4/4   0x4B/123   001  95%",
+          "   456      3/4   0x7A/456   010  87%",
+          "",
+          "KEY FOUND! [ password123 ]",
+          "Master key     : AA BB CC DD EE FF 00 11 22 33 44 55 66 77 88 99",
+          "Decrypted handshake saved to: cracked.cap"
+        ];
+        break;
+
+      case "msfconsole":
+      case "metasploit":
+        output = [
+          "",
+          "       =[ metasploit v6.3.52-dev                              ]",
+          "+ -- --=[ 2373 exploits - 1231 auxiliary - 416 post         ]",
+          "+ -- --=[ 1388 payloads - 46 encoders - 11 nops             ]",
+          "+ -- --=[ 9 evasion                                           ]",
+          "",
+          "Metasploit tip: View all productivity tips with the tips command",
+          "",
+          "msf6 > ",
+          "Available commands:",
+          "  use [exploit]     - Use an exploit",
+          "  search [keyword]  - Search for modules",
+          "  show exploits     - List all exploits",
+          "  back              - Move back from current context",
+          "  exit              - Exit Metasploit"
+        ];
+        break;
+
+      case "nikto":
+        if (args[0]) {
+          output = [
+            `- Nikto v2.5.0`,
+            `---------------------------------------------------------------------------`,
+            `+ Target IP:          192.168.1.100`,
+            `+ Target Hostname:    ${args[0]}`,
+            `+ Target Port:        80`,
+            `+ Start Time:         ${new Date().toLocaleString()}`,
+            `---------------------------------------------------------------------------`,
+            `+ Server: Apache/2.4.52 (Ubuntu)`,
+            `+ /: The anti-clickjacking X-Frame-Options header is not present.`,
+            `+ /: The X-Content-Type-Options header is not set.`,
+            `+ /: Server may leak inodes via ETags.`,
+            `+ /admin/: Admin login page/section found.`,
+            `+ /phpmyadmin/: phpMyAdmin directory found.`,
+            `+ /wp-login.php: WordPress login found.`,
+            `+ 8734 requests: 0 error(s) and 7 item(s) reported on remote host`,
+            `+ End Time:           ${new Date().toLocaleString()} (123 seconds)`,
+            `---------------------------------------------------------------------------`,
+            `+ 1 host(s) tested`
+          ];
+        } else {
+          output = ["Usage: nikto -h [host]", "Example: nikto -h example.com"];
+        }
+        break;
+
+      case "burpsuite":
+        output = [
+          "Starting Burp Suite Community Edition...",
+          "",
+          "Burp Suite is starting...",
+          "Loading extensions...",
+          "Starting proxy on 127.0.0.1:8080",
+          "",
+          "Burp Suite is now running.",
+          "Proxy listener: 127.0.0.1:8080",
+          "Configure your browser to use this proxy.",
+          "",
+          "Available modules:",
+          "  - Target",
+          "  - Proxy",
+          "  - Intruder",
+          "  - Repeater",
+          "  - Sequencer",
+          "  - Decoder",
+          "  - Comparer",
+          "  - Extender",
+          "  - Collaborator"
+        ];
+        break;
+
+      case "wireshark":
+        output = [
+          "Starting Wireshark...",
+          "",
+          "Capturing on interface: eth0",
+          "",
+          "No.     Time           Source                Destination          Protocol Length Info",
+          "1       0.000000       192.168.1.100         93.184.216.34        TCP      74     45678 → 80 [SYN]",
+          "2       0.012345       93.184.216.34         192.168.1.100        TCP      74     80 → 45678 [SYN, ACK]",
+          "3       0.023456       192.168.1.100         93.184.216.34        TCP      66     45678 → 80 [ACK]",
+          "4       0.123456       192.168.1.100         93.184.216.34        HTTP     456    GET /index.html",
+          "5       0.234567       93.184.216.34         192.168.1.100        HTTP     1234   HTTP/1.1 200 OK",
+          "",
+          "Capture statistics:",
+          "  Packets captured: 12345",
+          "  Packets received: 12346",
+          "  Packets dropped: 0"
+        ];
+        break;
+
+      case "searchsploit":
+        if (args[0]) {
+          output = [
+            "----------------------------------------------------------------------------------------",
+            " Exploit Title                                                          |  Path",
+            "----------------------------------------------------------------------------------------",
+            `${args[0]} - Remote Code Execution                                    | exploits/linux/remote/12345.py`,
+            `${args[0]} < 2.0 - SQL Injection                                      | exploits/web/remote/23456.txt`,
+            `${args[0]} - Cross-Site Scripting                                     | exploits/web/remote/34567.txt`,
+            "----------------------------------------------------------------------------------------",
+            "Shellcodes: No Results",
+            "Papers: No Results"
+          ];
+        } else {
+          output = ["Usage: searchsploit [keyword]", "Example: searchsploit wordpress"];
+        }
+        break;
+
+      case "setoolkit":
+        output = [
+          "[*] Social-Engineer Toolkit (SET) v9.0.3",
+          "[*] Created by: The Social-Engineer Toolkit (SET) Team",
+          "",
+          "Select from the menu:",
+          "",
+          "  1) Social-Engineering Attacks",
+          "  2) Fast-Track Penetration Testing",
+          "  3) Third Party Modules",
+          "  4) Update the Social-Engineer Toolkit",
+          "  5) Update SET configuration",
+          "  6) Help, Credits, and About",
+          "  99) Exit the Social-Engineer Toolkit",
+          "",
+          "set> "
+        ];
         break;
 
       case "sqlmap":
