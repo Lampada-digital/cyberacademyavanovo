@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Checkout</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0f14;--bg2:#111820;--bg3:#151d28;--bg4:#1a2332;--input:#0f1620;--teal:#00a8b5;--tealL:#00d4e0;--glow:rgba(0,168,181,.15);--txt:#fff;--txt2:#a0aec0;--txt3:#6b7a8d;--bd:#2a3544;--ok:#00d4a0;--warn:#ffb84d;--err:#ef4444;--grad:linear-gradient(135deg,#00a8b5,#00d4e0)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+header{background:rgba(10,15,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10}
+.hdr{max-width:1200px;margin:0 auto;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.logo svg{width:40px;height:40px}
+.lt{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--teal)}
+.ls{font-size:.65rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase}
+.badge{background:var(--glow);border:1px solid var(--teal);color:var(--teal);padding:.35rem .85rem;border-radius:100px;font-size:.75rem;font-weight:600;display:inline-flex;align-items:center;gap:.4rem}
+.wrap{max-width:1100px;margin:0 auto;padding:2.5rem 2rem}
+.hd{text-align:center;margin-bottom:2.5rem}
+.hd h1{font-family:'Space Grotesk',sans-serif;font-size:2.25rem;font-weight:700;margin-bottom:.5rem}
+.hd p{color:var(--txt2);font-size:1rem}
+.steps{display:flex;justify-content:center;gap:.5rem;margin-bottom:2.5rem;flex-wrap:wrap}
+.stp{display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;background:var(--bg3);border:1.5px solid var(--bd);border-radius:10px;font-weight:600;font-size:.85rem;color:var(--txt3)}
+.stp.on{border-color:var(--teal);background:var(--glow);color:var(--txt)}
+.stp.done{border-color:var(--ok);background:rgba(0,212,160,.1);color:var(--ok)}
+.stp .n{width:26px;height:26px;border-radius:50%;background:var(--bg4);border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.stp.on .n{background:var(--teal);border-color:var(--teal);color:var(--bg)}
+.stp.done .n{background:var(--ok);border-color:var(--ok);color:var(--bg)}
+.stp i{width:16px;height:16px}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:1.5rem}
+.card{background:var(--bg3);border:1.5px solid var(--bd);border-radius:14px;padding:1.75rem}
+.card-h{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--bd)}
+.card-h .ic{width:38px;height:38px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.card-h .ic i{width:20px;height:20px}
+.card-h h2{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700}
+.card-h p{font-size:.8rem;color:var(--txt3)}
+.step{display:none}.step.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.plans{display:grid;gap:.75rem;margin-bottom:1.5rem}
+.pl{background:var(--bg4);border:2px solid var(--bd);border-radius:10px;padding:1rem 1.25rem;cursor:pointer;transition:.2s;display:flex;justify-content:space-between;align-items:center}
+.pl:hover{border-color:var(--teal)}
+.pl.on{border-color:var(--teal);background:var(--glow)}
+.pl-n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+.pl-d{font-size:.8rem;color:var(--txt3);margin-top:.2rem}
+.pl-p{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--teal);font-size:1.1rem}
+.pl-p span{font-size:.75rem;color:var(--txt3);font-weight:400}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--txt2)}
+.fg label .r{color:var(--err)}
+.fg input,.fg select{width:100%;padding:.75rem 1rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:.95rem;font-family:inherit;transition:.2s}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--teal)}
+.fg input.err{border-color:var(--err)}
+.btn{padding:.8rem 1.5rem;border-radius:8px;font-weight:600;border:none;cursor:pointer;font-size:.95rem;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;transition:.2s;text-decoration:none}
+.btn i{width:16px;height:16px}
+.pri{background:var(--grad);color:var(--bg);box-shadow:0 4px 14px var(--glow)}
+.pri:hover{transform:translateY(-2px)}
+.sec{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+.sec:hover{background:var(--glow)}
+.gh{background:var(--bg4);color:var(--txt2);border:1px solid var(--bd)}
+.gh:hover{border-color:var(--teal);color:var(--teal)}
+.blk{width:100%}.lg{padding:1rem 2rem;font-size:1rem}
+.acts{display:flex;gap:.75rem;justify-content:space-between;margin-top:1.5rem}
+.pm{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
+.pmt{background:var(--bg4);border:2px solid var(--bd);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:.2s}
+.pmt:hover{border-color:var(--teal);transform:translateY(-2px)}
+.pmt.on{border-color:var(--teal);background:var(--glow)}
+.pmt i{width:24px;height:24px;color:var(--teal);margin-bottom:.5rem}
+.pmt.on i{color:var(--bg)}
+.pmt strong{display:block;font-size:.9rem}
+.pmt small{font-size:.7rem;color:var(--txt3)}
+.paybox{background:var(--bg4);border:1px solid var(--bd);border-radius:10px;padding:1.5rem;text-align:center}
+.qr{width:180px;height:180px;background:#fff;border-radius:10px;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;padding:.75rem}
+.qr svg{width:100%;height:100%}
+.timer{display:flex;align-items:center;justify-content:center;gap:.5rem;color:var(--warn);font-weight:600;font-size:.9rem;margin-bottom:1rem}
+.code{background:var(--input);border:1px solid var(--bd);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.75rem;color:var(--txt2);word-break:break-all;margin-bottom:1rem}
+.sum{margin-bottom:1rem}
+.sr{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--bd);font-size:.9rem}
+.sr:last-child{border:none}
+.sr .l{color:var(--txt2)}
+.sr .v{font-weight:600}
+.sr .v.t{color:var(--teal);font-family:'Space Grotesk',sans-serif}
+.tot{background:var(--bg4);border-radius:10px;padding:1rem;margin-top:1rem}
+.tot .sr{border:none;padding:.4rem 0}
+.tot .v.big{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;color:var(--teal);font-weight:700}
+.email-sent{text-align:center;padding:2rem 1rem}
+.email-ic{width:80px;height:80px;background:rgba(0,212,160,.15);border:2px solid var(--ok);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:var(--ok);animation:pop .5s}
+.email-ic i{width:40px;height:40px}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.email-sent h2{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;margin-bottom:.5rem;color:var(--ok)}
+.email-sent .to{color:var(--txt2);margin-bottom:1.5rem}
+.email-sent .to strong{color:var(--teal)}
+.mock-mail{background:var(--bg4);border:1px solid var(--bd);border-radius:10px;padding:1.25rem;text-align:left;margin-bottom:1.5rem}
+.mock-hdr{display:flex;align-items:center;gap:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--bd);margin-bottom:.75rem}
+.mock-hdr .av{width:36px;height:36px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.85rem}
+.mock-hdr .inf{flex:1}
+.mock-hdr .inf strong{display:block;font-size:.9rem}
+.mock-hdr .inf small{color:var(--txt3);font-size:.75rem}
+.mock-body h4{font-family:'Space Grotesk',sans-serif;margin-bottom:.5rem;font-size:1.05rem}
+.mock-body p{color:var(--txt2);font-size:.85rem;margin-bottom:1rem}
+.mock-btn{display:inline-block;background:var(--grad);color:var(--bg);padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.9rem;margin-bottom:.5rem}
+.mock-btn:hover{transform:translateY(-2px)}
+.mock-link{font-size:.75rem;color:var(--txt3);word-break:break-all;font-family:'Courier New',monospace}
+.warn{background:rgba(255,184,77,.1);border:1px solid var(--warn);border-radius:8px;padding:.75rem 1rem;font-size:.8rem;color:var(--warn);display:flex;gap:.5rem;align-items:flex-start;margin-top:1rem}
+.warn i{width:16px;height:16px;flex-shrink:0;margin-top:2px}
+.proc{display:none;text-align:center;padding:2rem}
+.proc.on{display:block}
+.spin{border:3px solid var(--bd);border-top:3px solid var(--teal);border-radius:50%;width:44px;height:44px;animation:sp 1s linear infinite;margin:0 auto 1rem}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.pm{grid-template-columns:1fr}.row{grid-template-columns:1fr}.hdr{padding:1rem}}
+</style>
+</head>
+<body>
+<header><div class="hdr">
+<a href="index.html" class="logo">
+<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text><text x="50" y="18" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">CYBER ACADEMY</text><text x="50" y="92" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">EST. 2022</text></svg>
+<div><div class="lt">Cyber Academy</div><div class="ls">Checkout · Etapa 2</div></div>
+</a>
+<div class="badge"><i data-lucide="shield-check"></i> Gateway Seguro</div>
+</div></header>
+
+<div class="wrap">
+<div class="hd"><h1>Finalize sua matrícula</h1><p>Preencha seus dados, faça o pagamento e receba o link de ativação por e-mail.</p></div>
+
+<div class="steps">
+<div class="stp on" data-s="1"><div class="n">1</div> Dados & Plano</div>
+<div class="stp" data-s="2"><div class="n">2</div> Pagamento</div>
+<div class="stp" data-s="3"><div class="n">3</div> E-mail Enviado</div>
+</div>
+
+<!-- ETAPA 1 -->
+<div class="step on" id="s1">
+<div class="grid">
+<div class="card">
+<div class="card-h"><div class="ic"><i data-lucide="user-plus"></i></div><div><h2>Seus dados</h2><p>Essas informações vão para o seu cadastro</p></div></div>
+<div class="fg"><label>Nome completo <span class="r">*</span></label><input type="text" id="name" placeholder="Seu nome"></div>
+<div class="fg"><label>E-mail <span class="r">*</span></label><input type="email" id="email" placeholder="seu@email.com"><small style="color:var(--txt3);font-size:.75rem;display:block;margin-top:.3rem">Você receberá o link de ativação neste e-mail</small></div>
+<div class="fg"><label>CPF <span class="r">*</span></label><input type="text" id="cpf" placeholder="Somente números" maxlength="11"></div>
+<div class="fg"><label>Telefone (WhatsApp) <span class="r">*</span></label><input type="tel" id="phone" placeholder="(00) 00000-0000"></div>
+</div>
+<div class="card">
+<div class="card-h"><div class="ic"><i data-lucide="crown"></i></div><div><h2>Escolha o plano</h2><p>Cada plano libera cursos ativos</p></div></div>
+<div class="plans">
+<div class="pl" data-p="essencial" data-v="100" data-c="1"><div><div class="pl-n"><i data-lucide="sparkles" style="width:16px;height:16px;color:var(--teal)"></i> Essencial</div><div class="pl-d">1 curso ativo · Grade completa</div></div><div class="pl-p">R$100<span>/mês</span></div></div>
+<div class="pl on" data-p="profissional" data-v="150" data-c="5"><div><div class="pl-n"><i data-lucide="rocket" style="width:16px;height:16px;color:var(--teal)"></i> Profissional</div><div class="pl-d">5 cursos ativos · Mentorias · Feedback</div></div><div class="pl-p">R$150<span>/mês</span></div></div>
+<div class="pl" data-p="corporativo" data-v="250" data-c="7"><div><div class="pl-n"><i data-lucide="building-2" style="width:16px;height:16px;color:var(--teal)"></i> Corporativo</div><div class="pl-d">7 cursos por aluno · Turmas fechadas</div></div><div class="pl-p">R$250<span>/mês</span></div></div>
+</div>
+<div class="fg"><label>Curso desejado (opcional)</label><select id="course"><option value="">Escolher depois</option><option value="1">Python do Zero ao Avançado</option><option value="3">Front-end Moderno</option><option value="6">IA Generativa & ML</option><option value="5">Azure & DevOps</option><option value="2">SQL & NoSQL Completo</option></select></div>
+<div class="tot">
+<div class="sr"><span class="l">Matrícula única</span><span class="v" id="t-enr">R$ 99,00</span></div>
+<div class="sr"><span class="l">1ª mensalidade</span><span class="v" id="t-mon">R$ 150,00</span></div>
+<div class="sr"><span class="l" style="font-weight:700;color:var(--txt)">Total hoje</span><span class="v big" id="t-tot">R$ 249,00</span></div>
+</div>
+<div class="acts">
+<a href="index.html" class="btn gh"><i data-lucide="arrow-left"></i> Voltar</a>
+<button class="btn pri lg" onclick="goStep(2)">Ir para pagamento <i data-lucide="arrow-right"></i></button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ETAPA 2 -->
+<div class="step" id="s2">
+<div class="grid">
+<div class="card">
+<div class="card-h"><div class="ic"><i data-lucide="credit-card"></i></div><div><h2>Forma de pagamento</h2><p>Escolha como pagar a matrícula + 1ª mensalidade</p></div></div>
+<div class="pm">
+<div class="pmt on" data-m="pix"><i data-lucide="qr-code"></i><strong>Pix</strong><small>Instantâneo</small></div>
+<div class="pmt" data-m="card"><i data-lucide="credit-card"></i><strong>Cartão</strong><small>Até 3x sem juros</small></div>
+<div class="pmt" data-m="boleto"><i data-lucide="barcode"></i><strong>Boleto</strong><small>1-3 dias úteis</small></div>
+</div>
+
+<div class="paybox" id="pay-pix">
+<div class="qr"><svg viewBox="0 0 200 200"><rect width="200" height="200" fill="#fff"/><g fill="#0a0f14"><rect x="20" y="20" width="50" height="50"/><rect x="30" y="30" width="30" height="30" fill="#fff"/><rect x="40" y="40" width="10" height="10"/><rect x="130" y="20" width="50" height="50"/><rect x="140" y="30" width="30" height="30" fill="#fff"/><rect x="150" y="40" width="10" height="10"/><rect x="20" y="130" width="50" height="50"/><rect x="30" y="140" width="30" height="30" fill="#fff"/><rect x="40" y="150" width="10" height="10"/><rect x="80" y="20" width="10" height="10"/><rect x="100" y="20" width="10" height="10"/><rect x="80" y="40" width="10" height="10"/><rect x="110" y="40" width="10" height="10"/><rect x="80" y="60" width="10" height="10"/><rect x="80" y="80" width="10" height="10"/><rect x="100" y="80" width="10" height="10"/><rect x="120" y="80" width="10" height="10"/><rect x="140" y="80" width="10" height="10"/><rect x="160" y="80" width="10" height="10"/><rect x="180" y="80" width="10" height="10"/><rect x="80" y="100" width="10" height="10"/><rect x="110" y="100" width="10" height="10"/><rect x="140" y="100" width="10" height="10"/><rect x="170" y="100" width="10" height="10"/><rect x="80" y="120" width="10" height="10"/><rect x="100" y="120" width="10" height="10"/><rect x="130" y="120" width="10" height="10"/><rect x="160" y="120" width="10" height="10"/><rect x="80" y="140" width="10" height="10"/><rect x="110" y="140" width="10" height="10"/><rect x="140" y="140" width="10" height="10"/><rect x="170" y="140" width="10" height="10"/><rect x="80" y="160" width="10" height="10"/><rect x="100" y="160" width="10" height="10"/><rect x="130" y="160" width="10" height="10"/><rect x="160" y="160" width="10" height="10"/><rect x="80" y="180" width="10" height="10"/><rect x="110" y="180" width="10" height="10"/><rect x="140" y="180" width="10" height="10"/><rect x="170" y="180" width="10" height="10"/></g><rect x="85" y="85" width="30" height="30" fill="#00a8b5" rx="4"/><text x="100" y="105" font-family="Space Grotesk" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">CA</text></svg></div>
+<div class="timer"><i data-lucide="clock" style="width:16px;height:16px"></i> Expira em <span id="pix-t">15:00</span></div>
+<div class="code" id="pix-code">00020126580014br.gov.bcb.pix0136ca-2026-tk-demo-5204000053039865405150.005802BR</div>
+<button class="btn pri lg blk" onclick="pay('pix')"><i data-lucide="check-circle"></i> Simular pagamento Pix aprovado</button>
+</div>
+
+<div class="paybox" id="pay-card" style="display:none">
+<div class="fg"><label>Número do cartão</label><input type="text" id="cc-num" placeholder="0000 0000 0000 0000" maxlength="19" value="4242 4242 4242 4242"></div>
+<div class="fg"><label>Nome no cartão</label><input type="text" id="cc-name" placeholder="Como está no cartão"></div>
+<div class="row"><div class="fg"><label>Validade</label><input type="text" id="cc-exp" placeholder="MM/AA" maxlength="5" value="12/28"></div><div class="fg"><label>CVV</label><input type="text" id="cc-cvv" placeholder="123" maxlength="4" value="123"></div></div>
+<button class="btn pri lg blk" onclick="pay('card')"><i data-lucide="lock"></i> Pagar agora</button>
+</div>
+
+<div class="paybox" id="pay-boleto" style="display:none">
+<div style="background:var(--input);padding:1rem;border-radius:8px;margin-bottom:1rem;font-family:'Courier New',monospace;font-size:.85rem;color:var(--txt2)">23793.38128 60000.000003 00000.000402 1 74230000024900</div>
+<button class="btn pri lg blk" onclick="pay('boleto')"><i data-lucide="check-circle"></i> Simular compensação</button>
+</div>
+
+<div class="proc" id="proc"><div class="spin"></div><strong>Processando pagamento…</strong><p style="color:var(--txt3);font-size:.85rem;margin-top:.5rem">Validando transação e gerando token de ativação</p></div>
+
+<div class="acts"><button class="btn gh" onclick="goStep(1)"><i data-lucide="arrow-left"></i> Voltar</button></div>
+</div>
+
+<div class="card">
+<div class="card-h"><div class="ic"><i data-lucide="receipt"></i></div><div><h2>Resumo</h2><p>Confira antes de pagar</p></div></div>
+<div class="sum">
+<div class="sr"><span class="l">Aluno</span><span class="v" id="r-name">—</span></div>
+<div class="sr"><span class="l">E-mail</span><span class="v" id="r-email">—</span></div>
+<div class="sr"><span class="l">CPF</span><span class="v" id="r-cpf">—</span></div>
+<div class="sr"><span class="l">Plano</span><span class="v t" id="r-plan">Profissional</span></div>
+<div class="sr"><span class="l">Cursos liberados</span><span class="v t" id="r-courses">5 ativos</span></div>
+<div class="sr"><span class="l">Curso escolhido</span><span class="v" id="r-course">A escolher</span></div>
+</div>
+<div class="tot">
+<div class="sr"><span class="l">Matrícula</span><span class="v" id="r-enr">R$ 99,00</span></div>
+<div class="sr"><span class="l">Mensalidade</span><span class="v" id="r-mon">R$ 150,00</span></div>
+<div class="sr"><span class="l" style="font-weight:700;color:var(--txt)">Total</span><span class="v big" id="r-tot">R$ 249,00</span></div>
+</div>
+<div class="warn"><i data-lucide="info"></i><span>Após o pagamento, você receberá um e-mail com link de ativação para criar login e senha. Sem esse link, o Portal não abre.</span></div>
+</div>
+</div>
+</div>
+
+<!-- ETAPA 3 -->
+<div class="step" id="s3">
+<div class="card" style="max-width:640px;margin:0 auto">
+<div class="email-sent">
+<div class="email-ic"><i data-lucide="mail-check"></i></div>
+<h2>Pagamento aprovado!</h2>
+<p class="to">Enviamos o link de ativação para <strong id="sent-email">—</strong></p>
+
+<div class="mock-mail">
+<div class="mock-hdr">
+<div class="av">CA</div>
+<div class="inf"><strong>Cyber Academy</strong><small>confirma@cyberacademy.demo · agora</small></div>
+<i data-lucide="mail" style="width:16px;height:16px;color:var(--txt3)"></i>
+</div>
+<div class="mock-body">
+<h4>Ative seu acesso — último passo 🎓</h4>
+<p>Olá <strong id="mock-name">—</strong>! Recebemos seu pagamento de <strong id="mock-total">—</strong>. Para acessar suas aulas, crie seu login e senha no link abaixo. O link expira em 24 horas.</p>
+<a href="#" class="mock-btn" id="activate-btn" onclick="goCadastro(event)"><i data-lucide="key-round" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:.4rem"></i> Criar meu login e senha</a>
+<div class="mock-link" id="mock-link">https://cyberacademy.demo/cadastro?token=—</div>
+</div>
+</div>
+
+<div class="warn"><i data-lucide="alert-circle"></i><span><strong>Modo demo:</strong> em produção, este e-mail seria enviado automaticamente pelo serviço transacional (Resend, SendGrid ou AWS SES). Aqui, clique no botão acima para simular o clique do aluno no link.</span></div>
+
+<div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+<button class="btn gh" onclick="resendEmail()"><i data-lucide="refresh-cw"></i> Reenviar e-mail</button>
+<button class="btn gh" onclick="location.reload()"><i data-lucide="plus"></i> Novo pedido</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+lucide.createIcons();
+
+const DB={
+  get:(k)=>JSON.parse(localStorage.getItem(k)||'[]'),
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+
+const plans={
+  essencial:{name:'Essencial',price:100,enr:79,courses:1,label:'1 curso ativo'},
+  profissional:{name:'Profissional',price:150,enr:99,courses:5,label:'5 cursos ativos'},
+  corporativo:{name:'Corporativo',price:250,enr:199,courses:7,label:'7 cursos ativos'}
+};
+
+let state={plan:'profissional',method:'pix',payment:null};
+
+// Seleção de plano
+document.querySelectorAll('.pl').forEach(p=>{
+  p.addEventListener('click',()=>{
+    document.querySelectorAll('.pl').forEach(x=>x.classList.remove('on'));
+    p.classList.add('on');
+    state.plan=p.dataset.p;
+    updateTotals();
+  });
+});
+
+// Método de pagamento
+document.querySelectorAll('.pmt').forEach(m=>{
+  m.addEventListener('click',()=>{
+    document.querySelectorAll('.pmt').forEach(x=>x.classList.remove('on'));
+    m.classList.add('on');
+    state.method=m.dataset.m;
+    document.getElementById('pay-pix').style.display=state.method==='pix'?'block':'none';
+    document.getElementById('pay-card').style.display=state.method==='card'?'block':'none';
+    document.getElementById('pay-boleto').style.display=state.method==='boleto'?'block':'none';
+  });
+});
+
+function updateTotals(){
+  const p=plans[state.plan];
+  const total=p.enr+p.price;
+  document.getElementById('t-enr').textContent=`R$ ${p.enr.toFixed(2).replace('.',',')}`;
+  document.getElementById('t-mon').textContent=`R$ ${p.price.toFixed(2).replace('.',',')}`;
+  document.getElementById('t-tot').textContent=`R$ ${total.toFixed(2).replace('.',',')}`;
+  document.getElementById('r-enr').textContent=`R$ ${p.enr.toFixed(2).replace('.',',')}`;
+  document.getElementById('r-mon').textContent=`R$ ${p.price.toFixed(2).replace('.',',')}`;
+  document.getElementById('r-tot').textContent=`R$ ${total.toFixed(2).replace('.',',')}`;
+  document.getElementById('r-plan').textContent=p.name;
+  document.getElementById('r-courses').textContent=p.label;
+}
+
+['name','email','cpf','phone'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{
+    document.getElementById('r-name').textContent=document.getElementById('name').value||'—';
+    document.getElementById('r-email').textContent=document.getElementById('email').value||'—';
+    document.getElementById('r-cpf').textContent=document.getElementById('cpf').value||'—';
+  });
+});
+document.getElementById('course').addEventListener('change',e=>{
+  document.getElementById('r-course').textContent=e.target.options[e.target.selectedIndex].text;
+});
+
+function validate(){
+  const n=document.getElementById('name').value.trim();
+  const e=document.getElementById('email').value.trim();
+  const c=document.getElementById('cpf').value.replace(/\D/g,'');
+  const p=document.getElementById('phone').value.trim();
+  if(n.length<3){alert('Informe seu nome completo (mín. 3 caracteres)');return false}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){alert('E-mail inválido');return false}
+  if(c.length!==11){alert('CPF deve ter 11 dígitos');return false}
+  if(p.length<10){alert('Informe um telefone válido');return false}
+  return true;
+}
+
+function goStep(n){
+  if(n===2&&!validate())return;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s'+n).classList.add('on');
+  document.querySelectorAll('.stp').forEach(s=>{
+    const sn=parseInt(s.dataset.s);
+    s.classList.remove('on','done');
+    if(sn===n)s.classList.add('on');
+    else if(sn<n)s.classList.add('done');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pay(method){
+  document.getElementById('proc').classList.add('on');
+  document.getElementById('pay-pix').style.display='none';
+  document.getElementById('pay-card').style.display='none';
+  document.getElementById('pay-boleto').style.display='none';
+  
+  setTimeout(()=>{
+    const p=plans[state.plan];
+    const total=p.enr+p.price;
+    const token='tk_'+Math.random().toString(36).substring(2,15)+Date.now().toString(36);
+    
+    const payment={
+      id:token,
+      token:token,
+      email:document.getElementById('email').value.trim(),
+      name:document.getElementById('name').value.trim(),
+      cpf:document.getElementById('cpf').value.replace(/\D/g,''),
+      phone:document.getElementById('phone').value.trim(),
+      plan:state.plan,
+      planName:p.name,
+      courseLimit:p.courses,
+      courseLimitLabel:p.label,
+      monthly:p.price,
+      enrollment:p.enr,
+      total:total,
+      method:method,
+      course:document.getElementById('course').value||null,
+      paidAt:new Date().toISOString(),
+      status:'paid',
+      registered:false
+    };
+    
+    const pays=DB.get('ca_payments');
+    pays.push(payment);
+    DB.set('ca_payments',pays);
+    
+    state.payment=payment;
+    document.getElementById('proc').classList.remove('on');
+    document.getElementById('pay-'+method).style.display='block';
+    
+    document.getElementById('sent-email').textContent=payment.email;
+    document.getElementById('mock-name').textContent=payment.name.split(' ')[0];
+    document.getElementById('mock-total').textContent=`R$ ${total.toFixed(2).replace('.',',')}`;
+    document.getElementById('mock-link').textContent=`https://cyberacademy.demo/cadastro.html?token=${token}`;
+    
+    goStep(3);
+    lucide.createIcons();
+  },1800);
+}
+
+function goCadastro(ev){
+  ev.preventDefault();
+  window.location.href='cadastro.html?token='+state.payment.token;
+}
+
+function resendEmail(){
+  alert('E-mail reenviado para '+state.payment.email);
+}
+
+// Timer Pix
+let pixT=900;
+setInterval(()=>{
+  if(pixT>0){pixT--;const m=Math.floor(pixT/60),s=pixT%60;document.getElementById('pix-t').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+},1000);
+
+// Formatação cartão
+document.getElementById('cc-num').addEventListener('input',e=>{
+  let v=e.target.value.replace(/\D/g,'').substring(0,16);
+  e.target.value=v.replace(/(\d{4})(?=\d)/g,'$1 ');
+});
+document.getElementById('cc-exp').addEventListener('input',e=>{
+  let v=e.target.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2);
+  e.target.value=v;
+});
+document.getElementById('cpf').addEventListener('input',e=>{
+  e.target.value=e.target.value.replace(/\D/g,'').substring(0,11);
+});
+
+updateTotals();
+</script>
+</body>
+</html>

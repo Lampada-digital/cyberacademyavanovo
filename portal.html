@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Portal do Aluno</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0f14;--bg2:#111820;--bg3:#151d28;--bg4:#1a2332;--input:#0f1620;--teal:#00a8b5;--glow:rgba(0,168,181,.15);--txt:#fff;--txt2:#a0aec0;--txt3:#6b7a8d;--bd:#2a3544;--ok:#00d4a0;--warn:#ffb84d;--err:#ef4444;--grad:linear-gradient(135deg,#00a8b5,#00d4e0)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--teal);border-radius:4px}
+.logo-svg{width:40px;height:40px}
+
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at top,#1a2332 0%,#0a0f14 70%)}
+.login-box{background:var(--bg3);border:1.5px solid var(--bd);border-radius:16px;padding:2.5rem;max-width:440px;width:100%}
+.login-box .logo{text-align:center;margin-bottom:2rem}
+.login-box .logo svg{width:56px;height:56px;margin-bottom:.5rem}
+.login-box h1{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;text-align:center;margin-bottom:.5rem}
+.login-box .sub{text-align:center;color:var(--txt2);font-size:.9rem;margin-bottom:2rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--txt2)}
+.fg input{width:100%;padding:.85rem 1rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:.95rem;font-family:inherit}
+.fg input:focus{outline:none;border-color:var(--teal)}
+.btn{padding:.9rem 1.5rem;border-radius:8px;font-weight:600;border:none;cursor:pointer;font-size:.95rem;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;transition:.2s;text-decoration:none}
+.btn i{width:16px;height:16px}
+.pri{background:var(--grad);color:var(--bg);box-shadow:0 4px 14px var(--glow)}
+.pri:hover{transform:translateY(-2px)}
+.sec{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+.gh{background:var(--bg4);color:var(--txt2);border:1px solid var(--bd)}
+.blk{width:100%}
+.err{background:rgba(239,68,68,.1);border:1px solid var(--err);color:var(--err);padding:.75rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem;display:none}
+.err.on{display:block}
+.hint{background:var(--bg4);border:1px solid var(--bd);border-radius:8px;padding:.75rem;font-size:.8rem;color:var(--txt2);margin-top:1rem}
+.hint strong{color:var(--teal)}
+
+/* APP */
+.app{display:none;min-height:100vh}
+.app.on{display:flex}
+.side{width:240px;background:var(--bg2);border-right:1px solid var(--bd);position:fixed;height:100vh;padding:1.5rem 0;overflow-y:auto}
+.side-h{padding:0 1.5rem 1.5rem;border-bottom:1px solid var(--bd);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.side-h .lt{font-family:'Space Grotesk',sans-serif;font-size:1rem;color:var(--teal);font-weight:700}
+.side-h .ls{font-size:.6rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase}
+.nav{padding:0 .75rem}
+.nav-t{font-size:.7rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;padding:0 .75rem;margin:.75rem 0 .5rem;font-weight:600}
+.nv{display:flex;align-items:center;gap:.6rem;padding:.65rem .75rem;border-radius:8px;color:var(--txt2);text-decoration:none;font-size:.9rem;cursor:pointer;transition:.2s;margin-bottom:.15rem}
+.nv:hover{background:var(--bg4);color:var(--txt)}
+.nv.on{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.nv i{width:16px;height:16px}
+.nv .bdg{margin-left:auto;background:var(--teal);color:var(--bg);padding:.1rem .4rem;border-radius:100px;font-size:.65rem;font-weight:700}
+.side-f{padding:1rem .75rem;border-top:1px solid var(--bd);margin-top:1rem}
+.uc{display:flex;align-items:center;gap:.6rem;padding:.6rem;background:var(--bg4);border-radius:8px;margin-bottom:.6rem}
+.uc .av{width:36px;height:36px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.85rem}
+.uc .n{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uc .p{font-size:.7rem;color:var(--teal)}
+.main{margin-left:240px;flex:1}
+.top{background:var(--bg2);border-bottom:1px solid var(--bd);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.top h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700}
+.top .s{font-size:.8rem;color:var(--txt3)}
+.ct{padding:2rem;max-width:1200px}
+.pg{display:none}.pg.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.st{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem}
+.st .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.st .ic{width:36px;height:36px;background:var(--glow);border:1px solid var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.st .ic i{width:18px;height:18px}
+.st .l{font-size:.8rem;color:var(--txt3)}
+.st .v{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;color:var(--teal)}
+.st .c{font-size:.75rem;color:var(--ok)}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.sh h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem}
+.sh p{font-size:.85rem;color:var(--txt3)}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+.cc{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem;cursor:pointer;transition:.3s;position:relative}
+.cc:hover{border-color:var(--teal);transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.cc-h{display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem}
+.cc-i{width:44px;height:44px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.cc-i i{width:22px;height:22px}
+.cc-s{padding:.25rem .6rem;border-radius:100px;font-size:.7rem;font-weight:600}
+.cc-s.on{background:rgba(0,212,160,.15);color:var(--ok);border:1px solid var(--ok)}
+.cc-s.done{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.cc h4{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin-bottom:.4rem}
+.cc .d{font-size:.85rem;color:var(--txt3);margin-bottom:1rem}
+.pb{background:var(--bg4);border-radius:100px;height:6px;overflow:hidden;margin-bottom:.4rem}
+.pb .f{height:100%;background:var(--grad);border-radius:100px;transition:.5s}
+.pt{display:flex;justify-content:space-between;font-size:.75rem;color:var(--txt3)}
+.add-c{background:var(--bg3);border:2px dashed var(--bd);border-radius:12px;padding:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.3s;text-align:center;min-height:200px}
+.add-c:hover{border-color:var(--teal);background:var(--glow)}
+.add-c .ic{width:48px;height:48px;background:var(--bg4);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--teal);margin-bottom:.75rem}
+.add-c .ic i{width:24px;height:24px}
+.add-c h4{font-family:'Space Grotesk',sans-serif;margin-bottom:.25rem}
+.add-c p{font-size:.8rem;color:var(--txt3)}
+.add-c.dis{opacity:.5;cursor:not-allowed}
+.empty{text-align:center;padding:3rem;color:var(--txt3);grid-column:1/-1}
+.empty i{width:48px;height:48px;margin-bottom:.75rem;opacity:.5}
+.empty h4{font-family:'Space Grotesk',sans-serif;color:var(--txt2);margin-bottom:.5rem}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);z-index:100;align-items:center;justify-content:center;padding:2rem}
+.modal.on{display:flex}
+.m-c{background:var(--bg2);border:1.5px solid var(--bd);border-radius:16px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto}
+.m-h{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.m-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem}
+.m-x{background:none;border:none;color:var(--txt2);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.m-x:hover{background:var(--bg4);color:var(--teal)}
+.m-x i{width:18px;height:18px}
+.m-b{padding:1.5rem}
+.cl-item{background:var(--bg4);border:1.5px solid var(--bd);border-radius:10px;padding:1rem;margin-bottom:.6rem;display:flex;align-items:center;gap:1rem;cursor:pointer;transition:.2s}
+.cl-item:hover{border-color:var(--teal)}
+.cl-item.on{border-color:var(--teal);background:var(--glow)}
+.cl-i{width:36px;height:36px;background:var(--glow);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.cl-i i{width:18px;height:18px}
+.cl-n{flex:1}
+.cl-n strong{display:block;font-size:.95rem}
+.cl-n small{color:var(--txt3);font-size:.8rem}
+
+/* PLAYER */
+.pl-hd{background:var(--bg4);border-radius:10px;padding:1.25rem;margin-bottom:1.25rem;text-align:center}
+.pl-hd .vid{aspect-ratio:16/9;background:linear-gradient(135deg,#1a2332,#0a0f14);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.pl-hd .play{width:56px;height:56px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);cursor:pointer;transition:.2s}
+.pl-hd .play:hover{transform:scale(1.1)}
+.pl-hd h4{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;margin-bottom:.25rem}
+.pl-hd p{color:var(--txt3);font-size:.85rem}
+.ls-item{padding:.75rem 1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:.75rem;cursor:pointer;transition:.2s;font-size:.9rem}
+.ls-item:hover{background:var(--bg4)}
+.ls-item.on{background:var(--glow);border-left:3px solid var(--teal)}
+.ls-item.done{opacity:.6}
+.ls-n{width:28px;height:28px;background:var(--bg4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+.ls-item.done .ls-n{background:var(--ok);color:var(--bg)}
+.ls-item.on .ls-n{background:var(--teal);color:var(--bg)}
+.ls-n i{width:14px;height:14px}
+.ls-i{flex:1}
+.ls-i strong{display:block;font-size:.9rem}
+.ls-i small{color:var(--txt3);font-size:.75rem}
+
+.c-card{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;display:flex;align-items:center;gap:1rem;margin-bottom:.75rem}
+.c-ic{width:56px;height:56px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.c-ic i{width:24px;height:24px}
+.c-n{flex:1}
+.c-n strong{display:block;font-family:'Space Grotesk',sans-serif;margin-bottom:.25rem}
+.c-n .code{font-family:'Courier New',monospace;font-size:.8rem;color:var(--teal);margin-bottom:.25rem}
+.c-n small{color:var(--txt3);font-size:.8rem}
+
+.plan-h{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.plan-h .av{width:64px;height:64px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:1.5rem}
+.plan-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin-bottom:.25rem}
+.plan-h p{color:var(--txt2);font-size:.9rem}
+.plan-h .bdg{display:inline-flex;align-items:center;gap:.4rem;background:var(--glow);border:1px solid var(--teal);color:var(--teal);padding:.3rem .75rem;border-radius:100px;font-size:.75rem;font-weight:600;margin-top:.5rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.p-sec{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem}
+.p-sec h4{font-family:'Space Grotesk',sans-serif;font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.p-sec h4 i{width:18px;height:18px;color:var(--teal)}
+.p-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--bd);font-size:.9rem}
+.p-row:last-child{border:none}
+.p-row .l{color:var(--txt3)}
+.p-row .v{font-weight:600}
+.p-row .v.ok{color:var(--ok)}
+
+.toast{position:fixed;top:1.5rem;right:1.5rem;background:var(--bg3);border:1.5px solid var(--teal);border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:center;gap:.6rem;z-index:1000;animation:slide .3s;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:400px}
+.toast.ok{border-color:var(--ok)}
+.toast.err{border-color:var(--err)}
+.toast i{width:20px;height:20px;flex-shrink:0}
+.toast.ok i{color:var(--ok)}
+.toast.err i{color:var(--err)}
+.toast span{font-size:.9rem}
+@keyframes slide{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+
+@media(max-width:900px){.side{transform:translateX(-100%);transition:.3s}.side.open{transform:none}.main{margin-left:0}.grid2{grid-template-columns:1fr}.cg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="logo">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text><text x="50" y="18" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">CYBER ACADEMY</text><text x="50" y="92" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">EST. 2022</text></svg>
+</div>
+<h1>Portal do Aluno</h1>
+<p class="sub">Acesse suas aulas, projetos e certificados</p>
+<div class="err" id="login-err"></div>
+<form id="login-form" onsubmit="doLogin(event)">
+<div class="fg"><label>E-mail</label><input type="email" id="li-email" required placeholder="seu@email.com"></div>
+<div class="fg"><label>Senha</label><input type="password" id="li-pass" required placeholder="Sua senha"></div>
+<button type="submit" class="btn pri blk"><i data-lucide="log-in"></i> Entrar no portal</button>
+</form>
+<div class="hint">
+<strong>Modo demo:</strong> após pagar no checkout e ativar pelo link do e-mail, faça login com o e-mail e a senha que você criou.
+</div>
+<div style="text-align:center;margin-top:1rem">
+<a href="checkout.html" class="btn gh" style="width:auto;padding:.6rem 1rem;font-size:.85rem">Ainda não pagou? Ir para checkout</a>
+</div>
+</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+<aside class="side" id="side">
+<div class="side-h">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text></svg>
+<div><div class="lt">Cyber Academy</div><div class="ls">Portal do Aluno</div></div>
+</div>
+<nav class="nav">
+<div class="nav-t">Principal</div>
+<a class="nv on" data-p="dash"><i data-lucide="layout-dashboard"></i> Visão geral</a>
+<a class="nv" data-p="courses"><i data-lucide="book-open"></i> Minhas aulas <span class="bdg" id="nv-c">0</span></a>
+<a class="nv" data-p="certs"><i data-lucide="award"></i> Certificados <span class="bdg" id="nv-cc">0</span></a>
+<div class="nav-t">Conta</div>
+<a class="nv" data-p="plan"><i data-lucide="crown"></i> Meu plano</a>
+<a class="nv" data-p="profile"><i data-lucide="user-circle"></i> Perfil</a>
+</nav>
+<div class="side-f">
+<div class="uc"><div class="av" id="u-av">--</div><div style="flex:1;min-width:0"><div class="n" id="u-n">--</div><div class="p" id="u-p">--</div></div></div>
+<button class="btn gh blk" onclick="logout()" style="font-size:.85rem;padding:.6rem"><i data-lucide="log-out"></i> Sair</button>
+</div>
+</aside>
+
+<main class="main">
+<div class="top">
+<div><h2 id="pg-t">Visão geral</h2><div class="s" id="pg-s">Seu painel pessoal</div></div>
+<a href="index.html" class="btn gh" style="padding:.5rem 1rem;font-size:.85rem"><i data-lucide="external-link"></i> Site</a>
+</div>
+<div class="ct">
+
+<div class="pg on" id="pg-dash">
+<div class="stats">
+<div class="st"><div class="h"><div class="ic"><i data-lucide="book-open"></i></div><span class="l">Cursos ativos</span></div><div class="v" id="s-ac">0</div><div class="c">de <span id="s-cl">0</span> liberados</div></div>
+<div class="st"><div class="h"><div class="ic"><i data-lucide="play-circle"></i></div><span class="l">Aulas concluídas</span></div><div class="v" id="s-lw">0</div><div class="c">no total</div></div>
+<div class="st"><div class="h"><div class="ic"><i data-lucide="award"></i></div><span class="l">Certificados</span></div><div class="v" id="s-cc">0</div><div class="c">emitidos</div></div>
+<div class="st"><div class="h"><div class="ic"><i data-lucide="flame"></i></div><span class="l">Sequência</span></div><div class="v" id="s-st">0</div><div class="c">dias seguidos</div></div>
+</div>
+<div class="sh"><div><h3>Continue de onde parou</h3><p>Retome suas aulas</p></div><button class="btn sec" onclick="navTo('courses')" style="padding:.5rem 1rem;font-size:.85rem">Ver todos <i data-lucide="arrow-right"></i></button></div>
+<div class="cg" id="dash-courses"></div>
+</div>
+
+<div class="pg" id="pg-courses">
+<div class="sh"><div><h3>Minhas aulas</h3><p id="courses-info">0 de 0 cursos ativos</p></div></div>
+<div class="cg" id="all-courses"></div>
+</div>
+
+<div class="pg" id="pg-certs">
+<div class="sh"><div><h3>Certificados</h3><p>Emitidos automaticamente ao concluir 100% das aulas</p></div></div>
+<div id="certs-list"></div>
+</div>
+
+<div class="pg" id="pg-plan">
+<div class="plan-h">
+<div class="av" id="pl-av">--</div>
+<div><h3 id="pl-n">--</h3><p id="pl-e">--</p><div class="bdg"><i data-lucide="crown" style="width:14px;height:14px"></i> <span id="pl-b">--</span></div></div>
+</div>
+<div class="grid2">
+<div class="p-sec"><h4><i data-lucide="receipt"></i> Assinatura</h4>
+<div class="p-row"><span class="l">Plano</span><span class="v" id="pl-pn">--</span></div>
+<div class="p-row"><span class="l">Mensalidade</span><span class="v" id="pl-mo">--</span></div>
+<div class="p-row"><span class="l">Matrícula paga</span><span class="v" id="pl-en">--</span></div>
+<div class="p-row"><span class="l">Status</span><span class="v ok">✓ Ativo</span></div>
+</div>
+<div class="p-sec"><h4><i data-lucide="book-open"></i> Cursos</h4>
+<div class="p-row"><span class="l">Limite do plano</span><span class="v" id="pl-lm">--</span></div>
+<div class="p-row"><span class="l">Ativos agora</span><span class="v" id="pl-ac">--</span></div>
+<div class="p-row"><span class="l">Disponíveis</span><span class="v" id="pl-dp">--</span></div>
+</div>
+</div>
+</div>
+
+<div class="pg" id="pg-profile">
+<div class="plan-h">
+<div class="av" id="pf-av">--</div>
+<div><h3 id="pf-n">--</h3><p id="pf-e">--</p><div class="bdg"><i data-lucide="calendar" style="width:14px;height:14px"></i> Membro desde <span id="pf-s">--</span></div></div>
+</div>
+<div class="grid2">
+<div class="p-sec"><h4><i data-lucide="user"></i> Dados pessoais</h4>
+<div class="p-row"><span class="l">Nome</span><span class="v" id="pf-dn">--</span></div>
+<div class="p-row"><span class="l">E-mail</span><span class="v" id="pf-de">--</span></div>
+<div class="p-row"><span class="l">CPF</span><span class="v" id="pf-dc">--</span></div>
+<div class="p-row"><span class="l">Telefone</span><span class="v" id="pf-dp">--</span></div>
+</div>
+<div class="p-sec"><h4><i data-lucide="activity"></i> Atividade</h4>
+<div class="p-row"><span class="l">Aulas concluídas</span><span class="v" id="pf-al">--</span></div>
+<div class="p-row"><span class="l">Certificados</span><span class="v" id="pf-ac">--</span></div>
+<div class="p-row"><span class="l">Último acesso</span><span class="v" id="pf-la">--</span></div>
+</div>
+</div>
+</div>
+
+</div>
+</main>
+</div>
+
+<!-- MODAL ADD COURSE -->
+<div class="modal" id="add-modal">
+<div class="m-c">
+<div class="m-h"><h3>Adicionar curso ativo</h3><button class="m-x" onclick="closeM('add-modal')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<p style="color:var(--txt2);margin-bottom:1rem;font-size:.9rem">Você tem <strong style="color:var(--teal)" id="slots">0</strong> vaga(s) disponível(is) no seu plano.</p>
+<div id="avail-list"></div>
+<div style="display:flex;gap:.75rem;margin-top:1.25rem">
+<button class="btn gh" onclick="closeM('add-modal')">Cancelar</button>
+<button class="btn pri" id="confirm-add" disabled onclick="confirmAdd()"><i data-lucide="plus"></i> Ativar curso</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- MODAL PLAYER -->
+<div class="modal" id="player-modal">
+<div class="m-c" style="max-width:900px">
+<div class="m-h"><h3 id="pl-title">Curso</h3><button class="m-x" onclick="closeM('player-modal')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<div class="pl-hd">
+<div class="vid"><div class="play" onclick="togglePlay()"><i data-lucide="play" id="play-icon" style="width:24px;height:24px"></i></div></div>
+<h4 id="pl-lesson">—</h4>
+<p id="pl-meta">—</p>
+<div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem">
+<button class="btn pri" onclick="markDone()" style="padding:.6rem 1rem;font-size:.85rem"><i data-lucide="check-circle"></i> Marcar concluída</button>
+<button class="btn sec" onclick="nextLesson()" style="padding:.6rem 1rem;font-size:.85rem">Próxima <i data-lucide="skip-forward"></i></button>
+</div>
+</div>
+<h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:.75rem">Grade curricular</h4>
+<div id="lessons-list" style="max-height:300px;overflow-y:auto;border:1px solid var(--bd);border-radius:8px"></div>
+</div>
+</div>
+</div>
+
+<script>
+const DB={get:(k)=>JSON.parse(localStorage.getItem(k)||'[]'),set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),getObj:(k)=>JSON.parse(localStorage.getItem(k)||'null'),setObj:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+
+const catalog=[
+{id:1,title:"Python do Zero ao Avançado",icon:"code-2",cat:"desenvolvimento",dur:"120h",les:48,mod:8,lvl:"Iniciante ao Avançado",desc:"Domine Python com IA e automação"},
+{id:2,title:"SQL & NoSQL Completo",icon:"database",cat:"dados",dur:"80h",les:36,mod:6,lvl:"Iniciante ao Avançado",desc:"Bancos de dados relacionais e não-relacionais"},
+{id:3,title:"Front-end Moderno",icon:"layout",cat:"desenvolvimento",dur:"100h",les:42,mod:7,lvl:"Iniciante ao Avançado",desc:"HTML, CSS, JavaScript, React e TypeScript"},
+{id:4,title:"Back-end & Arquitetura",icon:"server",cat:"desenvolvimento",dur:"110h",les:45,mod:8,lvl:"Intermediário ao Avançado",desc:"APIs, microsserviços e arquitetura distribuída"},
+{id:5,title:"Azure & DevOps",icon:"cloud",cat:"cloud",dur:"90h",les:38,mod:7,lvl:"Intermediário ao Avançado",desc:"Cloud, CI/CD, containers e IaC"},
+{id:6,title:"IA Generativa & Machine Learning",icon:"brain",cat:"ia",dur:"95h",les:40,mod:7,lvl:"Intermediário ao Avançado",desc:"RAG, agentes e ML aplicado"},
+{id:7,title:"Lógica de Programação & POO",icon:"lightbulb",cat:"desenvolvimento",dur:"60h",les:28,mod:5,lvl:"Iniciante",desc:"Fundamentos e programação orientada a objetos"},
+{id:8,title:"Análise de Dados com Python",icon:"bar-chart-3",cat:"dados",dur:"75h",les:32,mod:6,lvl:"Intermediário",desc:"Pandas, NumPy e visualização"},
+{id:9,title:"Git & GitHub Profissional",icon:"git-branch",cat:"desenvolvimento",dur:"40h",les:20,mod:4,lvl:"Iniciante ao Intermediário",desc:"Controle de versão e colaboração"},
+{id:10,title:"Empreendedorismo Tech",icon:"rocket",cat:"negocios",dur:"50h",les:24,mod:5,lvl:"Todos os níveis",desc:"Criar, validar e escalar startups"},
+{id:11,title:"Finanças para Tech",icon:"trending-up",cat:"negocios",dur:"45h",les:22,mod:4,lvl:"Intermediário",desc:"Gestão financeira e valuation"},
+{id:12,title:"Power BI & Business Intelligence",icon:"pie-chart",cat:"dados",dur:"65h",les:28,mod:5,lvl:"Iniciante ao Intermediário",desc:"Dashboards e análise de negócios"}
+];
+
+function genLessons(c){
+  const arr=[];const mods=["Fundamentos","Conceitos essenciais","Prática guiada","Tópicos avançados","Casos reais","Otimização","Projeto final","Deploy"];
+  for(let m=0;m<c.mod;m++){
+    const per=Math.ceil(c.les/c.mod);
+    for(let l=0;l<per&&arr.length<c.les;l++){
+      const min=Math.floor(Math.random()*15)+5;
+      arr.push({id:`l${arr.length+1}`,mod:mods[m]||`Módulo ${m+1}`,title:`Aula ${arr.length+1}: ${["Introdução","Conceitos","Sintaxe","Exercício","Projeto","Revisão"][l%6]} de ${mods[m]||'módulo'}`,dur:`${min}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`});
+    }
+  }
+  return arr;
+}
+
+let user=null;let currentCourse=null;let currentLessons=[];let currentIdx=0;let selectedAdd=null;
+
+function doLogin(e){
+  e.preventDefault();
+  const em=document.getElementById('li-email').value.trim().toLowerCase();
+  const pw=document.getElementById('li-pass').value;
+  const students=DB.get('ca_students');
+  const s=students.find(x=>x.email.toLowerCase()===em);
+  const err=document.getElementById('login-err');
+  
+  if(!s){err.textContent='Nenhum cadastro encontrado para este e-mail. Conclua o checkout e ative pelo link do e-mail.';err.classList.add('on');return}
+  if(s.password!==pw){err.textContent='Senha incorreta. Verifique e tente novamente.';err.classList.add('on');return}
+  
+  s.lastAccess=new Date().toISOString();
+  const idx=students.findIndex(x=>x.email===s.email);
+  students[idx]=s;DB.set('ca_students',students);
+  DB.setObj('ca_session',{email:s.email,at:new Date().toISOString()});
+  
+  enterApp(s);
+}
+
+function enterApp(s){
+  user=s;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('on');
+  const ini=s.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('u-av').textContent=ini;
+  document.getElementById('u-n').textContent=s.name;
+  document.getElementById('u-p').textContent=s.planName;
+  navTo('dash');
+  lucide.createIcons();
+}
+
+function logout(){
+  if(!confirm('Sair do portal?'))return;
+  localStorage.removeItem('ca_session');
+  location.reload();
+}
+
+document.querySelectorAll('.nv').forEach(n=>n.addEventListener('click',()=>navTo(n.dataset.p)));
+
+function navTo(p){
+  document.querySelectorAll('.nv').forEach(n=>n.classList.remove('on'));
+  document.querySelector(`.nv[data-p="${p}"]`)?.classList.add('on');
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-'+p).classList.add('on');
+  const t={dash:['Visão geral','Seu painel pessoal'],courses:['Minhas aulas','Gerencie seus cursos'],certs:['Certificados','Verificação digital'],plan:['Meu plano','Detalhes da assinatura'],profile:['Perfil','Seus dados']};
+  document.getElementById('pg-t').textContent=t[p][0];
+  document.getElementById('pg-s').textContent=t[p][1];
+  if(p==='dash')renderDash();
+  if(p==='courses')renderCourses();
+  if(p==='certs')renderCerts();
+  if(p==='plan')renderPlan();
+  if(p==='profile')renderProfile();
+  lucide.createIcons();
+}
+
+function getProgress(cid){return user.progress[cid]||{}}
+function getCompleted(cid){return Object.values(getProgress(cid)).filter(v=>v).length}
+
+function renderDash(){
+  const ac=user.activeCourses.length;
+  let total=0;
+  user.activeCourses.forEach(cid=>total+=getCompleted(cid));
+  document.getElementById('s-ac').textContent=ac;
+  document.getElementById('s-cl').textContent=user.courseLimit;
+  document.getElementById('s-lw').textContent=total;
+  document.getElementById('s-cc').textContent=user.certificates.length;
+  document.getElementById('s-st').textContent=user.streak||0;
+  document.getElementById('nv-c').textContent=ac;
+  document.getElementById('nv-cc').textContent=user.certificates.length;
+  
+  const grid=document.getElementById('dash-courses');
+  if(ac===0){
+    grid.innerHTML=`<div class="empty"><i data-lucide="book-open"></i><h4>Nenhum curso ativo</h4><p>Adicione seu primeiro curso para começar</p><button class="btn pri" style="margin-top:1rem" onclick="openAdd()"><i data-lucide="plus"></i> Adicionar curso</button></div>`;
+  }else{
+    grid.innerHTML=user.activeCourses.slice(0,3).map(cid=>courseCard(cid)).join('');
+  }
+  lucide.createIcons();
+}
+
+function courseCard(cid){
+  const c=catalog.find(x=>x.id===cid);if(!c)return'';
+  const done=getCompleted(cid);
+  const pct=Math.round((done/c.les)*100);
+  const isDone=pct===100;
+  return`<div class="cc" onclick="openPlayer(${cid})">
+    <div class="cc-h"><div class="cc-i"><i data-lucide="${c.icon}"></i></div><span class="cc-s ${isDone?'done':'on'}">${isDone?'Concluído':'Ativo'}</span></div>
+    <h4>${c.title}</h4><p class="d">${c.dur} · ${c.les} aulas</p>
+    <div class="pb"><div class="f" style="width:${pct}%"></div></div>
+    <div class="pt"><span>${pct}%</span><span>${done}/${c.les} aulas</span></div>
+  </div>`;
+}
+
+function renderCourses(){
+  const ac=user.activeCourses.length;
+  const av=user.courseLimit-ac;
+  document.getElementById('courses-info').textContent=`${ac} de ${user.courseLimit} cursos ativos · ${av} disponível(is)`;
+  let html=user.activeCourses.map(cid=>courseCard(cid)).join('');
+  if(av>0)html+=`<div class="add-c" onclick="openAdd()"><div class="ic"><i data-lucide="plus"></i></div><h4>Adicionar curso</h4><p>${av} vaga(s) disponível(is)</p></div>`;
+  else html+=`<div class="add-c dis"><div class="ic"><i data-lucide="lock"></i></div><h4>Limite atingido</h4><p>Conclua um curso para liberar vaga</p></div>`;
+  document.getElementById('all-courses').innerHTML=html;
+  lucide.createIcons();
+}
+
+function openAdd(){
+  const av=user.courseLimit-user.activeCourses.length;
+  if(av<=0)return;
+  document.getElementById('slots').textContent=av;
+  selectedAdd=null;
+  document.getElementById('confirm-add').disabled=true;
+  const avail=catalog.filter(c=>!user.activeCourses.includes(c.id));
+  document.getElementById('avail-list').innerHTML=avail.map(c=>`
+    <div class="cl-item" data-id="${c.id}" onclick="selAdd(${c.id})">
+      <div class="cl-i"><i data-lucide="${c.icon}"></i></div>
+      <div class="cl-n"><strong>${c.title}</strong><small>${c.dur} · ${c.les} aulas · ${c.lvl}</small></div>
+    </div>`).join('');
+  document.getElementById('add-modal').classList.add('on');
+  lucide.createIcons();
+}
+
+function selAdd(id){
+  selectedAdd=id;
+  document.querySelectorAll('.cl-item').forEach(i=>i.classList.toggle('on',parseInt(i.dataset.id)===id));
+  document.getElementById('confirm-add').disabled=false;
+}
+
+function confirmAdd(){
+  if(!selectedAdd)return;
+  user.activeCourses.push(selectedAdd);
+  user.progress[selectedAdd]={};
+  saveUser();
+  closeM('add-modal');
+  toast(`Curso ativado com sucesso!`,'ok');
+  renderCourses();
+}
+
+function openPlayer(cid){
+  const c=catalog.find(x=>x.id===cid);if(!c)return;
+  currentCourse=c;
+  currentLessons=genLessons(c);
+  const prog=user.progress[cid]||{};
+  currentIdx=currentLessons.findIndex(l=>!prog[l.id]);
+  if(currentIdx<0)currentIdx=0;
+  document.getElementById('pl-title').textContent=c.title;
+  renderLessons();
+  loadLesson(currentIdx);
+  document.getElementById('player-modal').classList.add('on');
+}
+
+function renderLessons(){
+  const prog=user.progress[currentCourse.id]||{};
+  document.getElementById('lessons-list').innerHTML=currentLessons.map((l,i)=>{
+    const done=prog[l.id];
+    return`<div class="ls-item ${done?'done':''} ${i===currentIdx?'on':''}" onclick="loadLesson(${i})">
+      <div class="ls-n">${done?'<i data-lucide="check"></i>':i+1}</div>
+      <div class="ls-i"><strong>${l.title}</strong><small>${l.mod} · ${l.dur}</small></div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function loadLesson(i){
+  currentIdx=i;
+  const l=currentLessons[i];
+  document.getElementById('pl-lesson').textContent=l.title;
+  document.getElementById('pl-meta').textContent=`${l.mod} · ${l.dur}`;
+  renderLessons();
+}
+
+function togglePlay(){
+  const ic=document.getElementById('play-icon');
+  if(ic.getAttribute('data-lucide')==='play'){ic.setAttribute('data-lucide','pause')}else{ic.setAttribute('data-lucide','play')}
+  lucide.createIcons();
+}
+
+function markDone(){
+  if(!user.progress[currentCourse.id])user.progress[currentCourse.id]={};
+  const l=currentLessons[currentIdx];
+  if(user.progress[currentCourse.id][l.id]){toast('Aula já concluída','err');return}
+  user.progress[currentCourse.id][l.id]=true;
+  user.streak=(user.streak||0)+1;
+  saveUser();
+  toast('Aula concluída! Progresso salvo.','ok');
+  renderLessons();
+  
+  const allDone=currentLessons.every(x=>user.progress[currentCourse.id][x.id]);
+  if(allDone){
+    setTimeout(()=>emitCert(currentCourse.id),800);
+  }
+}
+
+function nextLesson(){
+  if(currentIdx<currentLessons.length-1)loadLesson(currentIdx+1);
+  else toast('Última aula do curso!','ok');
+}
+
+function emitCert(cid){
+  const c=catalog.find(x=>x.id===cid);
+  if(user.certificates.find(x=>x.courseId===cid))return;
+  const code=`CA-2026-${Math.floor(Math.random()*9000)+1000}`;
+  user.certificates.push({code,courseId:cid,courseTitle:c.title,date:new Date().toISOString(),hours:parseInt(c.dur)});
+  saveUser();
+  toast(`🎉 Certificado emitido: ${code}`,'ok');
+  closeM('player-modal');
+  renderDash();
+}
+
+function renderCerts(){
+  const list=document.getElementById('certs-list');
+  if(!user.certificates.length){
+    list.innerHTML=`<div class="empty"><i data-lucide="award"></i><h4>Nenhum certificado</h4><p>Conclua 100% das aulas de um curso para emitir</p></div>`;
+    return;
+  }
+  list.innerHTML=user.certificates.map(c=>`
+    <div class="c-card">
+      <div class="c-ic"><i data-lucide="award"></i></div>
+      <div class="c-n"><strong>${c.courseTitle}</strong><div class="code">${c.code} · ${c.hours}h</div><small>Emitido em ${new Date(c.date).toLocaleDateString('pt-BR')}</small></div>
+      <a href="certificados.html?code=${c.code}" class="btn sec" style="padding:.5rem 1rem;font-size:.85rem"><i data-lucide="external-link"></i> Validar</a>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function renderPlan(){
+  const ini=user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('pl-av').textContent=ini;
+  document.getElementById('pl-n').textContent=user.name;
+  document.getElementById('pl-e').textContent=user.email;
+  document.getElementById('pl-b').textContent=user.planName;
+  document.getElementById('pl-pn').textContent=user.planName;
+  document.getElementById('pl-mo').textContent=`R$ ${user.monthly.toFixed(2).replace('.',',')}/mês`;
+  document.getElementById('pl-en').textContent=`R$ ${user.enrollment.toFixed(2).replace('.',',')}`;
+  document.getElementById('pl-lm').textContent=user.courseLimit;
+  document.getElementById('pl-ac').textContent=user.activeCourses.length;
+  document.getElementById('pl-dp').textContent=user.courseLimit-user.activeCourses.length;
+}
+
+function renderProfile(){
+  const ini=user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('pf-av').textContent=ini;
+  document.getElementById('pf-n').textContent=user.name;
+  document.getElementById('pf-e').textContent=user.email;
+  document.getElementById('pf-s').textContent=new Date(user.createdAt).toLocaleDateString('pt-BR');
+  let total=0;user.activeCourses.forEach(cid=>total+=getCompleted(cid));
+  document.getElementById('pf-dn').textContent=user.name;
+  document.getElementById('pf-de').textContent=user.email;
+  document.getElementById('pf-dc').textContent=user.cpf;
+  document.getElementById('pf-dp').textContent=user.phone||'—';
+  document.getElementById('pf-al').textContent=total;
+  document.getElementById('pf-ac').textContent=user.certificates.length;
+  document.getElementById('pf-la').textContent=new Date(user.lastAccess).toLocaleString('pt-BR');
+}
+
+function saveUser(){
+  const students=DB.get('ca_students');
+  const idx=students.findIndex(s=>s.email===user.email);
+  if(idx>=0)students[idx]=user;
+  DB.set('ca_students',students);
+}
+
+function closeM(id){document.getElementById(id).classList.remove('on')}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
+
+function toast(msg,type='ok'){
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<i data-lucide="${type==='ok'?'check-circle':'alert-circle'}"></i><span>${msg}</span>`;
+  document.body.appendChild(t);
+  lucide.createIcons();
+  setTimeout(()=>t.remove(),4000);
+}
+
+// Auto-login se sessão ativa
+const sess=DB.getObj('ca_session');
+if(sess){
+  const students=DB.get('ca_students');
+  const s=students.find(x=>x.email===sess.email);
+  if(s)enterApp(s);
+}
+
+// Pré-preencher email se vier da URL
+const urlEmail=new URLSearchParams(location.search).get('email');
+if(urlEmail)document.getElementById('li-email').value=urlEmail;
+
+lucide.createIcons();
+</script>
+</body>
+</html>

@@ -1,0 +1,1580 @@
+<file_write path="professor.html">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Portal do Professor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0f14;--bg2:#111820;--bg3:#151d28;--bg4:#1a2332;--input:#0f1620;--teal:#00a8b5;--tealL:#00d4e0;--glow:rgba(0,168,181,.15);--txt:#fff;--txt2:#a0aec0;--txt3:#6b7a8d;--bd:#2a3544;--ok:#00d4a0;--warn:#ffb84d;--err:#ef4444;--grad:linear-gradient(135deg,#00a8b5,#00d4e0)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--teal);border-radius:4px}
+.logo-svg{width:40px;height:40px}
+
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at top,#1a2332 0%,#0a0f14 70%)}
+.login-box{background:var(--bg3);border:1.5px solid var(--bd);border-radius:16px;padding:2.5rem;max-width:480px;width:100%}
+.login-box .logo{text-align:center;margin-bottom:2rem}
+.login-box .logo svg{width:56px;height:56px;margin-bottom:.5rem}
+.login-box h1{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;text-align:center;margin-bottom:.5rem}
+.login-box .sub{text-align:center;color:var(--txt2);font-size:.9rem;margin-bottom:2rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--txt2)}
+.fg input,.fg select,.fg textarea{width:100%;padding:.85rem 1rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:.95rem;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--teal)}
+.fg textarea{resize:vertical;min-height:80px}
+.btn{padding:.9rem 1.5rem;border-radius:8px;font-weight:600;border:none;cursor:pointer;font-size:.95rem;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;transition:.2s;text-decoration:none}
+.btn i{width:16px;height:16px}
+.pri{background:var(--grad);color:var(--bg);box-shadow:0 4px 14px var(--glow)}
+.pri:hover{transform:translateY(-2px)}
+.sec{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+.gh{background:var(--bg4);color:var(--txt2);border:1px solid var(--bd)}
+.dan{background:rgba(239,68,68,.15);color:var(--err);border:1px solid var(--err)}
+.ok-btn{background:rgba(0,212,160,.15);color:var(--ok);border:1px solid var(--ok)}
+.blk{width:100%}.lg{padding:1rem 2rem;font-size:1rem}.sm{padding:.5rem 1rem;font-size:.85rem}.xs{padding:.4rem .75rem;font-size:.8rem}
+.err-box{background:rgba(239,68,68,.1);border:1px solid var(--err);color:var(--err);padding:.75rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem;display:none}
+.err-box.on{display:block}
+.hint{background:var(--bg4);border:1px solid var(--bd);border-radius:8px;padding:.75rem;font-size:.8rem;color:var(--txt2);margin-top:1rem}
+.hint strong{color:var(--teal)}
+.demo-accounts{margin-top:1rem;display:grid;gap:.5rem}
+.demo-acc{background:var(--bg4);border:1px solid var(--bd);border-radius:8px;padding:.75rem;cursor:pointer;transition:.2s}
+.demo-acc:hover{border-color:var(--teal)}
+.demo-acc strong{display:block;font-size:.85rem;color:var(--teal)}
+.demo-acc small{color:var(--txt3);font-size:.75rem}
+.app{display:none;min-height:100vh}
+.app.on{display:flex}
+.side{width:260px;background:var(--bg2);border-right:1px solid var(--bd);position:fixed;height:100vh;padding:1.5rem 0;overflow-y:auto;z-index:50}
+.side-h{padding:0 1.5rem 1.5rem;border-bottom:1px solid var(--bd);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.side-h .lt{font-family:'Space Grotesk',sans-serif;font-size:1rem;color:var(--teal);font-weight:700}
+.side-h .ls{font-size:.6rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase}
+.nav{padding:0 .75rem}
+.nav-t{font-size:.7rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;padding:0 .75rem;margin:.75rem 0 .5rem;font-weight:600}
+.nv{display:flex;align-items:center;gap:.6rem;padding:.65rem .75rem;border-radius:8px;color:var(--txt2);text-decoration:none;font-size:.9rem;cursor:pointer;transition:.2s;margin-bottom:.15rem}
+.nv:hover{background:var(--bg4);color:var(--txt)}
+.nv.on{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.nv i{width:16px;height:16px}
+.nv .bdg{margin-left:auto;background:var(--teal);color:var(--bg);padding:.1rem .4rem;border-radius:100px;font-size:.65rem;font-weight:700}
+.nv .bdg.w{background:var(--warn)}
+.nv .bdg.d{background:var(--err)}
+.side-f{padding:1rem .75rem;border-top:1px solid var(--bd);margin-top:1rem}
+.uc{display:flex;align-items:center;gap:.6rem;padding:.6rem;background:var(--bg4);border-radius:8px;margin-bottom:.6rem}
+.uc .av{width:36px;height:36px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.85rem}
+.uc .n{font-size:.85rem;font-weight:600}
+.uc .p{font-size:.7rem;color:var(--teal)}
+.main{margin-left:260px;flex:1;min-height:100vh}
+.top{background:var(--bg2);border-bottom:1px solid var(--bd);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.top h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700}
+.top .s{font-size:.8rem;color:var(--txt3)}
+.top-r{display:flex;gap:.5rem;align-items:center}
+.ct{padding:2rem;max-width:1400px}
+.pg{display:none}.pg.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.st{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;transition:.2s}
+.st:hover{border-color:var(--teal);transform:translateY(-2px)}
+.st .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.st .ic{width:40px;height:40px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.st .ic.ok{background:rgba(0,212,160,.15);border-color:var(--ok);color:var(--ok)}
+.st .ic.w{background:rgba(255,184,77,.15);border-color:var(--warn);color:var(--warn)}
+.st .ic.d{background:rgba(239,68,68,.15);border-color:var(--err);color:var(--err)}
+.st .ic i{width:20px;height:20px}
+.st .l{font-size:.8rem;color:var(--txt3)}
+.st .v{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;color:var(--teal)}
+.st .c{font-size:.75rem;color:var(--ok);display:flex;align-items:center;gap:.25rem}
+.tbl{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+.tbl-h{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.tbl-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.1rem}
+.tbl-f{display:flex;gap:.5rem;flex-wrap:wrap}
+.tbl-f input,.tbl-f select{padding:.5rem .75rem;background:var(--input);border:1.5px solid var(--bd);border-radius:6px;color:var(--txt);font-size:.85rem;font-family:inherit;min-width:180px}
+.tbl-f input:focus,.tbl-f select:focus{outline:none;border-color:var(--teal)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.85rem 1.5rem;font-size:.75rem;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);background:var(--bg4)}
+td{padding:.85rem 1.5rem;border-bottom:1px solid var(--bd);font-size:.9rem}
+tr:last-child td{border:none}
+tr:hover{background:var(--bg4)}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:100px;font-size:.7rem;font-weight:600}
+.b-ok{background:rgba(0,212,160,.15);color:var(--ok);border:1px solid var(--ok)}
+.b-w{background:rgba(255,184,77,.15);color:var(--warn);border:1px solid var(--warn)}
+.b-d{background:rgba(239,68,68,.15);color:var(--err);border:1px solid var(--err)}
+.b-i{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.acts{display:flex;gap:.4rem}
+.ab{width:30px;height:30px;background:var(--bg4);border:1px solid var(--bd);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--txt2);cursor:pointer;transition:.2s}
+.ab:hover{border-color:var(--teal);color:var(--teal)}
+.ab.d:hover{border-color:var(--err);color:var(--err)}
+.ab i{width:14px;height:14px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);z-index:100;align-items:center;justify-content:center;padding:2rem}
+.modal.on{display:flex}
+.m-c{background:var(--bg2);border:1.5px solid var(--bd);border-radius:16px;max-width:800px;width:100%;max-height:92vh;overflow-y:auto}
+.m-c.lg{max-width:1000px}
+.m-h{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2);z-index:1}
+.m-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem}
+.m-x{background:none;border:none;color:var(--txt2);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.m-x:hover{background:var(--bg4);color:var(--teal)}
+.m-x i{width:18px;height:18px}
+.m-b{padding:1.5rem}
+.m-f{padding:1rem 1.5rem;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:.5rem;position:sticky;bottom:0;background:var(--bg2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:768px){.row{grid-template-columns:1fr}}
+.cc{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem;transition:.3s;cursor:pointer}
+.cc:hover{border-color:var(--teal);transform:translateY(-4px)}
+.cc-h{display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem}
+.cc-i{width:48px;height:48px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.cc-i i{width:24px;height:24px}
+.cc h4{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;margin-bottom:.4rem}
+.cc .d{color:var(--txt2);font-size:.85rem;margin-bottom:1rem}
+.cc .meta{display:flex;gap:1rem;color:var(--txt3);font-size:.8rem;flex-wrap:wrap}
+.cc .meta span{display:flex;align-items:center;gap:.3rem}
+.cc .meta i{width:12px;height:12px}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+.module{background:var(--bg4);border:1px solid var(--bd);border-radius:10px;margin-bottom:1rem;overflow:hidden}
+.module-h{padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:.2s}
+.module-h:hover{background:var(--bg3)}
+.module-h strong{font-family:'Space Grotesk',sans-serif;font-size:1rem}
+.module-h small{color:var(--txt3);font-size:.8rem}
+.module-body{padding:0 1.25rem 1.25rem;display:none}
+.module-body.on{display:block}
+.lesson{background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:.85rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem}
+.lesson .n{width:28px;height:28px;background:var(--bg4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+.lesson .info{flex:1;min-width:0}
+.lesson .info strong{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lesson .info small{color:var(--txt3);font-size:.75rem}
+.lesson .dur{color:var(--txt3);font-size:.8rem;white-space:nowrap}
+.lesson .acts{display:flex;gap:.3rem}
+.upload-area{border:2px dashed var(--bd);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:.2s;background:var(--bg4)}
+.upload-area:hover{border-color:var(--teal);background:var(--glow)}
+.upload-area i{width:32px;height:32px;color:var(--teal);margin-bottom:.5rem}
+.upload-area p{font-size:.85rem;color:var(--txt2)}
+.upload-area small{font-size:.75rem;color:var(--txt3)}
+.live-card{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;margin-bottom:1rem;display:flex;gap:1rem;align-items:center}
+.live-card .date{width:60px;height:60px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--teal);flex-shrink:0}
+.live-card .date .day{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;line-height:1}
+.live-card .date .mon{font-size:.65rem;text-transform:uppercase}
+.live-card .info{flex:1}
+.live-card .info h4{font-family:'Space Grotesk',sans-serif;font-size:1rem;margin-bottom:.25rem}
+.live-card .info p{color:var(--txt2);font-size:.85rem}
+.live-card .info small{color:var(--txt3);font-size:.75rem}
+.project-card{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.project-h{display:flex;justify-content:space-between;align-items:start;margin-bottom:.75rem;flex-wrap:wrap;gap:.75rem}
+.project-h h4{font-family:'Space Grotesk',sans-serif;font-size:1.05rem}
+.project-h small{color:var(--txt3);font-size:.8rem}
+.project-desc{color:var(--txt2);font-size:.9rem;margin-bottom:1rem}
+.project-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+.project-footer .student{display:flex;align-items:center;gap:.6rem}
+.project-footer .av{width:32px;height:32px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.75rem}
+.project-footer .name{font-weight:600;font-size:.9rem}
+.project-footer .email{color:var(--txt3);font-size:.75rem}
+.chat-container{display:grid;grid-template-columns:280px 1fr;gap:1rem;height:600px}
+.chat-list{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;overflow-y:auto}
+.chat-item{padding:1rem;border-bottom:1px solid var(--bd);cursor:pointer;transition:.2s}
+.chat-item:hover{background:var(--bg4)}
+.chat-item.on{background:var(--glow);border-left:3px solid var(--teal)}
+.chat-item .name{font-weight:600;font-size:.9rem;margin-bottom:.25rem}
+.chat-item .last{color:var(--txt3);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item .time{font-size:.7rem;color:var(--txt3);margin-top:.25rem}
+.chat-main{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;display:flex;flex-direction:column}
+.chat-header{padding:1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:.75rem}
+.chat-header .av{width:40px;height:40px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700}
+.chat-header .info strong{display:block;font-size:.95rem}
+.chat-header .info small{color:var(--txt3);font-size:.8rem}
+.chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.msg{max-width:70%;padding:.75rem 1rem;border-radius:12px;font-size:.9rem}
+.msg.sent{background:var(--teal);color:var(--bg);align-self:flex-end;border-bottom-right-radius:4px}
+.msg.received{background:var(--bg4);align-self:flex-start;border-bottom-left-radius:4px}
+.msg .time{font-size:.7rem;opacity:.7;margin-top:.25rem}
+.chat-input{padding:1rem;border-top:1px solid var(--bd);display:flex;gap:.5rem}
+.chat-input input{flex:1;padding:.75rem 1rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:.9rem;font-family:inherit}
+.chat-input input:focus{outline:none;border-color:var(--teal)}
+.diary-entry{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.diary-entry .date{font-size:.85rem;color:var(--teal);font-weight:600;margin-bottom:.5rem}
+.diary-entry h4{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin-bottom:.5rem}
+.diary-entry p{color:var(--txt2);font-size:.9rem;margin-bottom:.75rem}
+.diary-entry .meta{display:flex;gap:1rem;color:var(--txt3);font-size:.8rem}
+.empty{text-align:center;padding:3rem;color:var(--txt3)}
+.empty i{width:48px;height:48px;margin-bottom:.75rem;opacity:.5}
+.empty h4{font-family:'Space Grotesk',sans-serif;color:var(--txt2);margin-bottom:.5rem}
+.toast{position:fixed;top:1.5rem;right:1.5rem;background:var(--bg3);border:1.5px solid var(--teal);border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:center;gap:.6rem;z-index:1000;animation:slide .3s;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:400px}
+.toast.ok{border-color:var(--ok)}
+.toast.err{border-color:var(--err)}
+.toast i{width:20px;height:20px;flex-shrink:0}
+.toast.ok i{color:var(--ok)}
+.toast.err i{color:var(--err)}
+.toast span{font-size:.9rem}
+@keyframes slide{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:900px){.side{transform:translateX(-100%);transition:.3s}.side.open{transform:none}.main{margin-left:0}.stats{grid-template-columns:1fr}.tbl{overflow-x:auto}.chat-container{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="logo">
+<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text><text x="50" y="18" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">CYBER ACADEMY</text><text x="50" y="92" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">EST. 2022</text></svg>
+</div>
+<h1>Portal do Professor</h1>
+<p class="sub">Gestão de cursos, grades, vídeos, chat e banca</p>
+
+<div class="err-box" id="login-err"></div>
+
+<form id="login-form" onsubmit="doLogin(event)">
+<div class="fg"><label>E-mail</label><input type="email" id="li-email" required placeholder="seu@email.com"></div>
+<div class="fg"><label>Senha</label><input type="password" id="li-pass" required placeholder="••••••••"></div>
+<button type="submit" class="btn pri blk"><i data-lucide="log-in"></i> Entrar no portal</button>
+</form>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="app" id="app">
+<aside class="side" id="side">
+<div class="side-h">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text></svg>
+<div><div class="lt">Cyber Academy</div><div class="ls">Portal Docente</div></div>
+</div>
+<nav class="nav">
+<div class="nav-t">Docente</div>
+<a class="nv on" data-p="dash"><i data-lucide="layout-dashboard"></i> Visão geral</a>
+<a class="nv" data-p="courses"><i data-lucide="book-open"></i> Meus cursos <span class="bdg" id="nv-c">0</span></a>
+<a class="nv" data-p="diary"><i data-lucide="book-marked"></i> Diário de sala</a>
+<a class="nv" data-p="attendance"><i data-lucide="user-check"></i> Presença</a>
+<a class="nv" data-p="chat"><i data-lucide="message-circle"></i> Mentoria <span class="bdg w" id="nv-m">0</span></a>
+<a class="nv" data-p="live"><i data-lucide="video"></i> Ao vivo <span class="bdg w" id="nv-l">0</span></a>
+<a class="nv" data-p="mentoring"><i data-lucide="calendar-check"></i> Mentorias <span class="bdg d" id="nv-ment">0</span></a>
+<a class="nv" data-p="bank"><i data-lucide="clipboard-check"></i> Banca <span class="bdg d" id="nv-b">0</span></a>
+<div class="nav-t">Conta</div>
+<a class="nv" data-p="profile"><i data-lucide="user-circle"></i> Perfil</a>
+<div id="admin-nav" style="display:none">
+<div class="nav-t">Administração</div>
+<a class="nv" onclick="window.location.href='admin.html'"><i data-lucide="shield"></i> Painel Admin</a>
+</div>
+</nav>
+<div class="side-f">
+<div class="uc"><div class="av" id="u-av">--</div><div><div class="n" id="u-n">--</div><div class="p" id="u-p">--</div></div></div>
+<button class="btn gh blk" onclick="logout()" style="font-size:.85rem;padding:.6rem"><i data-lucide="log-out"></i> Sair</button>
+</div>
+</aside>
+
+<main class="main">
+<div class="top">
+<div><h2 id="pg-t">Visão geral</h2><div class="s" id="pg-s">Portal do Professor</div></div>
+<div class="top-r">
+<a href="index.html" class="btn gh sm"><i data-lucide="external-link"></i> Site</a>
+<a href="portal.html" class="btn gh sm"><i data-lucide="users"></i> Portal Aluno</a>
+</div>
+</div>
+<div class="ct">
+
+<div class="pg on" id="pg-dash">
+<div class="stats">
+<div class="st"><div class="h"><div class="ic"><i data-lucide="book-open"></i></div><span class="l">Meus cursos</span></div><div class="v" id="s-c">0</div><div class="c"><i data-lucide="trending-up"></i> ativos</div></div>
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="users"></i></div><span class="l">Alunos matriculados</span></div><div class="v" id="s-s">0</div><div class="c"><i data-lucide="trending-up"></i> no total</div></div>
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="video"></i></div><span class="l">Aulas ao vivo</span></div><div class="v" id="s-l">0</div><div class="c"><i data-lucide="calendar"></i> agendadas</div></div>
+<div class="st"><div class="h"><div class="ic d"><i data-lucide="clipboard-check"></i></div><span class="l">Projetos na banca</span></div><div class="v" id="s-b">0</div><div class="c" style="color:var(--warn)"><i data-lucide="clock"></i> pendentes</div></div>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem">
+<div class="tbl">
+<div class="tbl-h"><h3>Meus cursos</h3><button class="btn sec sm" onclick="navTo('courses')">Gerenciar <i data-lucide="arrow-right"></i></button></div>
+<div id="dash-courses" style="padding:1.5rem"></div>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Mensagens não lidas</h3></div>
+<div id="dash-messages" style="padding:1.5rem"></div>
+</div>
+</div>
+</div>
+
+<div class="pg" id="pg-courses">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Meus cursos</h3><p style="color:var(--txt3);font-size:.9rem">Gerencie grades, vídeos e conteúdo</p></div>
+</div>
+<div class="cg" id="courses-grid"></div>
+</div>
+
+<div class="pg" id="pg-course-detail">
+<button class="btn gh sm" onclick="navTo('courses')" style="margin-bottom:1rem"><i data-lucide="arrow-left"></i> Voltar aos cursos</button>
+<div id="course-detail-content"></div>
+</div>
+
+<div class="pg" id="pg-diary">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Diário de sala</h3><p style="color:var(--txt3);font-size:.9rem">Registre o conteúdo dado em cada aula</p></div>
+<button class="btn pri" onclick="openDiary()"><i data-lucide="plus"></i> Nova entrada</button>
+</div>
+<div id="diary-list"></div>
+</div>
+
+<div class="pg" id="pg-attendance">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Presença automática</h3>
+<p style="color:var(--txt3);font-size:.9rem">Alunos são marcados presentes automaticamente ao assistir vídeo-aulas</p>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Registro de presença</h3><div class="tbl-f"><select id="att-course"></select></div></div>
+<div id="attendance-list" style="padding:1.5rem"></div>
+</div>
+</div>
+
+<div class="pg" id="pg-chat">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Mentoria com alunos</h3>
+<p style="color:var(--txt3);font-size:.9rem">Chat individual com cada aluno matriculado nos seus cursos</p>
+</div>
+<div class="chat-container">
+<div class="chat-list" id="chat-list"></div>
+<div class="chat-main" id="chat-main">
+<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3)">
+<div style="text-align:center">
+<i data-lucide="message-circle" style="width:48px;height:48px;margin-bottom:1rem;opacity:.5"></i>
+<h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:.5rem">Selecione um aluno</h4>
+<p style="font-size:.9rem">Escolha um aluno na lista para iniciar a mentoria</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="pg" id="pg-live">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Aulas ao vivo</h3><p style="color:var(--txt3);font-size:.9rem">Agende e gerencie suas lives</p></div>
+<button class="btn pri" onclick="openLive()"><i data-lucide="plus"></i> Agendar aula ao vivo</button>
+</div>
+<div id="live-list"></div>
+</div>
+
+<div class="pg" id="pg-mentoring">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Mentorias agendadas pelos alunos</h3>
+<p style="color:var(--txt3);font-size:.9rem">Solicitações de mentoria ao vivo feitas pelos alunos</p>
+</div>
+<div id="mentoring-list"></div>
+</div>
+
+<div class="pg" id="pg-bank">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Banca de projetos</h3>
+<p style="color:var(--txt3);font-size:.9rem">Avalie as entregas dos alunos e emita certificados</p>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Projetos</h3><div class="tbl-f"><select id="bank-filter"><option value="submitted">Enviados</option><option value="pending">Pendentes</option><option value="approved">Aprovados</option><option value="rejected">Reprovados</option><option value="">Todos</option></select></div></div>
+<div id="bank-list" style="padding:1.5rem"></div>
+</div>
+</div>
+
+<div class="pg" id="pg-profile">
+<div style="margin-bottom:1.5rem"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Meu perfil</h3><p style="color:var(--txt3);font-size:.9rem">Suas informações e alteração de senha</p></div>
+<div id="profile-content"></div>
+</div>
+
+</div>
+</main>
+</div>
+
+<div class="modal" id="m-live">
+<div class="m-c">
+<div class="m-h"><h3 id="ml-title">Agendar aula ao vivo</h3><button class="m-x" onclick="closeM('m-live')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<input type="hidden" id="ml-id">
+<div class="fg"><label>Título da aula <span style="color:var(--err)">*</span></label><input type="text" id="ml-t" placeholder="Ex: Revisão de React Hooks"></div>
+<div class="row">
+<div class="fg"><label>Data <span style="color:var(--err)">*</span></label><input type="date" id="ml-date"></div>
+<div class="fg"><label>Horário <span style="color:var(--err)">*</span></label><input type="time" id="ml-time"></div>
+</div>
+<div class="fg"><label>Duração (minutos)</label><input type="number" id="ml-dur" placeholder="60"></div>
+<div class="fg"><label>Curso</label><select id="ml-course"></select></div>
+<div class="fg"><label>Descrição</label><textarea id="ml-desc" placeholder="O que será abordado na aula..."></textarea></div>
+<div class="fg"><label>Link da sala (Zoom/Meet/Teams)</label><input type="url" id="ml-link" placeholder="https://meet.google.com/..."></div>
+</div>
+<div class="m-f">
+<button class="btn gh" onclick="closeM('m-live')">Cancelar</button>
+<button class="btn pri" onclick="saveLive()"><i data-lucide="save"></i> Salvar</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="m-video">
+<div class="m-c">
+<div class="m-h"><h3 id="mv-title">Upload de vídeo</h3><button class="m-x" onclick="closeM('m-video')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<div class="fg"><label>Título da aula <span style="color:var(--err)">*</span></label><input type="text" id="mv-title-input" placeholder="Título da aula"></div>
+<div class="fg"><label>Duração (ex: 12:34)</label><input type="text" id="mv-dur" placeholder="12:34"></div>
+<div class="fg">
+<label>Vídeo da aula</label>
+<div class="upload-area" onclick="document.getElementById('mv-file').click()">
+<i data-lucide="video"></i>
+<p>Clique para enviar o vídeo</p>
+<small>MP4, MOV ou WebM · máx. 50MB (demo)</small>
+</div>
+<input type="file" id="mv-file" accept="video/*" style="display:none" onchange="handleVideoUpload(event)">
+<div id="video-preview" style="margin-top:.75rem;display:none">
+<video id="video-player" controls style="width:100%;border-radius:8px;max-height:300px"></video>
+<button class="btn gh xs" style="margin-top:.5rem" onclick="removeVideo()"><i data-lucide="trash-2"></i> Remover vídeo</button>
+</div>
+</div>
+<div class="fg"><label>Material complementar (PDF, ZIP)</label>
+<div class="upload-area" onclick="document.getElementById('mv-material').click()" style="padding:1rem">
+<i data-lucide="file-text" style="width:24px;height:24px"></i>
+<p style="font-size:.8rem">Anexar material</p>
+</div>
+<input type="file" id="mv-material" style="display:none" onchange="handleMaterialUpload(event)">
+<div id="material-name" style="margin-top:.5rem;font-size:.85rem;color:var(--teal)"></div>
+</div>
+</div>
+<div class="m-f">
+<button class="btn gh" onclick="closeM('m-video')">Cancelar</button>
+<button class="btn pri" onclick="saveVideo()"><i data-lucide="save"></i> Salvar aula</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="m-review">
+<div class="m-c lg">
+<div class="m-h"><h3>Avaliar projeto</h3><button class="m-x" onclick="closeM('m-review')"><i data-lucide="x"></i></button></div>
+<div class="m-b" id="review-content"></div>
+<div class="m-f">
+<button class="btn dan" onclick="rejectProject()"><i data-lucide="x-circle"></i> Reprovar</button>
+<button class="btn ok-btn" onclick="approveProject()"><i data-lucide="check-circle"></i> Aprovar e emitir certificado</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="m-diary">
+<div class="m-c">
+<div class="m-h"><h3 id="md-title">Nova entrada no diário</h3><button class="m-x" onclick="closeM('m-diary')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<input type="hidden" id="diary-id">
+<div class="fg"><label>Data <span style="color:var(--err)">*</span></label><input type="date" id="diary-date"></div>
+<div class="fg"><label>Curso <span style="color:var(--err)">*</span></label><select id="diary-course"></select></div>
+<div class="fg"><label>Título da aula <span style="color:var(--err)">*</span></label><input type="text" id="diary-title" placeholder="Ex: Introdução a React Hooks"></div>
+<div class="fg"><label>Conteúdo ministrado <span style="color:var(--err)">*</span></label><textarea id="diary-content" rows="6" placeholder="Descreva o conteúdo dado, tópicos abordados, exercícios..."></textarea></div>
+<div class="fg"><label>Observações</label><textarea id="diary-notes" rows="3" placeholder="Dificuldades dos alunos, próximos passos..."></textarea></div>
+</div>
+<div class="m-f">
+<button class="btn gh" onclick="closeM('m-diary')">Cancelar</button>
+<button class="btn pri" onclick="saveDiary()"><i data-lucide="save"></i> Salvar entrada</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="m-mentoring">
+<div class="m-c">
+<div class="m-h"><h3>Detalhes da mentoria</h3><button class="m-x" onclick="closeM('m-mentoring')"><i data-lucide="x"></i></button></div>
+<div class="m-b" id="mentoring-content"></div>
+<div class="m-f">
+<button class="btn gh" onclick="closeM('m-mentoring')">Fechar</button>
+<button class="btn pri" id="mentoring-accept-btn" onclick="acceptMentoring()"><i data-lucide="check"></i> Aceitar e enviar link</button>
+</div>
+</div>
+</div>
+
+<script>
+lucide.createIcons();
+
+const DB = {
+get: (k) => JSON.parse(localStorage.getItem(k) || '[]'),
+set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+getO: (k) => JSON.parse(localStorage.getItem(k) || 'null'),
+setO: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+};
+
+const icons = {desenvolvimento:'code-2', dados:'database', cloud:'cloud', ia:'brain', negocios:'rocket'};
+
+let currentUser = null;
+let currentCourse = null;
+let currentProject = null;
+let currentMentoring = null;
+let editingVideo = null;
+let chatWith = null;
+let pendingVideoData = null;
+let pendingMaterialData = null;
+
+// ===== INICIALIZAÇÃO DE DADOS PADRÃO =====
+function initDefaults() {
+// ADMIN - sempre garantido
+let teachers = DB.get('ca_teachers');
+const adminExists = teachers.find(t => t.email === 'admin@cyberacademy.demo');
+if (!adminExists) {
+teachers.push({
+id: 999,
+name: "Administrador",
+email: "admin@cyberacademy.demo",
+password: "admin1234",
+spec: "Administração",
+bio: "Administrador do sistema",
+exp: 0,
+courses: [],
+isAdmin: true
+});
+DB.set('ca_teachers', teachers);
+}
+
+// Professores padrão
+if (teachers.length <= 1) {
+teachers.push(
+{id:1, name:"Beatriz Rocha", email:"beatriz@cyberacademy.demo", password:"demo1234", spec:"Lógica · POO · Git", bio:"Especialista em fundamentos", exp:12, courses:[7,9]},
+{id:2, name:"Lucas Meireles", email:"lucas.meireles@cyberacademy.demo", password:"demo1234", spec:"Front-end", bio:"Engenheiro front-end sênior", exp:10, courses:[3]},
+{id:3, name:"Caio Bertoldi", email:"caio@cyberacademy.demo", password:"demo1234", spec:"Back-end & Arquitetura", bio:"Arquiteto de software", exp:12, courses:[4]},
+{id:4, name:"Paulo Sena", email:"paulo@cyberacademy.demo", password:"demo1234", spec:"Banco de Dados & BI", bio:"DBA e engenheiro de dados", exp:15, courses:[2,12]},
+{id:5, name:"Diego Tavares", email:"diego@cyberacademy.demo", password:"demo1234", spec:"Azure & DevOps", bio:"Arquiteto cloud", exp:13, courses:[5]},
+{id:6, name:"Marina Sato", email:"marina@cyberacademy.demo", password:"demo1234", spec:"IA & Machine Learning", bio:"Doutora em Computação", exp:11, courses:[6]}
+);
+DB.set('ca_teachers', teachers);
+}
+
+if (!DB.get('ca_courses').length) {
+DB.set('ca_courses', [
+{id:1, title:"Python do Zero ao Avançado", cat:"desenvolvimento", icon:"code-2", dur:"120h", les:48, mod:8, lvl:"Iniciante ao Avançado", desc:"Domine Python com IA", students:45, status:"publicado", teacherId:1, grades:[{name:"Módulo 1: Fundamentos", lessons:[{id:1, title:"Introdução ao Python", duration:"10:00", videoUrl:null, material:null}]}]},
+{id:2, title:"SQL & NoSQL Completo", cat:"dados", icon:"database", dur:"80h", les:36, mod:6, lvl:"Iniciante ao Avançado", desc:"Bancos de dados", students:32, status:"publicado", teacherId:4, grades:[]},
+{id:3, title:"Front-end Moderno", cat:"desenvolvimento", icon:"layout", dur:"100h", les:42, mod:7, lvl:"Iniciante ao Avançado", desc:"HTML, CSS, JS, React", students:58, status:"publicado", teacherId:2, grades:[]},
+{id:4, title:"Back-end & Arquitetura", cat:"desenvolvimento", icon:"server", dur:"110h", les:45, mod:8, lvl:"Intermediário ao Avançado", desc:"APIs e microsserviços", students:28, status:"publicado", teacherId:3, grades:[]},
+{id:5, title:"Azure & DevOps", cat:"cloud", icon:"cloud", dur:"90h", les:38, mod:7, lvl:"Intermediário ao Avançado", desc:"Cloud e CI/CD", students:22, status:"publicado", teacherId:5, grades:[]},
+{id:6, title:"IA Generativa & ML", cat:"ia", icon:"brain", dur:"95h", les:40, mod:7, lvl:"Intermediário ao Avançado", desc:"RAG e agentes", students:67, status:"publicado", teacherId:6, grades:[]},
+{id:7, title:"Lógica & POO", cat:"desenvolvimento", icon:"lightbulb", dur:"60h", les:28, mod:5, lvl:"Iniciante", desc:"Fundamentos", students:89, status:"publicado", teacherId:1, grades:[]},
+{id:9, title:"Git & GitHub", cat:"desenvolvimento", icon:"git-branch", dur:"40h", les:20, mod:4, lvl:"Iniciante ao Intermediário", desc:"Controle de versão", students:73, status:"publicado", teacherId:1, grades:[]},
+{id:12, title:"Power BI & BI", cat:"dados", icon:"pie-chart", dur:"65h", les:28, mod:5, lvl:"Iniciante ao Intermediário", desc:"Dashboards", students:34, status:"publicado", teacherId:4, grades:[]}
+]);
+}
+
+if (!DB.get('ca_students').length) {
+DB.set('ca_students', [
+{email:"aluno@cyberacademy.demo", name:"João Pedro Mendes", password:"demo1234", plan:"profissional", planName:"Profissional", courseLimit:5, courseLimitLabel:"5 cursos ativos", monthly:150, activeCourses:[3,6], progress:{}, certificates:[], streak:5, createdAt:new Date().toISOString(), lastAccess:new Date().toISOString()},
+{email:"maria@test.com", name:"Maria Silva", password:"demo1234", plan:"essencial", planName:"Essencial", courseLimit:1, courseLimitLabel:"1 curso ativo", monthly:100, activeCourses:[6], progress:{}, certificates:[], streak:2, createdAt:new Date().toISOString(), lastAccess:new Date().toISOString()}
+]);
+}
+
+if (!DB.get('ca_projects').length) {
+DB.set('ca_projects', [
+{id:1, courseId:3, studentEmail:"aluno@cyberacademy.demo", studentName:"João Pedro", title:"Dashboard React", desc:"Dashboard com React e TypeScript", status:"submitted", submittedAt:new Date().toISOString(), repo:"https://github.com/demo/dashboard", grade:null, feedback:null},
+{id:2, courseId:6, studentEmail:"maria@test.com", studentName:"Maria Silva", title:"Agente RAG", desc:"Agente com LangChain", status:"pending", submittedAt:null, repo:null, grade:null, feedback:null}
+]);
+}
+
+if (!DB.get('ca_live_classes').length) {
+DB.set('ca_live_classes', [
+{id:1, title:"Revisão de React Hooks", date:"2026-11-25", time:"19:00", duration:60, courseId:3, desc:"Revisão completa dos hooks principais", link:"https://meet.google.com/demo", teacherId:2},
+{id:2, title:"Mentoria de Projeto Final", date:"2026-11-28", time:"20:00", duration:90, courseId:3, desc:"Tire suas dúvidas do projeto final", link:"https://meet.google.com/demo2", teacherId:2}
+]);
+}
+
+if (!localStorage.getItem('ca_messages')) DB.set('ca_messages', []);
+if (!localStorage.getItem('ca_diary')) DB.set('ca_diary', []);
+if (!localStorage.getItem('ca_attendance')) DB.set('ca_attendance', []);
+if (!localStorage.getItem('ca_mentoring_requests')) DB.set('ca_mentoring_requests', []);
+}
+
+// ===== LOGIN CORRIGIDO =====
+function fillDemo(email, pass) {
+document.getElementById('li-email').value = email;
+document.getElementById('li-pass').value = pass;
+}
+
+function doLogin(e) {
+e.preventDefault();
+const email = document.getElementById('li-email').value.trim().toLowerCase();
+const pass = document.getElementById('li-pass').value;
+const err = document.getElementById('login-err');
+
+// Busca em ca_teachers
+const teachers = DB.get('ca_teachers');
+const teacher = teachers.find(t => t.email.toLowerCase() === email);
+
+if (!teacher) {
+err.textContent = 'Usuário não encontrado. Verifique o e-mail.';
+err.classList.add('on');
+return;
+}
+if (teacher.password !== pass) {
+err.textContent = 'Senha incorreta.';
+err.classList.add('on');
+return;
+}
+
+// Detecta admin pelo e-mail OU pelo flag isAdmin
+const isAdmin = email === 'admin@cyberacademy.demo' || teacher.isAdmin === true;
+
+currentUser = {
+...teacher,
+isAdmin: isAdmin,
+name: teacher.name || 'Administrador',
+email: teacher.email
+};
+
+DB.setO('ca_prof_session', {email: currentUser.email, at: new Date().toISOString(), isAdmin: isAdmin});
+
+err.classList.remove('on');
+enterApp();
+}
+
+function enterApp() {
+document.getElementById('login-screen').style.display = 'none';
+document.getElementById('app').classList.add('on');
+
+const ini = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+document.getElementById('u-av').textContent = ini;
+document.getElementById('u-n').textContent = currentUser.name;
+document.getElementById('u-p').textContent = currentUser.isAdmin ? 'Administrador' : 'Professor';
+
+// Mostra menu admin se for admin
+if (currentUser.isAdmin) {
+document.getElementById('admin-nav').style.display = 'block';
+} else {
+document.getElementById('admin-nav').style.display = 'none';
+}
+
+navTo('dash');
+}
+
+function logout() {
+if (!confirm('Sair do portal?')) return;
+localStorage.removeItem('ca_prof_session');
+location.reload();
+}
+
+// ===== NAVEGAÇÃO =====
+document.querySelectorAll('.nv[data-p]').forEach(n => n.addEventListener('click', () => navTo(n.dataset.p)));
+
+function navTo(p) {
+document.querySelectorAll('.nv[data-p]').forEach(n => n.classList.remove('on'));
+document.querySelector(`.nv[data-p="${p}"]`)?.classList.add('on');
+document.querySelectorAll('.pg').forEach(x => x.classList.remove('on'));
+document.getElementById('pg-' + p).classList.add('on');
+
+const titles = {
+dash: ['Visão geral', 'Seus cursos e métricas'],
+courses: ['Meus cursos', 'Gerencie grades e conteúdo'],
+'course-detail': ['Detalhes do curso', 'Editor de grade e vídeos'],
+diary: ['Diário de sala', 'Registro de aulas'],
+attendance: ['Presença', 'Registro automático'],
+chat: ['Mentoria', 'Chat com alunos'],
+live: ['Aulas ao vivo', 'Agenda de lives'],
+mentoring: ['Mentorias agendadas', 'Solicitações dos alunos'],
+bank: ['Banca de projetos', 'Avalie entregas'],
+profile: ['Perfil', 'Suas informações']
+};
+document.getElementById('pg-t').textContent = titles[p][0];
+document.getElementById('pg-s').textContent = titles[p][1];
+
+if (p === 'dash') renderDash();
+if (p === 'courses') renderCourses();
+if (p === 'diary') renderDiary();
+if (p === 'attendance') renderAttendance();
+if (p === 'chat') renderChat();
+if (p === 'live') renderLive();
+if (p === 'mentoring') renderMentoring();
+if (p === 'bank') renderBank();
+if (p === 'profile') renderProfile();
+
+lucide.createIcons();
+}
+
+function getMyCourses() {
+const all = DB.get('ca_courses');
+if (currentUser.isAdmin) return all;
+return all.filter(c => c.teacherId === currentUser.id);
+}
+
+// ===== DASHBOARD =====
+function renderDash() {
+const courses = getMyCourses();
+const lives = DB.get('ca_live_classes').filter(l => currentUser.isAdmin || l.teacherId === currentUser.id);
+const projects = DB.get('ca_projects').filter(p => courses.some(c => c.id === p.courseId));
+const pending = projects.filter(p => p.status === 'submitted').length;
+const mentoring = DB.get('ca_mentoring_requests').filter(m => currentUser.isAdmin || m.teacherId === currentUser.id);
+const pendingMentoring = mentoring.filter(m => m.status === 'pending').length;
+
+let totalStudents = 0;
+courses.forEach(c => totalStudents += (c.students || 0));
+
+document.getElementById('s-c').textContent = courses.length;
+document.getElementById('s-s').textContent = totalStudents;
+document.getElementById('s-l').textContent = lives.length;
+document.getElementById('s-b').textContent = pending;
+
+document.getElementById('nv-c').textContent = courses.length;
+document.getElementById('nv-l').textContent = lives.length;
+document.getElementById('nv-b').textContent = pending;
+document.getElementById('nv-ment').textContent = pendingMentoring;
+
+const messages = DB.get('ca_messages').filter(m => m.to === currentUser.email && !m.read);
+document.getElementById('nv-m').textContent = messages.length;
+
+const dc = document.getElementById('dash-courses');
+dc.innerHTML = courses.length ? courses.map(c => `
+<div style="display:flex;align-items:center;gap:1rem;padding:.75rem 0;border-bottom:1px solid var(--bd)">
+<div style="width:40px;height:40px;background:var(--glow);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--teal)"><i data-lucide="${c.icon}" style="width:20px;height:20px"></i></div>
+<div style="flex:1"><strong style="font-size:.9rem">${c.title}</strong><br><small style="color:var(--txt3)">${c.students || 0} alunos · ${(c.grades || []).reduce((s, m) => s + m.lessons.length, 0)} aulas</small></div>
+<button class="btn gh xs" onclick="openCourseDetail(${c.id})">Abrir</button>
+</div>
+`).join('') : '<div class="empty"><i data-lucide="book-open"></i><h4>Nenhum curso atribuído</h4><p>Contate o administrador para receber cursos.</p></div>';
+
+const dm = document.getElementById('dash-messages');
+const recentMsgs = DB.get('ca_messages').filter(m => m.to === currentUser.email).sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 5);
+dm.innerHTML = recentMsgs.length ? recentMsgs.map(m => {
+const student = DB.get('ca_students').find(s => s.email === m.from);
+return `<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--bd);cursor:pointer" onclick="navTo('chat');setTimeout(()=>openChatWith('${m.from}'),100)">
+<div style="width:36px;height:36px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.85rem">${student ? student.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '??'}</div>
+<div style="flex:1"><strong style="font-size:.9rem">${student ? student.name : m.from}</strong><br><small style="color:var(--txt3)">${m.text.substring(0, 50)}...</small></div>
+${!m.read ? '<div style="width:8px;height:8px;background:var(--teal);border-radius:50%"></div>' : ''}
+</div>`;
+}).join('') : '<div class="empty" style="padding:1.5rem"><i data-lucide="message-circle" style="width:32px;height:32px"></i><h4 style="font-size:.95rem">Nenhuma mensagem</h4></div>';
+
+lucide.createIcons();
+}
+
+// ===== CURSOS =====
+function renderCourses() {
+const courses = getMyCourses();
+const grid = document.getElementById('courses-grid');
+grid.innerHTML = courses.length ? courses.map(c => {
+const totalLessons = (c.grades || []).reduce((s, m) => s + m.lessons.length, 0);
+const hasVideos = (c.grades || []).some(m => m.lessons.some(l => l.videoUrl));
+return `
+<div class="cc" onclick="openCourseDetail(${c.id})">
+<div class="cc-h">
+<div class="cc-i"><i data-lucide="${c.icon}"></i></div>
+<span class="badge ${c.status === 'publicado' ? 'b-ok' : 'b-w'}">${c.status === 'publicado' ? 'Publicado' : 'Rascunho'}</span>
+</div>
+<h4>${c.title}</h4>
+<p class="d">${c.desc || ''}</p>
+<div class="meta">
+<span><i data-lucide="users"></i>${c.students || 0} alunos</span>
+<span><i data-lucide="play-circle"></i>${totalLessons} aulas</span>
+<span><i data-lucide="${hasVideos ? 'video' : 'video-off'}"></i>${hasVideos ? 'Com vídeo' : 'Sem vídeo'}</span>
+</div>
+</div>`;
+}).join('') : '<div class="empty" style="grid-column:1/-1"><i data-lucide="book-open"></i><h4>Nenhum curso atribuído</h4></div>';
+lucide.createIcons();
+}
+
+function openCourseDetail(id) {
+currentCourse = DB.get('ca_courses').find(c => c.id === id);
+if (!currentCourse) return;
+navTo('course-detail');
+renderCourseDetail();
+}
+
+function renderCourseDetail() {
+if (!currentCourse) return;
+const c = currentCourse;
+const grades = c.grades || [];
+const totalLessons = grades.reduce((s, m) => s + m.lessons.length, 0);
+
+document.getElementById('course-detail-content').innerHTML = `
+<div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem">
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+<div style="width:64px;height:64px;background:var(--glow);border:1px solid var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--teal)"><i data-lucide="${c.icon}" style="width:32px;height:32px"></i></div>
+<div style="flex:1"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:.25rem">${c.title}</h3><p style="color:var(--txt2);font-size:.9rem">${c.desc || ''}</p></div>
+<span class="badge ${c.status === 'publicado' ? 'b-ok' : 'b-w'}">${c.status === 'publicado' ? 'Publicado' : 'Rascunho'}</span>
+</div>
+<div style="display:flex;gap:2rem;color:var(--txt3);font-size:.85rem;flex-wrap:wrap">
+<span><i data-lucide="users" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> ${c.students || 0} alunos</span>
+<span><i data-lucide="play-circle" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> ${totalLessons} aulas cadastradas</span>
+<span><i data-lucide="clock" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> ${c.dur}</span>
+</div>
+</div>
+
+<div style="display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+<button class="btn pri" onclick="addModule()"><i data-lucide="folder-plus"></i> Adicionar módulo</button>
+<button class="btn sec" onclick="toggleCourseStatus()"><i data-lucide="${c.status === 'publicado' ? 'eye-off' : 'eye'}"></i> ${c.status === 'publicado' ? 'Mover para rascunho' : 'Publicar curso'}</button>
+</div>
+
+<h4 style="font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin-bottom:1rem">Grade curricular (${grades.length} módulos)</h4>
+<div id="grades-container">
+${grades.length ? grades.map((m, mi) => `
+<div class="module">
+<div class="module-h" onclick="toggleModule(${mi})">
+<div><strong>${m.name}</strong><br><small>${m.lessons.length} aulas</small></div>
+<div style="display:flex;gap:.4rem">
+<button class="ab" onclick="event.stopPropagation();addLesson(${mi})" title="Adicionar aula"><i data-lucide="plus"></i></button>
+<button class="ab d" onclick="event.stopPropagation();removeModule(${mi})" title="Excluir módulo"><i data-lucide="trash-2"></i></button>
+</div>
+</div>
+<div class="module-body" id="mod-${mi}">
+${m.lessons.length ? m.lessons.map((l, li) => `
+<div class="lesson">
+<div class="n">${li + 1}</div>
+<div class="info"><strong>${l.title}</strong><small>${l.duration || '—'}</small></div>
+${l.videoUrl ? '<span class="badge b-ok"><i data-lucide="video"></i> Vídeo</span>' : '<span class="badge b-w"><i data-lucide="video-off"></i> Sem vídeo</span>'}
+${l.material ? '<span class="badge b-i"><i data-lucide="file-text"></i> Material</span>' : ''}
+<div class="acts">
+<button class="ab" onclick="editLesson(${mi},${li})" title="Editar"><i data-lucide="edit"></i></button>
+<button class="ab d" onclick="removeLesson(${mi},${li})" title="Excluir"><i data-lucide="trash-2"></i></button>
+</div>
+</div>
+`).join('') : '<div style="padding:1rem;text-align:center;color:var(--txt3);font-size:.85rem">Nenhuma aula neste módulo</div>'}
+</div>
+</div>
+`).join('') : '<div class="empty"><i data-lucide="folder"></i><h4>Nenhum módulo criado</h4><p>Clique em "Adicionar módulo" para começar</p></div>'}
+</div>
+`;
+lucide.createIcons();
+}
+
+function toggleModule(i) {
+document.getElementById('mod-' + i).classList.toggle('on');
+}
+
+function addModule() {
+const name = prompt('Nome do módulo:');
+if (!name) return;
+const c = currentCourse;
+if (!c.grades) c.grades = [];
+c.grades.push({name, lessons: []});
+saveCourse(c);
+renderCourseDetail();
+toast('Módulo adicionado!', 'ok');
+}
+
+function removeModule(i) {
+if (!confirm('Excluir este módulo e todas as aulas?')) return;
+const c = currentCourse;
+c.grades.splice(i, 1);
+saveCourse(c);
+renderCourseDetail();
+toast('Módulo excluído', 'ok');
+}
+
+function addLesson(mi) {
+editingVideo = {moduleIndex: mi, lessonIndex: null};
+pendingVideoData = null;
+pendingMaterialData = null;
+document.getElementById('mv-title-input').value = '';
+document.getElementById('mv-dur').value = '';
+document.getElementById('video-preview').style.display = 'none';
+document.getElementById('video-player').src = '';
+document.getElementById('material-name').textContent = '';
+document.getElementById('mv-file').value = '';
+document.getElementById('mv-material').value = '';
+document.getElementById('mv-title').textContent = 'Nova aula';
+document.getElementById('m-video').classList.add('on');
+lucide.createIcons();
+}
+
+function editLesson(mi, li) {
+const c = currentCourse;
+const lesson = c.grades[mi].lessons[li];
+editingVideo = {moduleIndex: mi, lessonIndex: li};
+pendingVideoData = lesson.videoUrl || null;
+pendingMaterialData = lesson.material || null;
+document.getElementById('mv-title-input').value = lesson.title || '';
+document.getElementById('mv-dur').value = lesson.duration || '';
+if (lesson.videoUrl) {
+document.getElementById('video-player').src = lesson.videoUrl;
+document.getElementById('video-preview').style.display = 'block';
+} else {
+document.getElementById('video-preview').style.display = 'none';
+document.getElementById('video-player').src = '';
+}
+document.getElementById('material-name').textContent = lesson.material ? '📎 ' + lesson.material.name : '';
+document.getElementById('mv-file').value = '';
+document.getElementById('mv-material').value = '';
+document.getElementById('mv-title').textContent = 'Editar aula';
+document.getElementById('m-video').classList.add('on');
+lucide.createIcons();
+}
+
+function handleVideoUpload(e) {
+const file = e.target.files[0];
+if (!file) return;
+if (file.size > 50 * 1024 * 1024) {
+alert('Vídeo muito grande (máx. 50MB na demo)');
+return;
+}
+const reader = new FileReader();
+reader.onload = (ev) => {
+pendingVideoData = ev.target.result;
+document.getElementById('video-player').src = pendingVideoData;
+document.getElementById('video-preview').style.display = 'block';
+};
+reader.readAsDataURL(file);
+}
+
+function removeVideo() {
+pendingVideoData = null;
+document.getElementById('video-preview').style.display = 'none';
+document.getElementById('video-player').src = '';
+document.getElementById('mv-file').value = '';
+}
+
+function handleMaterialUpload(e) {
+const file = e.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = (ev) => {
+pendingMaterialData = {name: file.name, data: ev.target.result, type: file.type};
+document.getElementById('material-name').textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+};
+reader.readAsDataURL(file);
+}
+
+function saveVideo() {
+if (!editingVideo) return;
+const title = document.getElementById('mv-title-input').value.trim();
+const dur = document.getElementById('mv-dur').value.trim();
+if (!title) {
+toast('Informe o título da aula', 'err');
+return;
+}
+
+const c = currentCourse;
+const mi = editingVideo.moduleIndex;
+const li = editingVideo.lessonIndex;
+
+const lessonData = {
+title,
+duration: dur,
+videoUrl: pendingVideoData,
+material: pendingMaterialData
+};
+
+if (li !== null) {
+c.grades[mi].lessons[li] = lessonData;
+} else {
+c.grades[mi].lessons.push(lessonData);
+}
+
+saveCourse(c);
+closeM('m-video');
+renderCourseDetail();
+toast('Aula salva com sucesso! Vídeo e material persistidos.', 'ok');
+}
+
+function removeLesson(mi, li) {
+if (!confirm('Excluir esta aula?')) return;
+const c = currentCourse;
+c.grades[mi].lessons.splice(li, 1);
+saveCourse(c);
+renderCourseDetail();
+toast('Aula excluída', 'ok');
+}
+
+function toggleCourseStatus() {
+const c = currentCourse;
+c.status = c.status === 'publicado' ? 'rascunho' : 'publicado';
+saveCourse(c);
+renderCourseDetail();
+toast(`Curso ${c.status === 'publicado' ? 'publicado' : 'movido para rascunho'}`, 'ok');
+}
+
+function saveCourse(c) {
+const courses = DB.get('ca_courses');
+const idx = courses.findIndex(x => x.id === c.id);
+if (idx >= 0) courses[idx] = c;
+DB.set('ca_courses', courses);
+}
+
+// ===== DIÁRIO DE SALA =====
+function renderDiary() {
+const courses = getMyCourses();
+const diary = DB.get('ca_diary').filter(d => currentUser.isAdmin || courses.some(c => c.id === d.courseId));
+const list = document.getElementById('diary-list');
+
+if (!diary.length) {
+list.innerHTML = '<div class="empty"><i data-lucide="book-marked"></i><h4>Nenhuma entrada no diário</h4><p>Clique em "Nova entrada" para registrar uma aula.</p></div>';
+return;
+}
+
+list.innerHTML = diary.sort((a, b) => new Date(b.date) - new Date(a.date)).map(d => {
+const course = DB.get('ca_courses').find(c => c.id === d.courseId);
+return `<div class="diary-entry">
+<div class="date">${new Date(d.date).toLocaleDateString('pt-BR')} · ${course?.title || '—'}</div>
+<h4>${d.title}</h4>
+<p>${d.content}</p>
+${d.notes ? `<div style="background:var(--bg4);padding:.75rem;border-radius:8px;margin-top:.75rem;font-size:.85rem;color:var(--txt2)"><strong>Observações:</strong> ${d.notes}</div>` : ''}
+<div class="meta">
+<span><i data-lucide="clock" style="width:12px;height:12px;display:inline;vertical-align:middle"></i> Registrado em ${new Date(d.createdAt).toLocaleString('pt-BR')}</span>
+</div>
+<div style="margin-top:.75rem;display:flex;gap:.5rem">
+<button class="btn gh xs" onclick="openDiary(${d.id})"><i data-lucide="edit"></i> Editar</button>
+<button class="btn dan xs" onclick="deleteDiary(${d.id})"><i data-lucide="trash-2"></i> Excluir</button>
+</div>
+</div>`;
+}).join('');
+lucide.createIcons();
+}
+
+function openDiary(id) {
+document.getElementById('diary-id').value = '';
+document.getElementById('diary-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('diary-title').value = '';
+document.getElementById('diary-content').value = '';
+document.getElementById('diary-notes').value = '';
+document.getElementById('md-title').textContent = 'Nova entrada no diário';
+
+const courses = getMyCourses();
+document.getElementById('diary-course').innerHTML = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+
+if (id) {
+const d = DB.get('ca_diary').find(x => x.id === id);
+if (d) {
+document.getElementById('diary-id').value = d.id;
+document.getElementById('diary-date').value = d.date;
+document.getElementById('diary-course').value = d.courseId;
+document.getElementById('diary-title').value = d.title;
+document.getElementById('diary-content').value = d.content;
+document.getElementById('diary-notes').value = d.notes || '';
+document.getElementById('md-title').textContent = 'Editar entrada do diário';
+}
+}
+document.getElementById('m-diary').classList.add('on');
+lucide.createIcons();
+}
+
+function saveDiary() {
+const id = document.getElementById('diary-id').value;
+const date = document.getElementById('diary-date').value;
+const courseId = parseInt(document.getElementById('diary-course').value);
+const title = document.getElementById('diary-title').value.trim();
+const content = document.getElementById('diary-content').value.trim();
+const notes = document.getElementById('diary-notes').value.trim();
+
+if (!date || !title || !content) {
+toast('Preencha data, título e conteúdo', 'err');
+return;
+}
+
+const diary = DB.get('ca_diary');
+
+if (id) {
+const i = diary.findIndex(x => x.id === parseInt(id));
+if (i >= 0) diary[i] = {...diary[i], date, courseId, title, content, notes};
+} else {
+const nid = diary.length ? Math.max(...diary.map(x => x.id)) + 1 : 1;
+diary.push({id: nid, date, courseId, title, content, notes, teacherId: currentUser.id, teacherName: currentUser.name, createdAt: new Date().toISOString()});
+}
+DB.set('ca_diary', diary);
+closeM('m-diary');
+toast('Entrada salva no diário!', 'ok');
+renderDiary();
+}
+
+function deleteDiary(id) {
+if (!confirm('Excluir esta entrada do diário?')) return;
+DB.set('ca_diary', DB.get('ca_diary').filter(x => x.id !== id));
+toast('Entrada excluída', 'ok');
+renderDiary();
+}
+
+// ===== PRESENÇA AUTOMÁTICA =====
+function renderAttendance() {
+const courses = getMyCourses();
+document.getElementById('att-course').innerHTML = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+
+const courseId = parseInt(document.getElementById('att-course').value) || courses[0]?.id;
+if (!courseId) {
+document.getElementById('attendance-list').innerHTML = '<div class="empty"><i data-lucide="user-check"></i><h4>Selecione um curso</h4></div>';
+return;
+}
+
+const attendance = DB.get('ca_attendance').filter(a => a.courseId === courseId);
+const students = DB.get('ca_students').filter(s => s.activeCourses?.includes(courseId));
+const course = courses.find(c => c.id === courseId);
+const totalLessons = course ? (course.grades || []).reduce((s, m) => s + m.lessons.length, 0) : 0;
+
+const list = document.getElementById('attendance-list');
+if (!students.length) {
+list.innerHTML = '<div class="empty"><i data-lucide="users"></i><h4>Nenhum aluno matriculado</h4></div>';
+return;
+}
+
+list.innerHTML = `<table><thead><tr><th>Aluno</th><th>Aulas assistidas</th><th>Progresso</th><th>Último acesso</th></tr></thead><tbody>${students.map(s => {
+const studentAttendance = attendance.filter(a => a.studentEmail === s.email);
+const watched = studentAttendance.length;
+const pct = totalLessons ? Math.round((watched / totalLessons) * 100) : 0;
+const lastAccess = s.lastAccess ? new Date(s.lastAccess).toLocaleString('pt-BR') : '—';
+return `<tr>
+<td><strong>${s.name}</strong><br><small style="color:var(--txt3)">${s.email}</small></td>
+<td><span class="badge b-ok">${watched} aulas</span></td>
+<td>
+<div style="display:flex;align-items:center;gap:.5rem">
+<div style="background:var(--bg4);border-radius:100px;height:6px;width:100px;overflow:hidden">
+<div style="background:var(--grad);height:100%;width:${pct}%"></div>
+</div>
+<small style="color:var(--txt3)">${pct}%</small>
+</div>
+</td>
+<td style="color:var(--txt3);font-size:.85rem">${lastAccess}</td>
+</tr>`;
+}).join('')}</tbody></table>`;
+lucide.createIcons();
+}
+document.getElementById('att-course')?.addEventListener('change', renderAttendance);
+
+// ===== CHAT DE MENTORIA =====
+function renderChat() {
+const courses = getMyCourses();
+const students = DB.get('ca_students').filter(s => s.activeCourses?.some(cid => courses.some(c => c.id === cid)));
+const messages = DB.get('ca_messages');
+
+const list = document.getElementById('chat-list');
+list.innerHTML = students.length ? students.map(s => {
+const lastMsg = messages.filter(m => (m.from === s.email && m.to === currentUser.email) || (m.from === currentUser.email && m.to === s.email)).sort((a, b) => new Date(b.at) - new Date(a.at))[0];
+const unread = messages.filter(m => m.from === s.email && m.to === currentUser.email && !m.read).length;
+return `<div class="chat-item ${chatWith === s.email ? 'on' : ''}" onclick="openChatWith('${s.email}')">
+<div class="name">${s.name} ${unread ? `<span style="background:var(--err);color:#fff;padding:.1rem .4rem;border-radius:100px;font-size:.65rem;margin-left:.5rem">${unread}</span>` : ''}</div>
+<div class="last">${lastMsg ? lastMsg.text.substring(0, 40) + '...' : 'Nenhuma mensagem'}</div>
+<div class="time">${lastMsg ? new Date(lastMsg.at).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'}) : ''}</div>
+</div>`;
+}).join('') : '<div class="empty" style="padding:2rem"><i data-lucide="users"></i><h4>Nenhum aluno matriculado nos seus cursos</h4></div>';
+
+if (chatWith) openChatWith(chatWith);
+lucide.createIcons();
+}
+
+function openChatWith(email) {
+chatWith = email;
+const student = DB.get('ca_students').find(s => s.email === email);
+if (!student) return;
+
+const messages = DB.get('ca_messages').filter(m => (m.from === email && m.to === currentUser.email) || (m.from === currentUser.email && m.to === email)).sort((a, b) => new Date(a.at) - new Date(b.at));
+
+const allMsgs = DB.get('ca_messages');
+allMsgs.forEach(m => { if (m.from === email && m.to === currentUser.email) m.read = true; });
+DB.set('ca_messages', allMsgs);
+
+const ini = student.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+document.getElementById('chat-main').innerHTML = `
+<div class="chat-header">
+<div class="av">${ini}</div>
+<div class="info"><strong>${student.name}</strong><small>${student.email} · ${student.planName}</small></div>
+</div>
+<div class="chat-messages" id="chat-msgs">
+${messages.length ? messages.map(m => `<div class="msg ${m.from === currentUser.email ? 'sent' : 'received'}">${m.text}<div class="time">${new Date(m.at).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</div></div>`).join('') : '<div style="text-align:center;color:var(--txt3);padding:2rem">Nenhuma mensagem ainda. Inicie a conversa!</div>'}
+</div>
+<div class="chat-input">
+<input type="text" id="chat-text" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter')sendChat()">
+<button class="btn pri" onclick="sendChat()"><i data-lucide="send"></i></button>
+</div>
+`;
+
+renderChat();
+lucide.createIcons();
+
+const msgs = document.getElementById('chat-msgs');
+if (msgs) msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendChat() {
+const text = document.getElementById('chat-text').value.trim();
+if (!text || !chatWith) return;
+
+const messages = DB.get('ca_messages');
+messages.push({
+id: Date.now(),
+from: currentUser.email,
+to: chatWith,
+text,
+at: new Date().toISOString(),
+read: false
+});
+DB.set('ca_messages', messages);
+
+document.getElementById('chat-text').value = '';
+openChatWith(chatWith);
+}
+
+// ===== AULAS AO VIVO =====
+function renderLive() {
+const lives = DB.get('ca_live_classes').filter(l => currentUser.isAdmin || l.teacherId === currentUser.id);
+const list = document.getElementById('live-list');
+
+if (!lives.length) {
+list.innerHTML = '<div class="empty"><i data-lucide="video"></i><h4>Nenhuma aula ao vivo agendada</h4><p>Clique em "Agendar aula ao vivo" para criar.</p></div>';
+return;
+}
+
+list.innerHTML = lives.sort((a, b) => new Date(a.date) - new Date(b.date)).map(l => {
+const d = new Date(l.date + 'T' + l.time);
+const course = DB.get('ca_courses').find(c => c.id === l.courseId);
+const isPast = d < new Date();
+return `<div class="live-card" style="${isPast ? 'opacity:.6' : ''}">
+<div class="date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('pt-BR', {month: 'short'})}</div></div>
+<div class="info">
+<h4>${l.title}</h4>
+<p>${l.desc || ''}</p>
+<small><i data-lucide="clock" style="width:12px;height:12px;display:inline;vertical-align:middle"></i> ${l.time} · ${l.duration}min · ${course?.title || '—'}</small>
+</div>
+<div style="display:flex;gap:.4rem">
+${l.link ? `<a href="${l.link}" target="_blank" class="btn pri xs"><i data-lucide="video"></i> Entrar</a>` : ''}
+<button class="ab" onclick="editLive(${l.id})"><i data-lucide="edit"></i></button>
+<button class="ab d" onclick="deleteLive(${l.id})"><i data-lucide="trash-2"></i></button>
+</div>
+</div>`;
+}).join('');
+lucide.createIcons();
+}
+
+function openLive(id) {
+document.getElementById('ml-id').value = '';
+document.getElementById('ml-t').value = '';
+document.getElementById('ml-date').value = '';
+document.getElementById('ml-time').value = '';
+document.getElementById('ml-dur').value = '';
+document.getElementById('ml-desc').value = '';
+document.getElementById('ml-link').value = '';
+document.getElementById('ml-title').textContent = 'Agendar aula ao vivo';
+
+const courses = getMyCourses();
+document.getElementById('ml-course').innerHTML = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+
+if (id) {
+const l = DB.get('ca_live_classes').find(x => x.id === id);
+if (l) {
+document.getElementById('ml-id').value = l.id;
+document.getElementById('ml-t').value = l.title;
+document.getElementById('ml-date').value = l.date;
+document.getElementById('ml-time').value = l.time;
+document.getElementById('ml-dur').value = l.duration;
+document.getElementById('ml-course').value = l.courseId;
+document.getElementById('ml-desc').value = l.desc || '';
+document.getElementById('ml-link').value = l.link || '';
+document.getElementById('ml-title').textContent = 'Editar aula ao vivo';
+}
+}
+document.getElementById('m-live').classList.add('on');
+lucide.createIcons();
+}
+
+function editLive(id) { openLive(id); }
+
+function saveLive() {
+const id = document.getElementById('ml-id').value;
+const title = document.getElementById('ml-t').value.trim();
+const date = document.getElementById('ml-date').value;
+const time = document.getElementById('ml-time').value;
+const duration = parseInt(document.getElementById('ml-dur').value) || 60;
+const courseId = parseInt(document.getElementById('ml-course').value);
+const desc = document.getElementById('ml-desc').value.trim();
+const link = document.getElementById('ml-link').value.trim();
+
+if (!title || !date || !time) {
+toast('Preencha título, data e horário', 'err');
+return;
+}
+
+const lives = DB.get('ca_live_classes');
+if (id) {
+const i = lives.findIndex(x => x.id === parseInt(id));
+if (i >= 0) lives[i] = {...lives[i], title, date, time, duration, courseId, desc, link};
+} else {
+const nid = lives.length ? Math.max(...lives.map(x => x.id)) + 1 : 1;
+lives.push({id: nid, title, date, time, duration, courseId, desc, link, teacherId: currentUser.id});
+}
+DB.set('ca_live_classes', lives);
+closeM('m-live');
+toast(id ? 'Aula atualizada!' : 'Aula agendada!', 'ok');
+renderLive();
+}
+
+function deleteLive(id) {
+if (!confirm('Excluir esta aula ao vivo?')) return;
+DB.set('ca_live_classes', DB.get('ca_live_classes').filter(x => x.id !== id));
+toast('Aula excluída', 'ok');
+renderLive();
+}
+
+// ===== MENTORIAS =====
+function renderMentoring() {
+const mentoring = DB.get('ca_mentoring_requests').filter(m => currentUser.isAdmin || m.teacherId === currentUser.id);
+const list = document.getElementById('mentoring-list');
+
+if (!mentoring.length) {
+list.innerHTML = '<div class="empty"><i data-lucide="calendar-check"></i><h4>Nenhuma mentoria agendada</h4><p>Os alunos podem solicitar mentorias pelo portal deles.</p></div>';
+return;
+}
+
+list.innerHTML = mentoring.sort((a, b) => new Date(a.date) - new Date(b.date)).map(m => {
+const course = DB.get('ca_courses').find(c => c.id === m.courseId);
+const d = new Date(m.date + 'T' + m.time);
+const statusLabels = {pending: 'Pendente', accepted: 'Aceita', completed: 'Concluída', cancelled: 'Cancelada'};
+const statusClass = {pending: 'b-w', accepted: 'b-ok', completed: 'b-i', cancelled: 'b-d'};
+return `<div class="live-card">
+<div class="date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('pt-BR', {month: 'short'})}</div></div>
+<div class="info">
+<h4>${m.title}</h4>
+<p>${m.desc || ''}</p>
+<small><i data-lucide="user" style="width:12px;height:12px;display:inline;vertical-align:middle"></i> ${m.studentName} · ${m.time} · ${course?.title || '—'}</small>
+</div>
+<div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+<span class="badge ${statusClass[m.status] || 'b-i'}">${statusLabels[m.status] || m.status}</span>
+${m.status === 'pending' ? `<button class="btn pri xs" onclick="openMentoringDetail(${m.id})"><i data-lucide="eye"></i> Ver</button>` : ''}
+${m.link && m.status === 'accepted' ? `<a href="${m.link}" target="_blank" class="btn ok-btn xs"><i data-lucide="video"></i> Entrar</a>` : ''}
+</div>
+</div>`;
+}).join('');
+lucide.createIcons();
+}
+
+function openMentoringDetail(id) {
+currentMentoring = DB.get('ca_mentoring_requests').find(m => m.id === id);
+if (!currentMentoring) return;
+const m = currentMentoring;
+const course = DB.get('ca_courses').find(c => c.id === m.courseId);
+const d = new Date(m.date + 'T' + m.time);
+
+document.getElementById('mentoring-content').innerHTML = `
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+<div style="width:64px;height:64px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:1.5rem">${m.studentName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}</div>
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.25rem">${m.studentName}</h3><p style="color:var(--txt2);font-size:.9rem">${m.studentEmail}</p></div>
+</div>
+<div style="background:var(--bg4);border-radius:10px;padding:1.25rem;margin-bottom:1.5rem">
+<h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:.5rem">${m.title}</h4>
+<p style="color:var(--txt2);font-size:.9rem;margin-bottom:.75rem">${m.desc || ''}</p>
+<div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.85rem;color:var(--txt3)">
+<span><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> ${d.toLocaleDateString('pt-BR')} às ${m.time}</span>
+<span><i data-lucide="clock" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> ${m.duration} minutos</span>
+<span><i data-lucide="book-open" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> ${course?.title || '—'}</span>
+</div>
+</div>
+<div class="fg"><label>Link da sala (Zoom/Meet/Teams) <span style="color:var(--err)">*</span></label><input type="url" id="mentoring-link" placeholder="https://meet.google.com/..." value="${m.link || ''}"></div>
+`;
+
+document.getElementById('mentoring-accept-btn').style.display = m.status === 'pending' ? 'inline-flex' : 'none';
+document.getElementById('m-mentoring').classList.add('on');
+lucide.createIcons();
+}
+
+function acceptMentoring() {
+if (!currentMentoring) return;
+const link = document.getElementById('mentoring-link').value.trim();
+if (!link) {
+toast('Informe o link da sala', 'err');
+return;
+}
+
+const mentoring = DB.get('ca_mentoring_requests');
+const idx = mentoring.findIndex(m => m.id === currentMentoring.id);
+if (idx >= 0) {
+mentoring[idx] = {...mentoring[idx], status: 'accepted', link, acceptedAt: new Date().toISOString()};
+DB.set('ca_mentoring_requests', mentoring);
+}
+closeM('m-mentoring');
+toast('Mentoria aceita! Aluno notificado.', 'ok');
+renderMentoring();
+}
+
+// ===== BANCA DE PROJETOS =====
+function renderBank() {
+const courses = getMyCourses();
+const projects = DB.get('ca_projects').filter(p => currentUser.isAdmin || courses.some(c => c.id === p.courseId));
+const filter = document.getElementById('bank-filter')?.value || 'submitted';
+const filtered = filter ? projects.filter(p => p.status === filter) : projects;
+
+const list = document.getElementById('bank-list');
+if (!filtered.length) {
+list.innerHTML = '<div class="empty"><i data-lucide="clipboard-check"></i><h4>Nenhum projeto nesta categoria</h4></div>';
+return;
+}
+
+list.innerHTML = filtered.map(p => {
+const course = DB.get('ca_courses').find(c => c.id === p.courseId);
+const ini = p.studentName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+const statusLabels = {pending: 'Pendente', submitted: 'Enviado', approved: 'Aprovado', rejected: 'Reprovado'};
+const statusClass = {pending: 'b-w', submitted: 'b-i', approved: 'b-ok', rejected: 'b-d'};
+return `<div class="project-card">
+<div class="project-h">
+<div><h4>${p.title}</h4><small>${course?.title || '—'} · ${p.studentName}</small></div>
+<span class="badge ${statusClass[p.status] || 'b-i'}">${statusLabels[p.status] || p.status}</span>
+</div>
+<div class="project-desc">${p.desc || ''}</div>
+${p.repo ? `<div style="margin-bottom:1rem"><a href="${p.repo}" target="_blank" class="btn gh xs"><i data-lucide="external-link"></i> Ver repositório</a></div>` : ''}
+${p.feedback ? `<div style="background:var(--bg4);padding:1rem;border-radius:8px;margin-bottom:1rem;border-left:3px solid ${p.status === 'approved' ? 'var(--ok)' : 'var(--err)'}"><strong style="color:${p.status === 'approved' ? 'var(--ok)' : 'var(--err)'};font-size:.85rem">Feedback${p.grade ? ' · Nota: ' + p.grade + '/10' : ''}</strong><p style="color:var(--txt2);font-size:.85rem;margin-top:.5rem">${p.feedback}</p></div>` : ''}
+<div class="project-footer">
+<div class="student">
+<div class="av">${ini}</div>
+<div><div class="name">${p.studentName}</div><div class="email">${p.studentEmail}</div></div>
+</div>
+${p.status === 'submitted' ? `<button class="btn pri xs" onclick="openReview(${p.id})"><i data-lucide="clipboard-check"></i> Avaliar</button>` : ''}
+</div>
+</div>`;
+}).join('');
+lucide.createIcons();
+}
+document.getElementById('bank-filter')?.addEventListener('change', renderBank);
+
+function openReview(id) {
+currentProject = DB.get('ca_projects').find(p => p.id === id);
+if (!currentProject) return;
+const p = currentProject;
+const course = DB.get('ca_courses').find(c => c.id === p.courseId);
+const ini = p.studentName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+document.getElementById('review-content').innerHTML = `
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+<div style="width:64px;height:64px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:1.5rem">${ini}</div>
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.25rem">${p.studentName}</h3><p style="color:var(--txt2);font-size:.9rem">${p.studentEmail}</p></div>
+</div>
+<div style="background:var(--bg4);border-radius:10px;padding:1.25rem;margin-bottom:1.5rem">
+<h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:.5rem">${p.title}</h4>
+<p style="color:var(--txt2);font-size:.9rem;margin-bottom:.75rem">${p.desc || ''}</p>
+${p.repo ? `<a href="${p.repo}" target="_blank" class="btn gh xs"><i data-lucide="external-link"></i> Ver repositório</a>` : ''}
+<div style="margin-top:.75rem;font-size:.8rem;color:var(--txt3)">Curso: ${course?.title || '—'} · Enviado em ${p.submittedAt ? new Date(p.submittedAt).toLocaleDateString('pt-BR') : '—'}</div>
+</div>
+<div class="fg"><label>Nota (0-10)</label><input type="number" id="rv-grade" min="0" max="10" step="0.1" placeholder="9.5"></div>
+<div class="fg"><label>Feedback para o aluno <span style="color:var(--err)">*</span></label><textarea id="rv-feedback" rows="5" placeholder="Escreva seu feedback detalhado..."></textarea></div>
+`;
+document.getElementById('m-review').classList.add('on');
+lucide.createIcons();
+}
+
+function approveProject() {
+if (!currentProject) return;
+const grade = parseFloat(document.getElementById('rv-grade').value);
+const feedback = document.getElementById('rv-feedback').value.trim();
+if (!feedback) {
+toast('Escreva um feedback', 'err');
+return;
+}
+
+const projects = DB.get('ca_projects');
+const idx = projects.findIndex(p => p.id === currentProject.id);
+if (idx >= 0) {
+projects[idx] = {...projects[idx], status: 'approved', grade, feedback, reviewedAt: new Date().toISOString()};
+DB.set('ca_projects', projects);
+emitCertificate(currentProject);
+}
+closeM('m-review');
+toast('Projeto aprovado! Certificado emitido.', 'ok');
+renderBank();
+}
+
+function rejectProject() {
+if (!currentProject) return;
+const feedback = document.getElementById('rv-feedback').value.trim();
+if (!feedback) {
+toast('Escreva um feedback explicando a reprovação', 'err');
+return;
+}
+
+const projects = DB.get('ca_projects');
+const idx = projects.findIndex(p => p.id === currentProject.id);
+if (idx >= 0) {
+projects[idx] = {...projects[idx], status: 'rejected', feedback, reviewedAt: new Date().toISOString()};
+DB.set('ca_projects', projects);
+}
+closeM('m-review');
+toast('Projeto reprovado. Aluno notificado.', 'ok');
+renderBank();
+}
+
+function emitCertificate(project) {
+const students = DB.get('ca_students');
+const student = students.find(s => s.email === project.studentEmail);
+if (!student) return;
+
+const course = DB.get('ca_courses').find(c => c.id === project.courseId);
+if (!course) return;
+
+const code = `CA-2026-${Math.floor(Math.random() * 9000) + 1000}`;
+if (!student.certificates) student.certificates = [];
+student.certificates.push({code, courseId: course.id, courseTitle: course.title, date: new Date().toISOString(), hours: parseInt(course.dur) || 0});
+
+const idx = students.findIndex(s => s.email === student.email);
+if (idx >= 0) students[idx] = student;
+DB.set('ca_students', students);
+}
+
+// ===== PERFIL E ALTERAÇÃO DE SENHA =====
+function renderProfile() {
+const ini = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+const courses = getMyCourses();
+const lives = DB.get('ca_live_classes').filter(l => currentUser.isAdmin || l.teacherId === currentUser.id);
+const projects = DB.get('ca_projects').filter(p => currentUser.isAdmin || courses.some(c => c.id === p.courseId));
+
+document.getElementById('profile-content').innerHTML = `
+<div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+<div style="width:80px;height:80px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:1.75rem">${ini}</div>
+<div style="flex:1"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:.25rem">${currentUser.name}</h3><p style="color:var(--txt2);font-size:.9rem">${currentUser.email}</p><div style="display:inline-flex;align-items:center;gap:.5rem;background:var(--glow);border:1px solid var(--teal);color:var(--teal);padding:.35rem .75rem;border-radius:100px;font-size:.8rem;font-weight:600;margin-top:.5rem"><i data-lucide="${currentUser.isAdmin ? 'shield' : 'graduation-cap'}" style="width:14px;height:14px"></i> ${currentUser.isAdmin ? 'Administrador' : 'Professor'}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+<div class="tbl"><div class="tbl-h"><h3>Informações</h3></div>
+<div style="padding:1.5rem">
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">E-mail</span><span style="font-weight:600">${currentUser.email}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Especialidade</span><span style="font-weight:600">${currentUser.spec || '—'}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0"><span style="color:var(--txt3)">Experiência</span><span style="font-weight:600">${currentUser.exp || 0} anos</span></div>
+</div>
+</div>
+<div class="tbl"><div class="tbl-h"><h3>Alterar senha</h3></div>
+<div style="padding:1.5rem">
+<div class="fg"><label>Senha atual</label><input type="password" id="old-pass" placeholder="••••••••"></div>
+<div class="fg"><label>Nova senha</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres"></div>
+<div class="fg"><label>Confirmar nova senha</label><input type="password" id="confirm-pass" placeholder="Digite novamente"></div>
+<button class="btn pri blk" onclick="changePassword()"><i data-lucide="key"></i> Alterar senha</button>
+</div>
+</div>
+<div class="tbl"><div class="tbl-h"><h3>Estatísticas</h3></div>
+<div style="padding:1.5rem">
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Cursos lecionados</span><span style="font-weight:600">${courses.length}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Aulas ao vivo</span><span style="font-weight:600">${lives.length}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0"><span style="color:var(--txt3)">Projetos avaliados</span><span style="font-weight:600">${projects.filter(p => p.status === 'approved' || p.status === 'rejected').length}</span></div>
+</div>
+</div>
+</div>
+`;
+lucide.createIcons();
+}
+
+function changePassword() {
+const oldPass = document.getElementById('old-pass').value;
+const newPass = document.getElementById('new-pass').value;
+const confirmPass = document.getElementById('confirm-pass').value;
+
+if (oldPass !== currentUser.password) {
+toast('Senha atual incorreta', 'err');
+return;
+}
+if (newPass.length < 6) {
+toast('Nova senha deve ter pelo menos 6 caracteres', 'err');
+return;
+}
+if (newPass !== confirmPass) {
+toast('As senhas não coincidem', 'err');
+return;
+}
+
+const teachers = DB.get('ca_teachers');
+const idx = teachers.findIndex(t => t.email === currentUser.email);
+if (idx >= 0) {
+teachers[idx].password = newPass;
+DB.set('ca_teachers', teachers);
+currentUser.password = newPass;
+toast('Senha alterada com sucesso!', 'ok');
+document.getElementById('old-pass').value = '';
+document.getElementById('new-pass').value = '';
+document.getElementById('confirm-pass').value = '';
+}
+}
+
+// ===== UTILITÁRIOS =====
+function closeM(id) { document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); }));
+
+function toast(msg, type = 'ok') {
+const t = document.createElement('div');
+t.className = `toast ${type}`;
+t.innerHTML = `<i data-lucide="${type === 'ok' ? 'check-circle' : 'alert-circle'}"></i><span>${msg}</span>`;
+document.body.appendChild(t);
+lucide.createIcons();
+setTimeout(() => t.remove(), 4000);
+}
+
+// ===== INICIALIZAÇÃO =====
+initDefaults();
+const sess = DB.getO('ca_prof_session');
+if (sess) {
+const teachers = DB.get('ca_teachers');
+const t = teachers.find(x => x.email === sess.email);
+if (t) {
+const isAdmin = sess.email === 'admin@cyberacademy.demo' || t.isAdmin === true;
+currentUser = {...t, isAdmin};
+enterApp();
+}
+}
+lucide.createIcons();
+</script>
+</body>
+</html>
+</file_write>

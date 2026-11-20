@@ -1,0 +1,911 @@
+<read_file>
+<path>certificados.html</path>
+</read_file>
+
+Agora vou modificar o arquivo para implementar a regra de que certificados só são emitidos quando o aluno conclui pelo menos 90% do curso:
+<write_file>
+<path>certificados.html</path>
+<content><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Certificados & Validação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root {
+--bg-primary: #0a0f14;
+--bg-secondary: #111820;
+--bg-tertiary: #1a2332;
+--bg-card: #151d28;
+--teal: #00a8b5;
+--teal-light: #00d4e0;
+--teal-dark: #008a94;
+--teal-glow: rgba(0, 168, 181, 0.15);
+--text-primary: #ffffff;
+--text-secondary: #a0aec0;
+--text-muted: #6b7a8d;
+--border: #2a3544;
+--success: #00d4a0;
+--warning: #ffb84d;
+--danger: #ef4444;
+--gradient-teal: linear-gradient(135deg, #00a8b5 0%, #00d4e0 100%);
+}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--teal-dark); border-radius: 4px; }
+
+    .logo-svg { width: 48px; height: 48px; }
+
+    header {
+        background: rgba(10, 15, 20, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .header-content {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1.25rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+    }
+
+    .logo-text { display: flex; flex-direction: column; }
+
+    .logo-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--teal);
+        line-height: 1.2;
+    }
+
+    .logo-subtitle {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .header-badge {
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        color: var(--teal);
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .header-nav { display: flex; gap: 1rem; align-items: center; }
+
+    .btn-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-link:hover { color: var(--teal); }
+
+    .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-header h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        letter-spacing: -1px;
+    }
+
+    .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        background: var(--bg-card);
+        padding: 0.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+
+    .tab {
+        flex: 1;
+        padding: 0.85rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        background: none;
+        font-family: inherit;
+    }
+
+    .tab.active {
+        background: var(--teal);
+        color: var(--bg-primary);
+    }
+
+    .tab:hover:not(.active) {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .panel-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+    }
+
+    .panel-icon i { width: 20px; height: 20px; }
+
+    .panel-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .panel-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        background: var(--bg-input);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--teal);
+        background: var(--bg-tertiary);
+    }
+
+    .btn {
+        padding: 0.9rem 1.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .btn i { width: 18px; height: 18px; }
+
+    .btn-primary {
+        background: var(--gradient-teal);
+        color: var(--bg-primary);
+        box-shadow: 0 4px 16px var(--teal-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 168, 181, 0.3);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--teal);
+        border: 1.5px solid var(--teal);
+    }
+
+    .btn-secondary:hover { background: var(--teal-glow); }
+
+    .btn-block { width: 100%; }
+
+    .validation-result {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: none;
+    }
+
+    .validation-result.show { display: block; animation: fadeIn 0.3s; }
+
+    .validation-result.valid {
+        background: rgba(0, 212, 160, 0.1);
+        border: 1.5px solid var(--success);
+    }
+
+    .validation-result.invalid {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1.5px solid var(--danger);
+    }
+
+    .validation-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .validation-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .validation-icon.valid {
+        background: var(--success);
+        color: var(--bg-primary);
+    }
+
+    .validation-icon.invalid {
+        background: var(--danger);
+        color: white;
+    }
+
+    .validation-icon i { width: 24px; height: 24px; }
+
+    .validation-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .validation-title.valid { color: var(--success); }
+    .validation-title.invalid { color: var(--danger); }
+
+    .cert-details {
+        background: var(--bg-tertiary);
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .cert-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+    }
+
+    .cert-row:last-child { border-bottom: none; }
+
+    .cert-label { color: var(--text-muted); }
+    .cert-value { font-weight: 600; }
+
+    .cert-preview {
+        background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+        border: 2px solid var(--teal);
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-top: 1.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cert-preview::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, var(--teal-glow) 0%, transparent 70%);
+        opacity: 0.3;
+    }
+
+    .cert-preview-content { position: relative; z-index: 1; }
+
+    .cert-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .cert-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--teal);
+        margin-bottom: 0.5rem;
+    }
+
+    .cert-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .cert-student {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .cert-course {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .cert-code {
+        font-family: 'Courier New', monospace;
+        font-size: 1.25rem;
+        color: var(--teal);
+        background: var(--bg-primary);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .cert-date {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .cert-seal {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        width: 80px;
+        height: 80px;
+        background: var(--teal);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bg-primary);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-align: center;
+        line-height: 1.2;
+        box-shadow: 0 4px 16px rgba(0, 168, 181, 0.3);
+    }
+
+    .info-box {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .info-box i { color: var(--teal); flex-shrink: 0; margin-top: 2px; }
+
+    .info-box p { font-size: 0.9rem; color: var(--text-secondary); }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--teal);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    footer {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        padding: 2rem;
+        margin-top: 4rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 768px) {
+        .header-content { padding: 1rem; }
+        .container { padding: 2rem 1rem; }
+        .page-header h1 { font-size: 1.75rem; }
+        .tabs { flex-direction: column; }
+        .cert-preview { padding: 1.5rem; }
+        .cert-student { font-size: 1.5rem; }
+        .cert-seal { width: 60px; height: 60px; font-size: 0.65rem; top: 1rem; right: 1rem; }
+    }
+</style>
+</head>
+<body>
+<header>
+<div class="header-content">
+<a href="index.html" class="logo-container">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+<circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+<text x="50" y="62" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+<text x="50" y="18" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">CYBER ACADEMY</text>
+<text x="50" y="92" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">EST. 2022</text>
+</svg>
+<div class="logo-text">
+<span class="logo-title">Cyber Academy</span>
+<span class="logo-subtitle">Certificados · Etapa 6</span>
+</div>
+</a>
+<div class="header-badge">
+<i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+Validação Pública
+</div>
+<div class="header-nav">
+<a href="index.html" class="btn-link">
+<i data-lucide="home" style="width:16px;height:16px;"></i>
+Site
+</a>
+<a href="portal.html" class="btn-link">
+<i data-lucide="user" style="width:16px;height:16px;"></i>
+Portal
+</a>
+</div>
+</div>
+</header>
+<div class="container">
+    <div class="page-header">
+        <h1>Certificados & Validação</h1>
+        <p>Verifique a autenticidade de certificados emitidos pela Cyber Academy</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="validate">
+            <i data-lucide="search" style="width:18px;height:18px;"></i>
+            Validar Certificado
+        </button>
+        <button class="tab" data-tab="info">
+            <i data-lucide="info" style="width:18px;height:18px;"></i>
+            Sobre Certificados
+        </button>
+    </div>
+
+    <!-- TAB: VALIDAR -->
+    <div class="tab-content active" id="tab-validate">
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-icon">
+                    <i data-lucide="award"></i>
+                </div>
+                <div>
+                    <div class="panel-title">Validação de Certificado</div>
+                    <div class="panel-subtitle">Confira a autenticidade de qualquer certificado emitido</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Código do Certificado</label>
+                <input type="text" id="cert-code" placeholder="CA-2026-XXXX" style="font-family: 'Courier New', monospace; font-size: 1.1rem; text-transform: uppercase;">
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="validateCertificate()">
+                <i data-lucide="search"></i>
+                Verificar Autenticidade
+            </button>
+
+            <div class="info-box">
+                <i data-lucide="info" style="width:20px;height:20px;"></i>
+                <p><strong>Como encontrar o código:</strong> O código está impresso no certificado no formato <code style="background:var(--bg-primary);padding:0.2rem 0.5rem;border-radius:4px;font-family:'Courier New',monospace">CA-ANO-XXXX</code>. Exemplo: <code style="background:var(--bg-primary);padding:0.2rem 0.5rem;border-radius:4px;font-family:'Courier New',monospace">CA-2026-8317</code></p>
+            </div>
+
+            <div class="validation-result" id="validation-result"></div>
+        </div>
+    </div>
+
+    <!-- TAB: INFO -->
+    <div class="tab-content" id="tab-info">
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-icon">
+                    <i data-lucide="award"></i>
+                </div>
+                <div>
+                    <div class="panel-title">Sobre os Certificados</div>
+                    <div class="panel-subtitle">Regras de emissão e validade</div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Certificados Emitidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-valid">0</div>
+                    <div class="stat-label">Válidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">90%</div>
+                    <div class="stat-label">Conclusão Mínima</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">∞</div>
+                    <div class="stat-label">Validade</div>
+                </div>
+            </div>
+
+            <div style="margin-top:2rem">
+                <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin-bottom:1rem;color:var(--teal)">
+                    <i data-lucide="check-circle" style="width:20px;height:20px;display:inline;vertical-align:middle;margin-right:0.5rem"></i>
+                    Regras de Emissão
+                </h3>
+                <ul style="list-style:none;color:var(--text-secondary)">
+                    <li style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:0.75rem">
+                        <i data-lucide="check" style="width:18px;height:18px;color:var(--success);flex-shrink:0;margin-top:2px"></i>
+                        <span><strong style="color:var(--text-primary)">Conclusão mínima de 90%:</strong> O certificado só é emitido quando o aluno conclui pelo menos 90% das aulas do curso.</span>
+                    </li>
+                    <li style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:0.75rem">
+                        <i data-lucide="check" style="width:18px;height:18px;color:var(--success);flex-shrink:0;margin-top:2px"></i>
+                        <span><strong style="color:var(--text-primary)">Projeto final aprovado:</strong> O aluno deve entregar e ter o projeto final aprovado pela banca docente.</span>
+                    </li>
+                    <li style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:0.75rem">
+                        <i data-lucide="check" style="width:18px;height:18px;color:var(--success);flex-shrink:0;margin-top:2px"></i>
+                        <span><strong style="color:var(--text-primary)">Código único:</strong> Cada certificado recebe um código único no formato CA-ANO-XXXX para validação pública.</span>
+                    </li>
+                    <li style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:0.75rem">
+                        <i data-lucide="check" style="width:18px;height:18px;color:var(--success);flex-shrink:0;margin-top:2px"></i>
+                        <span><strong style="color:var(--text-primary)">Validade permanente:</strong> Certificados não expiram e podem ser verificados a qualquer momento nesta página.</span>
+                    </li>
+                    <li style="padding:0.75rem 0;display:flex;align-items:flex-start;gap:0.75rem">
+                        <i data-lucide="check" style="width:18px;height:18px;color:var(--success);flex-shrink:0;margin-top:2px"></i>
+                        <span><strong style="color:var(--text-primary)">Horas complementares:</strong> Certificados são aceitos como horas complementares conforme Decreto nº 5.154/2004.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="margin-top:2rem">
+                <i data-lucide="shield" style="width:20px;height:20px;"></i>
+                <p><strong>Validação pública:</strong> Qualquer pessoa pode verificar a autenticidade de um certificado usando o código impresso. Esta página consulta o banco de dados oficial da Cyber Academy.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div style="max-width:1280px;margin:0 auto">
+        <div style="display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap">
+            <a href="index.html">Site institucional</a>
+            <a href="portal.html">Portal do Aluno</a>
+            <a href="admin.html">Admin</a>
+            <a href="professor.html">Portal do Professor</a>
+        </div>
+        <div>© 2026 Cyber Academy · EST. 2022 · Etapa 6 de 6 · Certificados & Validação Pública</div>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // Banco de dados centralizado
+    const DB = {
+        get: (k) => JSON.parse(localStorage.getItem(k) || '[]'),
+        set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+        getO: (k) => JSON.parse(localStorage.getItem(k) || 'null'),
+        setO: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+    };
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            lucide.createIcons();
+        });
+    });
+
+    // Validar certificado
+    function validateCertificate() {
+        const code = document.getElementById('cert-code').value.trim().toUpperCase();
+        const resultDiv = document.getElementById('validation-result');
+
+        if (!code) {
+            resultDiv.className = 'validation-result show invalid';
+            resultDiv.innerHTML = `
+                <div class="validation-header">
+                    <div class="validation-icon invalid">
+                        <i data-lucide="x"></i>
+                    </div>
+                    <div class="validation-title invalid">Código não informado</div>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem">Digite o código do certificado no formato CA-ANO-XXXX</p>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        // Buscar em todos os alunos
+        const students = DB.get('ca_students');
+        let foundCert = null;
+        let foundStudent = null;
+
+        for (const student of students) {
+            if (student.certificates) {
+                const cert = student.certificates.find(c => c.code === code);
+                if (cert) {
+                    foundCert = cert;
+                    foundStudent = student;
+                    break;
+                }
+            }
+        }
+
+        if (foundCert && foundStudent) {
+            // Verificar se o aluno realmente concluiu 90%+ do curso
+            const course = DB.get('ca_courses').find(c => c.id === foundCert.courseId);
+            const totalLessons = course ? course.les : 0;
+            const completedLessons = foundStudent.progress && foundStudent.progress[foundCert.courseId] 
+                ? Object.values(foundStudent.progress[foundCert.courseId]).filter(v => v).length 
+                : 0;
+            const completionRate = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+
+            resultDiv.className = 'validation-result show valid';
+            resultDiv.innerHTML = `
+                <div class="validation-header">
+                    <div class="validation-icon valid">
+                        <i data-lucide="check"></i>
+                    </div>
+                    <div class="validation-title valid">Certificado Válido</div>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem">Este certificado foi emitido pela Cyber Academy e é autêntico.</p>
+                
+                <div class="cert-details">
+                    <div class="cert-row">
+                        <span class="cert-label">Aluno</span>
+                        <span class="cert-value">${foundStudent.name}</span>
+                    </div>
+                    <div class="cert-row">
+                        <span class="cert-label">Curso</span>
+                        <span class="cert-value">${foundCert.courseTitle}</span>
+                    </div>
+                    <div class="cert-row">
+                        <span class="cert-label">Carga Horária</span>
+                        <span class="cert-value">${foundCert.hours}h</span>
+                    </div>
+                    <div class="cert-row">
+                        <span class="cert-label">Conclusão</span>
+                        <span class="cert-value" style="color:var(--success)">${completionRate.toFixed(1)}% ✓</span>
+                    </div>
+                    <div class="cert-row">
+                        <span class="cert-label">Data de Emissão</span>
+                        <span class="cert-value">${new Date(foundCert.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div class="cert-row">
+                        <span class="cert-label">Código</span>
+                        <span class="cert-value" style="font-family:'Courier New',monospace;color:var(--teal)">${foundCert.code}</span>
+                    </div>
+                </div>
+
+                <div class="cert-preview">
+                    <div class="cert-seal">Cyber<br>Academy<br>2022</div>
+                    <div class="cert-preview-content">
+                        <svg class="cert-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+                            <circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+                            <text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+                            <text x="50" y="18" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">CYBER ACADEMY</text>
+                            <text x="50" y="92" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">EST. 2022</text>
+                        </svg>
+                        <div class="cert-title">Certificado de Conclusão</div>
+                        <div class="cert-subtitle">Certificamos que</div>
+                        <div class="cert-student">${foundStudent.name}</div>
+                        <div class="cert-course">concluiu o curso<br><strong>${foundCert.courseTitle}</strong><br>com carga horária de ${foundCert.hours} horas</div>
+                        <div class="cert-code">${foundCert.code}</div>
+                        <div class="cert-date">Emitido em ${new Date(foundCert.date).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            resultDiv.className = 'validation-result show invalid';
+            resultDiv.innerHTML = `
+                <div class="validation-header">
+                    <div class="validation-icon invalid">
+                        <i data-lucide="x"></i>
+                    </div>
+                    <div class="validation-title invalid">Certificado Não Encontrado</div>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem">Nenhum certificado válido encontrado com o código <code style="background:var(--bg-primary);padding:0.2rem 0.5rem;border-radius:4px;font-family:'Courier New',monospace">${code}</code></p>
+                <div class="info-box" style="margin-top:1rem">
+                    <i data-lucide="alert-circle" style="width:20px;height:20px;color:var(--warning)"></i>
+                    <p style="font-size:0.85rem"><strong>Possíveis motivos:</strong> Código digitado incorretamente, certificado ainda não emitido (aluno não concluiu 90% do curso), ou certificado inválido/fraudulento.</p>
+                </div>
+            `;
+        }
+
+        lucide.createIcons();
+    }
+
+    // Estatísticas
+    function updateStats() {
+        const students = DB.get('ca_students');
+        let totalCerts = 0;
+        let validCerts = 0;
+
+        students.forEach(student => {
+            if (student.certificates) {
+                totalCerts += student.certificates.length;
+                student.certificates.forEach(cert => {
+                    const course = DB.get('ca_courses').find(c => c.id === cert.courseId);
+                    const totalLessons = course ? course.les : 0;
+                    const completedLessons = student.progress && student.progress[cert.courseId]
+                        ? Object.values(student.progress[cert.courseId]).filter(v => v).length
+                        : 0;
+                    const completionRate = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+                    
+                    if (completionRate >= 90) {
+                        validCerts++;
+                    }
+                });
+            }
+        });
+
+        document.getElementById('stat-total').textContent = totalCerts;
+        document.getElementById('stat-valid').textContent = validCerts;
+    }
+
+    // Permitir Enter no input
+    document.getElementById('cert-code').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') validateCertificate();
+    });
+
+    // Auto-preencher se vier da URL
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get('code');
+    if (codeParam) {
+        document.getElementById('cert-code').value = codeParam.toUpperCase();
+        validateCertificate();
+    }
+
+    updateStats();
+    lucide.createIcons();
+</script>
+</body>
+</html>
+</content>
+</write_file>

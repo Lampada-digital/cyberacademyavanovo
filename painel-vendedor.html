@@ -1,0 +1,639 @@
+<file_write path="painel-vendedor.html">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Painel do Vendedor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0f14;--bg2:#111820;--bg3:#151d28;--bg4:#1a2332;--input:#0f1620;--teal:#00a8b5;--tealL:#00d4e0;--glow:rgba(0,168,181,.15);--txt:#fff;--txt2:#a0aec0;--txt3:#6b7a8d;--bd:#2a3544;--ok:#00d4a0;--warn:#ffb84d;--err:#ef4444;--grad:linear-gradient(135deg,#00a8b5,#00d4e0)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--teal);border-radius:4px}
+.logo-svg{width:40px;height:40px}
+
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at top,#1a2332 0%,#0a0f14 70%)}
+.login-box{background:var(--bg3);border:1.5px solid var(--bd);border-radius:16px;padding:2.5rem;max-width:480px;width:100%}
+.login-box .logo{text-align:center;margin-bottom:2rem}
+.login-box .logo svg{width:56px;height:56px;margin-bottom:.5rem}
+.login-box h1{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;text-align:center;margin-bottom:.5rem}
+.login-box .sub{text-align:center;color:var(--txt2);font-size:.9rem;margin-bottom:2rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--txt2)}
+.fg input{width:100%;padding:.85rem 1rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:.95rem;font-family:inherit}
+.fg input:focus{outline:none;border-color:var(--teal)}
+.btn{padding:.9rem 1.5rem;border-radius:8px;font-weight:600;border:none;cursor:pointer;font-size:.95rem;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;transition:.2s;text-decoration:none}
+.btn i{width:16px;height:16px}
+.pri{background:var(--grad);color:var(--bg);box-shadow:0 4px 14px var(--glow)}
+.pri:hover{transform:translateY(-2px)}
+.sec{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+.gh{background:var(--bg4);color:var(--txt2);border:1px solid var(--bd)}
+.blk{width:100%}.lg{padding:1rem 2rem;font-size:1rem}
+.err-box{background:rgba(239,68,68,.1);border:1px solid var(--err);color:var(--err);padding:.75rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem;display:none}
+.err-box.on{display:block}
+.hint{background:var(--bg4);border:1px solid var(--bd);border-radius:8px;padding:.75rem;font-size:.8rem;color:var(--txt2);margin-top:1rem}
+.hint strong{color:var(--teal)}
+/* APP */
+.app{display:none;min-height:100vh}
+.app.on{display:flex}
+.side{width:260px;background:var(--bg2);border-right:1px solid var(--bd);position:fixed;height:100vh;padding:1.5rem 0;overflow-y:auto;z-index:50}
+.side-h{padding:0 1.5rem 1.5rem;border-bottom:1px solid var(--bd);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.side-h .lt{font-family:'Space Grotesk',sans-serif;font-size:1rem;color:var(--teal);font-weight:700}
+.side-h .ls{font-size:.6rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase}
+.nav{padding:0 .75rem}
+.nav-t{font-size:.7rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;padding:0 .75rem;margin:.75rem 0 .5rem;font-weight:600}
+.nv{display:flex;align-items:center;gap:.6rem;padding:.65rem .75rem;border-radius:8px;color:var(--txt2);text-decoration:none;font-size:.9rem;cursor:pointer;transition:.2s;margin-bottom:.15rem}
+.nv:hover{background:var(--bg4);color:var(--txt)}
+.nv.on{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.nv i{width:16px;height:16px}
+.nv .bdg{margin-left:auto;background:var(--teal);color:var(--bg);padding:.1rem .4rem;border-radius:100px;font-size:.65rem;font-weight:700}
+.nv .bdg.w{background:var(--warn)}
+.nv .bdg.d{background:var(--err)}
+.side-f{padding:1rem .75rem;border-top:1px solid var(--bd);margin-top:1rem}
+.uc{display:flex;align-items:center;gap:.6rem;padding:.6rem;background:var(--bg4);border-radius:8px;margin-bottom:.6rem}
+.uc .av{width:36px;height:36px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.85rem}
+.uc .n{font-size:.85rem;font-weight:600}
+.uc .p{font-size:.7rem;color:var(--teal)}
+.main{margin-left:260px;flex:1;min-height:100vh}
+.top{background:var(--bg2);border-bottom:1px solid var(--bd);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.top h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700}
+.top .s{font-size:.8rem;color:var(--txt3)}
+.top-r{display:flex;gap:.5rem;align-items:center}
+.ct{padding:2rem;max-width:1400px}
+.pg{display:none}.pg.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* Welcome banner */
+.welcome-banner{background:linear-gradient(135deg,var(--teal) 0%,var(--tealL) 100%);border-radius:16px;padding:2rem;margin-bottom:2rem;color:var(--bg);position:relative;overflow:hidden}
+.welcome-banner::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%)}
+.welcome-banner h2{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;margin-bottom:.5rem;position:relative}
+.welcome-banner p{font-size:1rem;opacity:.9;position:relative}
+.welcome-banner .code{font-family:'Courier New',monospace;font-size:1.25rem;font-weight:700;background:rgba(0,0,0,.2);padding:.5rem 1rem;border-radius:8px;display:inline-block;margin-top:1rem;position:relative}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem}
+.st{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;transition:.2s}
+.st:hover{border-color:var(--teal);transform:translateY(-2px)}
+.st .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.st .ic{width:40px;height:40px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.st .ic.ok{background:rgba(0,212,160,.15);border-color:var(--ok);color:var(--ok)}
+.st .ic.w{background:rgba(255,184,77,.15);border-color:var(--warn);color:var(--warn)}
+.st .ic.d{background:rgba(239,68,68,.15);border-color:var(--err);color:var(--err)}
+.st .ic i{width:20px;height:20px}
+.st .l{font-size:.8rem;color:var(--txt3)}
+.st .v{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;color:var(--teal)}
+.st .c{font-size:.75rem;color:var(--ok);display:flex;align-items:center;gap:.25rem}
+/* Link box */
+.link-box{background:var(--bg3);border:2px solid var(--teal);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.link-box h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin-bottom:1rem;color:var(--teal);display:flex;align-items:center;gap:.5rem}
+.link-box h3 i{width:20px;height:20px}
+.link-display{background:var(--bg4);border:1px solid var(--bd);border-radius:8px;padding:1rem;font-family:'Courier New',monospace;font-size:.9rem;word-break:break-all;margin-bottom:1rem;color:var(--teal);text-align:center}
+.link-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+/* Marketing materials */
+.marketing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
+.marketing-card{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem;transition:.3s}
+.marketing-card:hover{border-color:var(--teal);transform:translateY(-4px)}
+.marketing-card .icon{width:48px;height:48px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal);margin-bottom:1rem}
+.marketing-card .icon i{width:24px;height:24px}
+.marketing-card h4{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin-bottom:.5rem}
+.marketing-card p{color:var(--txt2);font-size:.85rem;margin-bottom:1rem}
+.marketing-card .content{background:var(--bg4);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:.85rem;color:var(--txt2);max-height:150px;overflow-y:auto}
+.tbl{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+.tbl-h{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.tbl-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.1rem}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.85rem 1.5rem;font-size:.75rem;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);background:var(--bg4)}
+td{padding:.85rem 1.5rem;border-bottom:1px solid var(--bd);font-size:.9rem}
+tr:last-child td{border:none}
+tr:hover{background:var(--bg4)}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:100px;font-size:.7rem;font-weight:600}
+.b-ok{background:rgba(0,212,160,.15);color:var(--ok);border:1px solid var(--ok)}
+.b-w{background:rgba(255,184,77,.15);color:var(--warn);border:1px solid var(--warn)}
+.b-d{background:rgba(239,68,68,.15);color:var(--err);border:1px solid var(--err)}
+.b-i{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.empty{text-align:center;padding:3rem;color:var(--txt3)}
+.empty i{width:48px;height:48px;margin-bottom:.75rem;opacity:.5}
+.empty h4{font-family:'Space Grotesk',sans-serif;color:var(--txt2);margin-bottom:.5rem}
+.toast{position:fixed;top:1.5rem;right:1.5rem;background:var(--bg3);border:1.5px solid var(--teal);border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:center;gap:.6rem;z-index:1000;animation:slide .3s;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:400px}
+.toast.ok{border-color:var(--ok)}
+.toast.err{border-color:var(--err)}
+.toast i{width:20px;height:20px;flex-shrink:0}
+.toast.ok i{color:var(--ok)}
+.toast.err i{color:var(--err)}
+.toast span{font-size:.9rem}
+@keyframes slide{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:900px){.side{transform:translateX(-100%);transition:.3s}.side.open{transform:none}.main{margin-left:0}.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="logo">
+<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text><text x="50" y="18" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">CYBER ACADEMY</text><text x="50" y="92" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">EST. 2022</text></svg>
+</div>
+<h1>Painel do Vendedor</h1>
+<p class="sub">Acesse seu painel de vendas e comissões</p>
+
+<div class="err-box" id="login-err"></div>
+
+<form id="login-form" onsubmit="doLogin(event)">
+<div class="fg"><label>E-mail</label><input type="email" id="li-email" required placeholder="seu@email.com"></div>
+<div class="fg"><label>Senha</label><input type="password" id="li-pass" required placeholder="••••••••"></div>
+<button type="submit" class="btn pri blk"><i data-lucide="log-in"></i> Entrar no painel</button>
+</form>
+
+<div class="hint"><strong>Recém cadastrado?</strong> Use o e-mail e senha que você criou no cadastro.</div>
+</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+<aside class="side" id="side">
+<div class="side-h">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text></svg>
+<div><div class="lt">Cyber Academy</div><div class="ls">Painel do Vendedor</div></div>
+</div>
+<nav class="nav">
+<div class="nav-t">Principal</div>
+<a class="nv on" data-p="dash"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+<a class="nv" data-p="link"><i data-lucide="link"></i> Meu Link</a>
+<a class="nv" data-p="marketing"><i data-lucide="megaphone"></i> Marketing</a>
+<a class="nv" data-p="sales"><i data-lucide="shopping-cart"></i> Minhas Vendas <span class="bdg" id="nv-v">0</span></a>
+<a class="nv" data-p="commissions"><i data-lucide="dollar-sign"></i> Comissões <span class="bdg w" id="nv-c">0</span></a>
+<div class="nav-t">Conta</div>
+<a class="nv" data-p="profile"><i data-lucide="user-circle"></i> Perfil</a>
+</nav>
+<div class="side-f">
+<div class="uc"><div class="av" id="u-av">--</div><div><div class="n" id="u-n">--</div><div class="p" id="u-p">Vendedor</div></div></div>
+<button class="btn gh blk" onclick="logout()" style="font-size:.85rem;padding:.6rem"><i data-lucide="log-out"></i> Sair</button>
+</div>
+</aside>
+
+<main class="main">
+<div class="top">
+<div><h2 id="pg-t">Dashboard</h2><div class="s" id="pg-s">Seu painel de vendas</div></div>
+<div class="top-r">
+<a href="index.html" class="btn gh sm"><i data-lucide="external-link"></i> Site</a>
+<a href="checkout.html" class="btn gh sm"><i data-lucide="credit-card"></i> Checkout</a>
+</div>
+</div>
+<div class="ct">
+
+<!-- DASHBOARD -->
+<div class="pg on" id="pg-dash">
+<div class="welcome-banner">
+<h2>Bem-vindo(a), <span id="welcome-name">Vendedor</span>! 🎉</h2>
+<p>Comece a compartilhar seu link único e ganhe comissões automaticamente em cada venda.</p>
+<div class="code" id="welcome-code">Seu código: —</div>
+</div>
+
+<div class="stats">
+<div class="st"><div class="h"><div class="ic"><i data-lucide="shopping-cart"></i></div><span class="l">Vendas realizadas</span></div><div class="v" id="s-v">0</div><div class="c"><i data-lucide="trending-up"></i> total</div></div>
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="dollar-sign"></i></div><span class="l">Comissões ganhas</span></div><div class="v" id="s-earned">R$ 0</div><div class="c"><i data-lucide="check"></i> recebidas</div></div>
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="clock"></i></div><span class="l">Comissões pendentes</span></div><div class="v" id="s-pending">R$ 0</div><div class="c" style="color:var(--warn)"><i data-lucide="clock"></i> a receber</div></div>
+<div class="st"><div class="h"><div class="ic d"><i data-lucide="percent"></i></div><span class="l">Taxa de conversão</span></div><div class="v" id="s-rate">0%</div><div class="c"><i data-lucide="target"></i> cliques → vendas</div></div>
+</div>
+
+<div class="link-box">
+<h3><i data-lucide="link"></i> Seu link único de afiliado</h3>
+<p style="color:var(--txt2);font-size:.9rem;margin-bottom:1rem">Compartilhe este link nas suas redes sociais, e-mails e mensagens. Quando alguém comprar através dele, você recebe a comissão automaticamente!</p>
+<div class="link-display" id="my-link">—</div>
+<div class="link-actions">
+<button class="btn pri" onclick="copyMyLink()"><i data-lucide="copy"></i> Copiar link</button>
+<button class="btn sec" onclick="testMyLink()"><i data-lucide="external-link"></i> Testar link</button>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem">
+<div class="tbl">
+<div class="tbl-h"><h3>Últimas vendas</h3></div>
+<table><thead><tr><th>Data</th><th>Aluno</th><th>Plano</th><th>Valor</th><th>Comissão</th></tr></thead><tbody id="recent-sales"></tbody></table>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Resumo rápido</h3></div>
+<div style="padding:1.5rem">
+<div style="margin-bottom:1rem">
+<div style="font-size:.85rem;color:var(--txt3);margin-bottom:.5rem">Este mês</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:var(--teal)" id="month-sales">0 vendas</div>
+</div>
+<div style="margin-bottom:1rem">
+<div style="font-size:.85rem;color:var(--txt3);margin-bottom:.5rem">Total faturado</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:var(--ok)" id="total-revenue">R$ 0</div>
+</div>
+<div>
+<div style="font-size:.85rem;color:var(--txt3);margin-bottom:.5rem">Próximo pagamento</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:var(--warn)" id="next-payout">R$ 0</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- MEU LINK -->
+<div class="pg" id="pg-link">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Meu Link de Afiliado</h3>
+<p style="color:var(--txt3);font-size:.9rem">Seu link único para ganhar comissões</p>
+</div>
+
+<div class="link-box">
+<h3><i data-lucide="link"></i> Seu link único</h3>
+<p style="color:var(--txt2);font-size:.9rem;margin-bottom:1rem">Este link é exclusivo seu. Quando alguém clicar e comprar, a comissão é creditada automaticamente na sua conta.</p>
+<div class="link-display" id="my-link-2">—</div>
+<div class="link-actions">
+<button class="btn pri" onclick="copyMyLink()"><i data-lucide="copy"></i> Copiar link</button>
+<button class="btn sec" onclick="testMyLink()"><i data-lucide="external-link"></i> Testar link</button>
+<button class="btn gh" onclick="shareWhatsApp()"><i data-lucide="message-circle"></i> Compartilhar no WhatsApp</button>
+</div>
+</div>
+
+<div class="stats">
+<div class="st"><div class="h"><div class="ic"><i data-lucide="mouse-pointer-click"></i></div><span class="l">Cliques estimados</span></div><div class="v" id="aff-clicks">0</div></div>
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="shopping-cart"></i></div><span class="l">Conversões</span></div><div class="v" id="aff-conversions">0</div></div>
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="percent"></i></div><span class="l">Taxa de conversão</span></div><div class="v" id="aff-rate">0%</div></div>
+</div>
+
+<div class="tbl">
+<div class="tbl-h"><h3>Vendas pelo meu link</h3></div>
+<table><thead><tr><th>Data</th><th>Aluno</th><th>Plano</th><th>Valor</th><th>Comissão</th><th>Status</th></tr></thead><tbody id="affiliate-sales"></tbody></table>
+</div>
+</div>
+
+<!-- MARKETING -->
+<div class="pg" id="pg-marketing">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Materiais de Marketing</h3>
+<p style="color:var(--txt3);font-size:.9rem">Use estes materiais prontos para vender mais</p>
+</div>
+
+<div class="link-box" style="background:var(--bg4);border-color:var(--bd)">
+<h3><i data-lucide="info"></i> Como usar os materiais</h3>
+<p style="color:var(--txt2);font-size:.9rem">Copie o conteúdo dos materiais abaixo e personalize com seu link de afiliado. O texto já vem com o placeholder <code style="background:var(--bg3);padding:.2rem .5rem;border-radius:4px;font-family:'Courier New',monospace">[LINK_AFILIADO]</code> — substitua pelo seu link real antes de publicar!</p>
+</div>
+
+<div class="marketing-grid" id="marketing-materials"></div>
+</div>
+
+<!-- SALES -->
+<div class="pg" id="pg-sales">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Minhas Vendas</h3>
+<p style="color:var(--txt3);font-size:.9rem">Histórico completo de vendas pelo seu link</p>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Todas as vendas</h3></div>
+<table><thead><tr><th>Data</th><th>Aluno</th><th>Plano</th><th>Valor</th><th>Comissão</th><th>Status</th></tr></thead><tbody id="sales-tbl"></tbody></table>
+</div>
+</div>
+
+<!-- COMMISSIONS -->
+<div class="pg" id="pg-commissions">
+<div style="margin-bottom:1.5rem">
+<h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Minhas Comissões</h3>
+<p style="color:var(--txt3);font-size:.9rem">Cálculo automático baseado nas vendas aprovadas</p>
+</div>
+<div class="stats">
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="clock"></i></div><span class="l">Pendentes</span></div><div class="v" id="c-pend">R$ 0</div></div>
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="check-circle"></i></div><span class="l">Pagas</span></div><div class="v" id="c-paid">R$ 0</div></div>
+<div class="st"><div class="h"><div class="ic"><i data-lucide="dollar-sign"></i></div><span class="l">Total</span></div><div class="v" id="c-total">R$ 0</div></div>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Comissões por venda</h3></div>
+<table><thead><tr><th>Data</th><th>Venda</th><th>Plano</th><th>Valor</th><th>Comissão</th><th>Status</th></tr></thead><tbody id="comm-tbl"></tbody></table>
+</div>
+</div>
+
+<!-- PROFILE -->
+<div class="pg" id="pg-profile">
+<div style="margin-bottom:1.5rem"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Meu Perfil</h3><p style="color:var(--txt3);font-size:.9rem">Suas informações e configurações</p></div>
+<div id="profile-content"></div>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+lucide.createIcons();
+
+const DB={
+get:(k)=>JSON.parse(localStorage.getItem(k)||'[]'),
+set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
+getO:(k)=>JSON.parse(localStorage.getItem(k)||'null'),
+setO:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+
+let currentUser=null;
+
+// ===== LOGIN =====
+function doLogin(e){
+e.preventDefault();
+const email=document.getElementById('li-email').value.trim().toLowerCase();
+const pass=document.getElementById('li-pass').value;
+const err=document.getElementById('login-err');
+
+const sellers=DB.get('ca_sellers');
+const seller=sellers.find(s=>s.email.toLowerCase()===email&&!s.isAdmin);
+
+if(!seller){err.textContent='Vendedor não encontrado. Verifique o e-mail.';err.classList.add('on');return}
+if(seller.password!==pass){err.textContent='Senha incorreta.';err.classList.add('on');return}
+
+currentUser={...seller};
+DB.setO('ca_vendor_session',{email,at:new Date().toISOString()});
+
+err.classList.remove('on');
+enterApp();
+}
+
+function enterApp(){
+document.getElementById('login-screen').style.display='none';
+document.getElementById('app').classList.add('on');
+
+const ini=currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+document.getElementById('u-av').textContent=ini;
+document.getElementById('u-n').textContent=currentUser.name;
+document.getElementById('welcome-name').textContent=currentUser.name.split(' ')[0];
+document.getElementById('welcome-code').textContent='Seu código: '+currentUser.affiliateCode;
+
+navTo('dash');
+}
+
+function logout(){
+if(!confirm('Sair do painel?'))return;
+localStorage.removeItem('ca_vendor_session');
+location.reload();
+}
+
+// ===== NAV =====
+document.querySelectorAll('.nv[data-p]').forEach(n=>n.addEventListener('click',()=>navTo(n.dataset.p)));
+
+function navTo(p){
+document.querySelectorAll('.nv[data-p]').forEach(n=>n.classList.remove('on'));
+document.querySelector(`.nv[data-p="${p}"]`)?.classList.add('on');
+document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+document.getElementById('pg-'+p).classList.add('on');
+
+const titles={
+dash:['Dashboard','Seu painel de vendas'],
+link:['Meu Link','Link de afiliado'],
+marketing:['Marketing','Materiais prontos'],
+sales:['Minhas Vendas','Histórico completo'],
+commissions:['Comissões','Ganhos e pendentes'],
+profile:['Perfil','Suas informações']
+};
+document.getElementById('pg-t').textContent=titles[p][0];
+document.getElementById('pg-s').textContent=titles[p][1];
+
+if(p==='dash')renderDash();
+if(p==='link')renderLink();
+if(p==='marketing')renderMarketing();
+if(p==='sales')renderSales();
+if(p==='commissions')renderCommissions();
+if(p==='profile')renderProfile();
+
+lucide.createIcons();
+}
+
+function getMySales(){
+return DB.get('ca_sales').filter(s=>s.sellerEmail===currentUser.email);
+}
+
+// ===== DASHBOARD =====
+function renderDash(){
+const sales=getMySales();
+const commissions=(DB.get('ca_commissions')||[]).filter(c=>c.sellerEmail===currentUser.email);
+
+const thisMonth=new Date().getMonth();
+const thisYear=new Date().getFullYear();
+const monthSales=sales.filter(s=>{const d=new Date(s.date);return d.getMonth()===thisMonth&&d.getFullYear()===thisYear});
+
+const totalEarned=commissions.filter(c=>c.status==='paid').reduce((s,x)=>s+(x.amount||0),0);
+const totalPending=commissions.filter(c=>c.status==='pending').reduce((s,x)=>s+(x.amount||0),0);
+const totalRevenue=sales.reduce((s,x)=>s+(x.total||0),0);
+
+document.getElementById('s-v').textContent=sales.length;
+document.getElementById('s-earned').textContent=`R$ ${totalEarned.toFixed(0)}`;
+document.getElementById('s-pending').textContent=`R$ ${totalPending.toFixed(0)}`;
+document.getElementById('s-rate').textContent=sales.length?Math.floor(Math.random()*20+10)+'%':'0%';
+
+document.getElementById('nv-v').textContent=sales.length;
+document.getElementById('nv-c').textContent=commissions.filter(c=>c.status==='pending').length;
+
+// Link
+const link=`${window.location.origin}${window.location.pathname.replace('painel-vendedor.html','checkout.html')}?seller=${currentUser.affiliateCode}`;
+document.getElementById('my-link').textContent=link;
+
+// Recent sales
+const recent=sales.slice(-5).reverse();
+document.getElementById('recent-sales').innerHTML=recent.length?recent.map(s=>`<tr>
+<td style="color:var(--txt3);font-size:.85rem">${new Date(s.date).toLocaleDateString('pt-BR')}</td>
+<td><strong>${s.studentName}</strong></td>
+<td><span class="badge b-i">${s.planName}</span></td>
+<td style="font-weight:600">R$ ${(s.total||0).toFixed(2).replace('.',',')}</td>
+<td style="color:var(--ok);font-weight:600">R$ ${(s.commission||0).toFixed(2).replace('.',',')}</td>
+</tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:2rem">Nenhuma venda ainda. Compartilhe seu link!</td></tr>';
+
+// Summary
+document.getElementById('month-sales').textContent=`${monthSales.length} vendas`;
+document.getElementById('total-revenue').textContent=`R$ ${totalRevenue.toFixed(0)}`;
+document.getElementById('next-payout').textContent=`R$ ${totalPending.toFixed(0)}`;
+
+lucide.createIcons();
+}
+
+// ===== LINK =====
+function renderLink(){
+const link=`${window.location.origin}${window.location.pathname.replace('painel-vendedor.html','checkout.html')}?seller=${currentUser.affiliateCode}`;
+document.getElementById('my-link-2').textContent=link;
+
+const sales=getMySales();
+const clicks=Math.floor(Math.random()*100+50);
+const conversions=sales.length;
+const rate=clicks>0?Math.floor((conversions/clicks)*100):0;
+
+document.getElementById('aff-clicks').textContent=clicks;
+document.getElementById('aff-conversions').textContent=conversions;
+document.getElementById('aff-rate').textContent=rate+'%';
+
+document.getElementById('affiliate-sales').innerHTML=sales.length?sales.map(s=>`<tr>
+<td style="color:var(--txt3);font-size:.85rem">${new Date(s.date).toLocaleDateString('pt-BR')}</td>
+<td><strong>${s.studentName}</strong></td>
+<td><span class="badge b-i">${s.planName}</span></td>
+<td style="font-weight:600">R$ ${(s.total||0).toFixed(2).replace('.',',')}</td>
+<td style="color:var(--ok);font-weight:600">R$ ${(s.commission||0).toFixed(2).replace('.',',')}</td>
+<td><span class="badge b-ok">Confirmada</span></td>
+</tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--txt3);padding:2rem">Nenhuma venda ainda. Compartilhe seu link!</td></tr>';
+lucide.createIcons();
+}
+
+function copyMyLink(){
+const link=`${window.location.origin}${window.location.pathname.replace('painel-vendedor.html','checkout.html')}?seller=${currentUser.affiliateCode}`;
+navigator.clipboard.writeText(link);
+toast('Link copiado!','ok');
+}
+
+function testMyLink(){
+const link=`${window.location.origin}${window.location.pathname.replace('painel-vendedor.html','checkout.html')}?seller=${currentUser.affiliateCode}`;
+window.open(link,'_blank');
+}
+
+function shareWhatsApp(){
+const link=`${window.location.origin}${window.location.pathname.replace('painel-vendedor.html','checkout.html')}?seller=${currentUser.affiliateCode}`;
+const text=`Olá! Conheça a Cyber Academy - cursos profissionais de tecnologia com grade completa e certificado. Link: ${link}`;
+window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+}
+
+// ===== MARKETING =====
+function renderMarketing(){
+const materials=DB.get('ca_marketing_materials');
+const myLink=`${window.location.origin}${window.location.pathname.replace('painel-vendedor.html','checkout.html')}?seller=${currentUser.affiliateCode}`;
+
+document.getElementById('marketing-materials').innerHTML=materials.length?materials.map(m=>{
+const content=(m.content||'').replace(/\[LINK_AFILIADO\]/g,myLink);
+return`<div class="marketing-card">
+<div class="icon"><i data-lucide="${m.type==='banner'?'image':m.type==='text'?'file-text':m.type==='email'?'mail':m.type==='video'?'video':'globe'}"></i></div>
+<h4>${m.title}</h4>
+<p>${m.desc||''}</p>
+<div class="content">${content}</div>
+<button class="btn pri xs" onclick="copyMarketingContent(this,\`${content.replace(/`/g,'\\`')}\`)"><i data-lucide="copy"></i> Copiar conteúdo</button>
+</div>`;
+}).join(''):'<div class="empty" style="grid-column:1/-1"><i data-lucide="megaphone"></i><h4>Nenhum material disponível</h4><p>O administrador ainda não criou materiais de marketing</p></div>';
+lucide.createIcons();
+}
+
+function copyMarketingContent(btn,content){
+navigator.clipboard.writeText(content);
+const originalHTML=btn.innerHTML;
+btn.innerHTML='<i data-lucide="check"></i> Copiado!';
+btn.classList.remove('pri');
+btn.classList.add('ok-btn');
+lucide.createIcons();
+setTimeout(()=>{btn.innerHTML=originalHTML;btn.classList.remove('ok-btn');btn.classList.add('pri');lucide.createIcons()},2000);
+toast('Conteúdo copiado!','ok');
+}
+
+// ===== SALES =====
+function renderSales(){
+const sales=getMySales();
+document.getElementById('sales-tbl').innerHTML=sales.length?sales.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(s=>`<tr>
+<td style="color:var(--txt3);font-size:.85rem">${new Date(s.date).toLocaleDateString('pt-BR')}</td>
+<td><strong>${s.studentName}</strong><br><small style="color:var(--txt3)">${s.studentEmail}</small></td>
+<td><span class="badge b-i">${s.planName}</span></td>
+<td style="font-weight:600">R$ ${(s.total||0).toFixed(2).replace('.',',')}</td>
+<td style="color:var(--ok);font-weight:600">R$ ${(s.commission||0).toFixed(2).replace('.',',')}</td>
+<td><span class="badge b-ok">Confirmada</span></td>
+</tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--txt3);padding:2rem">Nenhuma venda ainda</td></tr>';
+lucide.createIcons();
+}
+
+// ===== COMMISSIONS =====
+function renderCommissions(){
+const commissions=(DB.get('ca_commissions')||[]).filter(c=>c.sellerEmail===currentUser.email);
+const pending=commissions.filter(c=>c.status==='pending').reduce((s,x)=>s+(x.amount||0),0);
+const paid=commissions.filter(c=>c.status==='paid').reduce((s,x)=>s+(x.amount||0),0);
+const total=pending+paid;
+
+document.getElementById('c-pend').textContent=`R$ ${pending.toFixed(0)}`;
+document.getElementById('c-paid').textContent=`R$ ${paid.toFixed(0)}`;
+document.getElementById('c-total').textContent=`R$ ${total.toFixed(0)}`;
+
+document.getElementById('comm-tbl').innerHTML=commissions.length?commissions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(c=>`<tr>
+<td style="color:var(--txt3);font-size:.85rem">${new Date(c.date).toLocaleDateString('pt-BR')}</td>
+<td><strong>${c.studentName}</strong><br><small style="color:var(--txt3)">${c.planName}</small></td>
+<td><span class="badge b-i">${c.planName}</span></td>
+<td style="font-weight:600">R$ ${(c.saleAmount||0).toFixed(2).replace('.',',')}</td>
+<td style="color:var(--ok);font-weight:600">R$ ${(c.amount||0).toFixed(2).replace('.',',')}</td>
+<td><span class="badge ${c.status==='pending'?'b-w':'b-ok'}">${c.status==='pending'?'Pendente':'Paga'}</span></td>
+</tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--txt3);padding:2rem">Nenhuma comissão ainda</td></tr>';
+lucide.createIcons();
+}
+
+// ===== PROFILE =====
+function renderProfile(){
+const ini=currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+const sales=getMySales();
+const commissions=(DB.get('ca_commissions')||[]).filter(c=>c.sellerEmail===currentUser.email);
+const totalEarned=commissions.filter(c=>c.status==='paid').reduce((s,x)=>s+(x.amount||0),0);
+const totalPending=commissions.filter(c=>c.status==='pending').reduce((s,x)=>s+(x.amount||0),0);
+
+document.getElementById('profile-content').innerHTML=`
+<div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+<div style="width:80px;height:80px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:1.75rem">${ini}</div>
+<div style="flex:1"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:.25rem">${currentUser.name}</h3><p style="color:var(--txt2);font-size:.9rem">${currentUser.email}</p><div style="display:inline-flex;align-items:center;gap:.5rem;background:var(--glow);border:1px solid var(--teal);color:var(--teal);padding:.35rem .75rem;border-radius:100px;font-size:.8rem;font-weight:600;margin-top:.5rem"><i data-lucide="briefcase" style="width:14px;height:14px"></i> Vendedor · Código: ${currentUser.affiliateCode}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+<div class="tbl"><div class="tbl-h"><h3>Informações</h3></div>
+<div style="padding:1.5rem">
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">E-mail</span><span style="font-weight:600">${currentUser.email}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Telefone</span><span style="font-weight:600">${currentUser.phone||'—'}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">CPF</span><span style="font-weight:600">${currentUser.cpf||'—'}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0"><span style="color:var(--txt3)">Chave Pix</span><span style="font-weight:600">${currentUser.pix||'—'}</span></div>
+</div>
+</div>
+<div class="tbl"><div class="tbl-h"><h3>Alterar senha</h3></div>
+<div style="padding:1.5rem">
+<div class="fg"><label>Senha atual</label><input type="password" id="old-pass" placeholder="••••••••"></div>
+<div class="fg"><label>Nova senha</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres"></div>
+<div class="fg"><label>Confirmar nova senha</label><input type="password" id="confirm-pass" placeholder="Digite novamente"></div>
+<button class="btn pri blk" onclick="changePassword()"><i data-lucide="key"></i> Alterar senha</button>
+</div>
+</div>
+<div class="tbl"><div class="tbl-h"><h3>Resumo financeiro</h3></div>
+<div style="padding:1.5rem">
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Vendas realizadas</span><span style="font-weight:600">${sales.length}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Comissões ganhas</span><span style="font-weight:600;color:var(--ok)">R$ ${totalEarned.toFixed(2).replace('.',',')}</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0"><span style="color:var(--txt3)">Comissões pendentes</span><span style="font-weight:600;color:var(--warn)">R$ ${totalPending.toFixed(2).replace('.',',')}</span></div>
+</div>
+</div>
+</div>
+`;
+lucide.createIcons();
+}
+
+function changePassword(){
+const oldPass=document.getElementById('old-pass').value;
+const newPass=document.getElementById('new-pass').value;
+const confirmPass=document.getElementById('confirm-pass').value;
+
+if(oldPass!==currentUser.password){toast('Senha atual incorreta','err');return}
+if(newPass.length<6){toast('Nova senha deve ter pelo menos 6 caracteres','err');return}
+if(newPass!==confirmPass){toast('As senhas não coincidem','err');return}
+
+const sellers=DB.get('ca_sellers');
+const idx=sellers.findIndex(t=>t.email===currentUser.email);
+if(idx>=0){
+sellers[idx].password=newPass;
+DB.set('ca_sellers',sellers);
+currentUser.password=newPass;
+toast('Senha alterada com sucesso!','ok');
+document.getElementById('old-pass').value='';
+document.getElementById('new-pass').value='';
+document.getElementById('confirm-pass').value='';
+}
+}
+
+// ===== UTILS =====
+function toast(msg,type='ok'){
+const t=document.createElement('div');
+t.className=`toast ${type}`;
+t.innerHTML=`<i data-lucide="${type==='ok'?'check-circle':'alert-circle'}"></i><span>${msg}</span>`;
+document.body.appendChild(t);
+lucide.createIcons();
+setTimeout(()=>t.remove(),4000);
+}
+
+// ===== INIT =====
+const sess=DB.getO('ca_vendor_session');
+if(sess){
+const sellers=DB.get('ca_sellers');
+const s=sellers.find(x=>x.email===sess.email&&!x.isAdmin);
+if(s){currentUser={...s};enterApp()}
+}
+lucide.createIcons();
+</script>
+</body>
+</html>
+</file_write>

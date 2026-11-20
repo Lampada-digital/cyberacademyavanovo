@@ -1,18 +1,1703 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Cyber Academy — Escola de Tecnologia. Cursos de programação, cibersegurança e dados com SIA, AVA, certificados verificáveis e pagamento via Mercado Pago." />
-    <title>Cyber Academy — Escola de Tecnologia · SIA · AVA</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 9v14L16 30 4 23V9z' fill='%2301070D' stroke='%2303A6A6' stroke-width='2'/%3E%3Cpath d='M12 11l-4 5 4 5M20 11l4 5-4 5' stroke='%235FE3D8' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
-    <style>html,body{margin:0;padding:0;background:#01070D;}</style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Academy — Cursos Profissionais de Tecnologia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0f14;
+            --bg-secondary: #111820;
+            --bg-tertiary: #1a2332;
+            --bg-card: #151d28;
+            --teal: #00a8b5;
+            --teal-light: #00d4e0;
+            --teal-dark: #008a94;
+            --teal-glow: rgba(0, 168, 181, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-muted: #6b7a8d;
+            --border: #2a3544;
+            --border-light: #3a4a5c;
+            --success: #00d4a0;
+            --warning: #ffb84d;
+            --gradient-teal: linear-gradient(135deg, #00a8b5 0%, #00d4e0 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--teal-dark); border-radius: 4px; }
+
+        .logo-svg { width: 48px; height: 48px; }
+
+        header {
+            background: rgba(10, 15, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+        }
+
+        .logo-text { display: flex; flex-direction: column; }
+
+        .logo-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--teal);
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        nav { display: flex; gap: 2.5rem; align-items: center; }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        nav a:hover { color: var(--teal); }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--teal);
+            transition: width 0.3s;
+        }
+
+        nav a:hover::after { width: 100%; }
+
+        .nav-buttons { display: flex; gap: 1rem; }
+
+        .btn {
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-teal);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 16px var(--teal-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 168, 181, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--teal);
+            border: 1.5px solid var(--teal);
+        }
+
+        .btn-secondary:hover {
+            background: var(--teal-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-large { padding: 1rem 2.5rem; font-size: 1.05rem; }
+
+        .hero {
+            background: radial-gradient(ellipse at top, var(--bg-tertiary) 0%, var(--bg-primary) 70%);
+            padding: 8rem 2rem 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--teal-glow) 0%, transparent 70%);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--teal-glow);
+            border: 1px solid var(--teal);
+            color: var(--teal);
+            padding: 0.5rem 1.5rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .hero h1 .highlight {
+            background: var(--gradient-teal);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.35rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 5rem;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 3rem;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 4rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat { text-align: center; }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            background: var(--teal-glow);
+            border: 1px solid var(--teal);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal);
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--teal);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .catalog-controls {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3.5rem;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--teal);
+            background: var(--bg-tertiary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+
+        .filter-btn.active {
+            background: var(--teal);
+            color: var(--bg-primary);
+            border-color: var(--teal);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+        }
+
+        .course-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-teal);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--teal);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px var(--teal-glow);
+        }
+
+        .course-card:hover::before { opacity: 1; }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+
+        .course-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--teal-glow);
+            border: 1.5px solid var(--teal);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal);
+        }
+
+        .course-badge {
+            background: var(--teal-glow);
+            color: var(--teal);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--teal);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .course-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .course-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .course-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .course-level {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .course-price {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--teal);
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .plan-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.4s;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--teal);
+        }
+
+        .plan-card.featured {
+            border-color: var(--teal);
+            background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-card) 100%);
+            box-shadow: 0 20px 60px rgba(0, 168, 181, 0.15);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-teal);
+            color: var(--bg-primary);
+            padding: 0.5rem 1.75rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .plan-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-tagline {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .plan-price {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin: 1.5rem 0;
+            line-height: 1;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .plan-enrollment {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2.5rem;
+        }
+
+        .plan-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .plan-features li::before {
+            content: "";
+            color: var(--teal);
+            font-weight: 700;
+            width: 24px;
+            height: 24px;
+            background: var(--teal-glow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid var(--teal);
+        }
+
+        .institution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .institution-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .institution-card:hover {
+            border-color: var(--teal);
+            transform: translateY(-4px);
+        }
+
+        .institution-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--teal-glow);
+            border: 1.5px solid var(--teal);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal);
+            margin-bottom: 1.5rem;
+        }
+
+        .institution-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .institution-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .contact-info {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+        }
+
+        .contact-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--teal-glow);
+            border: 1.5px solid var(--teal);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal);
+            flex-shrink: 0;
+        }
+
+        .contact-info h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-info p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-info .email {
+            color: var(--teal);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .contact-form {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--teal);
+            background: var(--bg-secondary);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 120px; }
+
+        footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 4rem 2rem 2rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-top: 1.5rem;
+        }
+
+        .footer-column h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--teal);
+        }
+
+        .footer-column ul { list-style: none; }
+
+        .footer-column li { margin-bottom: 0.75rem; }
+
+        .footer-column a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-column a:hover { color: var(--teal); }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 2rem 2.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--teal);
+        }
+
+        .modal-body { padding: 2.5rem; }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .modal-stat {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .modal-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .topic-tag {
+            background: var(--bg-tertiary);
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--teal);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .footer-content { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.75rem; }
+            .section-header h2 { font-size: 2rem; }
+            nav { display: none; }
+            .course-grid { grid-template-columns: 1fr; }
+            .plans-grid { grid-template-columns: 1fr; }
+            .modal-stats { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; }
+            .header-content { padding: 1rem; }
+            .hero { padding: 5rem 1rem 4rem; }
+            section { padding: 4rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo-container">
+                <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+                    <text x="50" y="62" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+                    <text x="50" y="18" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">CYBER ACADEMY</text>
+                    <text x="50" y="92" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">EST. 2022</text>
+                </svg>
+                <div class="logo-text">
+                    <span class="logo-title">Cyber Academy</span>
+                    <span class="logo-subtitle">Est. 2022 · Ensino Livre</span>
+                </div>
+            </a>
+            <nav>
+                <a href="#catalogo">Catálogo</a>
+                <a href="#planos">Planos</a>
+                <a href="#instituicao">Instituição</a>
+                <a href="#contato">Contato</a>
+            </nav>
+            <div class="nav-buttons">
+                <a href="portal.html" class="btn btn-secondary">
+                    <i data-lucide="user-circle" style="width:18px;height:18px;"></i>
+                    Área do Aluno
+                </a>
+                <a href="#planos" class="btn btn-primary">
+                    <i data-lucide="graduation-cap" style="width:18px;height:18px;"></i>
+                    Matricule-se
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i data-lucide="calendar-check" style="width:16px;height:16px;"></i>
+                Matrículas Abertas · Nov 2026
+            </div>
+            <h1>Tecnologia inteira.<br><span class="highlight">Nível profissional.</span></h1>
+            <p>Instituição de ensino livre 100% online com grade curricular completa em cada curso. Matrícula única e mensalidade fixa.</p>
+            <div class="hero-buttons">
+                <a href="#catalogo" class="btn btn-primary btn-large">
+                    <i data-lucide="book-open" style="width:20px;height:20px;"></i>
+                    Ver Catálogo Completo
+                </a>
+                <a href="<a href="checkout.html" class="btn btn-primary">Reservar matrícula</a>" class="btn btn-secondary btn-large">
+                    <i data-lucide="credit-card" style="width:20px;height:20px;"></i>
+                    Reservar Matrícula
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-icon"><i data-lucide="layers" style="width:24px;height:24px;"></i></div>
+                    <div class="stat-value" id="stat-courses">0</div>
+                    <div class="stat-label">Cursos Profissionais</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon"><i data-lucide="users" style="width:24px;height:24px;"></i></div>
+                    <div class="stat-value" id="stat-students">0</div>
+                    <div class="stat-label">Alunos Ativos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon"><i data-lucide="play-circle" style="width:24px;height:24px;"></i></div>
+                    <div class="stat-value" id="stat-lessons">0</div>
+                    <div class="stat-label">Aulas Publicadas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon"><i data-lucide="building-2" style="width:24px;height:24px;"></i></div>
+                    <div class="stat-value" id="stat-companies">0</div>
+                    <div class="stat-label">Equipes Treinadas</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catálogo -->
+    <section id="catalogo">
+        <div class="section-header">
+            <div class="section-label">
+                <i data-lucide="library" style="width:16px;height:16px;"></i>
+                Catálogo Completo
+            </div>
+            <h2>Toda a tecnologia, módulo a módulo</h2>
+            <p>Abra qualquer curso para ver a grade curricular completa: módulos, aulas, duração e projeto final</p>
+        </div>
+
+        <div class="catalog-controls">
+            <div class="search-box">
+                <i data-lucide="search" class="search-icon" style="width:20px;height:20px;"></i>
+                <input type="text" id="search-input" placeholder="Buscar cursos...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i data-lucide="grid-3x3" style="width:16px;height:16px;"></i>
+                    Todos
+                </button>
+                <button class="filter-btn" data-filter="desenvolvimento">
+                    <i data-lucide="code-2" style="width:16px;height:16px;"></i>
+                    Desenvolvimento
+                </button>
+                <button class="filter-btn" data-filter="dados">
+                    <i data-lucide="database" style="width:16px;height:16px;"></i>
+                    Dados
+                </button>
+                <button class="filter-btn" data-filter="cloud">
+                    <i data-lucide="cloud" style="width:16px;height:16px;"></i>
+                    Cloud
+                </button>
+                <button class="filter-btn" data-filter="ia">
+                    <i data-lucide="brain" style="width:16px;height:16px;"></i>
+                    IA
+                </button>
+                <button class="filter-btn" data-filter="negocios">
+                    <i data-lucide="briefcase" style="width:16px;height:16px;"></i>
+                    Negócios
+                </button>
+            </div>
+        </div>
+
+        <div class="course-grid" id="course-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                Carregando cursos...
+            </div>
+        </div>
+    </section>
+
+    <!-- Planos -->
+    <section id="planos">
+        <div class="section-header">
+            <div class="section-label">
+                <i data-lucide="crown" style="width:16px;height:16px;"></i>
+                Planos de Mensalidade
+            </div>
+            <h2>Estude o ano inteiro. Pague por mês.</h2>
+            <p>Matrícula única, mensalidade fixa e sem fidelidade</p>
+        </div>
+
+        <div class="plans-grid">
+            <div class="plan-card">
+                <div class="plan-name">Essencial</div>
+                <div class="plan-tagline">Para dar o primeiro passo</div>
+                <div class="plan-price">R$100<span>/mês</span></div>
+                <div class="plan-enrollment">+ matrícula única de R$ 79,00</div>
+                <ul class="plan-features">
+                    <li>1 curso ativo</li>
+                    <li>Grade completa liberada</li>
+                    <li>Nível profissional</li>
+                    <li>Projeto final</li>
+                    <li>Certificado verificável</li>
+                    <li>Acesso em 1 dispositivo</li>
+                    <li>Fórum da comunidade</li>
+                </ul>
+                <a href="checkout.html?plan=essencial" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                    Reservar Matrícula
+                </a>
+            </div>
+
+            <div class="plan-card featured">
+                <div class="plan-badge">
+                    <i data-lucide="star" style="width:14px;height:14px;"></i>
+                    MAIS ESCOLHIDO
+                </div>
+                <div class="plan-name">Profissional</div>
+                <div class="plan-tagline">Para acelerar a carreira</div>
+                <div class="plan-price">R$150<span>/mês</span></div>
+                <div class="plan-enrollment">+ matrícula única de R$ 99,00</div>
+                <ul class="plan-features">
+                    <li>5 cursos ativos</li>
+                    <li>Grades completas liberadas</li>
+                    <li>Trilhas guiadas</li>
+                    <li>2 mentorias ao vivo/mês</li>
+                    <li>Feedback docente</li>
+                    <li>Certificados verificáveis</li>
+                    <li>Suporte prioritário</li>
+                </ul>
+                <a href="checkout.html?plan=profissional" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="rocket" style="width:18px;height:18px;"></i>
+                    Reservar Matrícula
+                </a>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Corporativo</div>
+                <div class="plan-tagline">Para treinar equipes</div>
+                <div class="plan-price">R$250<span>/aluno/mês</span></div>
+                <div class="plan-enrollment">+ adesão única de R$ 199,00</div>
+                <ul class="plan-features">
+                    <li>5 cursos por aluno</li>
+                    <li>Turmas fechadas</li>
+                    <li>Trilha por cargo</li>
+                    <li>Painel de gestão</li>
+                    <li>Relatórios de progresso</li>
+                    <li>Gerente de conta dedicado</li>
+                    <li>Mínimo 5 alunos</li>
+                </ul>
+                <a href="checkout.html?plan=corporativo" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="building" style="width:18px;height:18px;"></i>
+                    Reservar para Empresa
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instituição -->
+    <section id="instituicao">
+        <div class="section-header">
+            <div class="section-label">
+                <i data-lucide="landmark" style="width:16px;height:16px;"></i>
+                A Instituição
+            </div>
+            <h2>Ensino livre com padrão profissional</h2>
+            <p>Fundada em 2022, formando profissionais de tecnologia em todas as frentes</p>
+        </div>
+
+        <div class="institution-grid">
+            <div class="institution-card">
+                <div class="institution-icon"><i data-lucide="target" style="width:28px;height:28px;"></i></div>
+                <h3>Missão</h3>
+                <p>Formar profissionais capazes de construir software, operar dados e nuvem, aplicar IA e conduzir negócios de tecnologia com padrão de mercado.</p>
+            </div>
+            <div class="institution-card">
+                <div class="institution-icon"><i data-lucide="file-text" style="width:28px;height:28px;"></i></div>
+                <h3>Grade Transparente</h3>
+                <p>Módulos, aulas e cargas horárias publicados curso a curso. O aluno sabe exatamente o que vai estudar, praticar e entregar antes de se matricular.</p>
+            </div>
+            <div class="institution-card">
+                <div class="institution-icon"><i data-lucide="users-round" style="width:28px;height:28px;"></i></div>
+                <h3>Corpo Docente</h3>
+                <p>Instrutores com experiência real de mercado e formação acadêmica sólida, selecionados por domínio técnico e didática.</p>
+            </div>
+            <div class="institution-card">
+                <div class="institution-icon"><i data-lucide="building-2" style="width:28px;height:28px;"></i></div>
+                <h3>Treinamento Corporativo</h3>
+                <p>Programas tecnológicos para equipes: turmas fechadas, conteúdo aplicado ao contexto da empresa e indicadores para o RH.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contato -->
+    <section id="contato">
+        <div class="section-header">
+            <div class="section-label">
+                <i data-lucide="headphones" style="width:16px;height:16px;"></i>
+                Suporte & Contato
+            </div>
+            <h2>Fale com a Cyber Academy</h2>
+            <p>Respondemos em até 1 dia útil</p>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-icon"><i data-lucide="life-buoy" style="width:24px;height:24px;"></i></div>
+                <div>
+                    <h3>Suporte ao Aluno</h3>
+                    <p class="email">suporte@cyberacademy.demo</p>
+                    <p>Ajuda com acesso, aulas e certificados</p>
+                </div>
+            </div>
+            <div class="contact-info">
+                <div class="contact-icon"><i data-lucide="briefcase" style="width:24px;height:24px;"></i></div>
+                <div>
+                    <h3>Comercial</h3>
+                    <p class="email">empresas@cyberacademy.demo</p>
+                    <p>Turmas fechadas, trilhas por cargo e propostas</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="contact-form" class="contact-form">
+            <div class="form-group">
+                <label>Nome completo</label>
+                <input type="text" required placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Assunto</label>
+                <select required>
+                    <option value="">Selecione...</option>
+                    <option value="matricula">Quero me matricular</option>
+                    <option value="equipe">Treinamento de equipe</option>
+                    <option value="grade">Dúvida sobre grade</option>
+                    <option value="suporte">Suporte ao aluno</option>
+                    <option value="outro">Outro assunto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Mensagem</label>
+                <textarea required placeholder="Escreva sua mensagem..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-large" style="width: 100%; justify-content: center;">
+                <i data-lucide="send" style="width:20px;height:20px;"></i>
+                Enviar Mensagem
+            </button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo-container">
+                    <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+                        <text x="50" y="62" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+                        <text x="50" y="18" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">CYBER ACADEMY</text>
+                        <text x="50" y="92" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">EST. 2022</text>
+                    </svg>
+                    <div class="logo-text">
+                        <span class="logo-title">Cyber Academy</span>
+                        <span class="logo-subtitle">Est. 2022 · Ensino Livre</span>
+                    </div>
+                </div>
+                <p>Instituição de ensino livre 100% online. Cursos de tecnologia em nível profissional com grade curricular completa e treinamento de equipes para empresas.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Ensino</h4>
+                <ul>
+                    <li><a href="#catalogo"><i data-lucide="book-open" style="width:14px;height:14px;"></i> Catálogo</a></li>
+                    <li><a href="#planos"><i data-lucide="crown" style="width:14px;height:14px;"></i> Planos</a></li>
+                    <li><a href="checkout.html"><i data-lucide="credit-card" style="width:14px;height:14px;"></i> Checkout</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Plataforma</h4>
+                <ul>
+                    <li><a href="portal.html"><i data-lucide="user-circle" style="width:14px;height:14px;"></i> Portal do Aluno</a></li>
+                    <li><a href="admin.html"><i data-lucide="shield" style="width:14px;height:14px;"></i> Admin</a></li>
+                    <li><a href="certificados.html"><i data-lucide="award" style="width:14px;height:14px;"></i> Certificados</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Termos de uso</a></li>
+                    <li><a href="#"><i data-lucide="lock" style="width:14px;height:14px;"></i> Privacidade</a></li>
+                    <li><a href="#"><i data-lucide="award" style="width:14px;height:14px;"></i> Certificados</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Cyber Academy · EST. 2022 · Cursos livres conforme Decreto nº 5.154/2004
+        </div>
+    </footer>
+
+    <!-- Modal de Curso -->
+    <div class="modal" id="course-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalhes do Curso</h2>
+                <button class="modal-close" onclick="closeModal()">
+                    <i data-lucide="x" style="width:24px;height:24px;"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Conteúdo dinâmico -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+
+        // Dados dos cursos
+        const courses = [
+            {
+                id: 1,
+                title: "Python do Zero ao Avançado",
+                category: "desenvolvimento",
+                icon: "code-2",
+                description: "Domine Python desde os fundamentos até projetos avançados com IA e automação.",
+                duration: "120h",
+                lessons: 48,
+                modules: 8,
+                level: "Iniciante ao Avançado",
+                price: "Incluso nos planos",
+                topics: ["Sintaxe básica", "Estruturas de dados", "OOP", "APIs", "Automação", "IA com Python"]
+            },
+            {
+                id: 2,
+                title: "SQL & NoSQL Completo",
+                category: "dados",
+                icon: "database",
+                description: "Bancos de dados relacionais e não-relacionais do básico ao avançado.",
+                duration: "80h",
+                lessons: 36,
+                modules: 6,
+                level: "Iniciante ao Avançado",
+                price: "Incluso nos planos",
+                topics: ["SQL básico", "Joins avançados", "MongoDB", "Redis", "Modelagem", "Performance"]
+            },
+            {
+                id: 3,
+                title: "Front-end Moderno",
+                category: "desenvolvimento",
+                icon: "layout",
+                description: "HTML, CSS, JavaScript, React e TypeScript para aplicações profissionais.",
+                duration: "100h",
+                lessons: 42,
+                modules: 7,
+                level: "Iniciante ao Avançado",
+                price: "Incluso nos planos",
+                topics: ["HTML5", "CSS3", "JavaScript ES6+", "React", "TypeScript", "Testes"]
+            },
+            {
+                id: 4,
+                title: "Back-end & Arquitetura",
+                category: "desenvolvimento",
+                icon: "server",
+                description: "APIs, microsserviços, mensageria e arquitetura de sistemas distribuídos.",
+                duration: "110h",
+                lessons: 45,
+                modules: 8,
+                level: "Intermediário ao Avançado",
+                price: "Incluso nos planos",
+                topics: ["APIs REST", "Microsserviços", "RabbitMQ", ".NET", "Docker", "Kubernetes"]
+            },
+            {
+                id: 5,
+                title: "Azure & DevOps",
+                category: "cloud",
+                icon: "cloud",
+                description: "Cloud computing, CI/CD, containers e infraestrutura como código.",
+                duration: "90h",
+                lessons: 38,
+                modules: 7,
+                level: "Intermediário ao Avançado",
+                price: "Incluso nos planos",
+                topics: ["Azure Fundamentals", "DevOps", "CI/CD", "Docker", "Terraform", "Monitoramento"]
+            },
+            {
+                id: 6,
+                title: "IA Generativa & Machine Learning",
+                category: "ia",
+                icon: "brain",
+                description: "Inteligência artificial, RAG, agentes e machine learning aplicado.",
+                duration: "95h",
+                lessons: 40,
+                modules: 7,
+                level: "Intermediário ao Avançado",
+                price: "Incluso nos planos",
+                topics: ["Fundamentos de IA", "RAG", "Agentes", "LLMs", "ML clássico", "Deep Learning"]
+            },
+            {
+                id: 7,
+                title: "Lógica de Programação & POO",
+                category: "desenvolvimento",
+                icon: "lightbulb",
+                description: "Fundamentos da programação e programação orientada a objetos.",
+                duration: "60h",
+                lessons: 28,
+                modules: 5,
+                level: "Iniciante",
+                price: "Incluso nos planos",
+                topics: ["Lógica básica", "Variáveis", "Condicionais", "Loops", "OOP", "Padrões"]
+            },
+            {
+                id: 8,
+                title: "Análise de Dados com Python",
+                category: "dados",
+                icon: "bar-chart-3",
+                description: "Pandas, NumPy, visualização e análise exploratória de dados.",
+                duration: "75h",
+                lessons: 32,
+                modules: 6,
+                level: "Intermediário",
+                price: "Incluso nos planos",
+                topics: ["Pandas", "NumPy", "Matplotlib", "Seaborn", "EDA", "Dashboards"]
+            },
+            {
+                id: 9,
+                title: "Git & GitHub Profissional",
+                category: "desenvolvimento",
+                icon: "git-branch",
+                description: "Controle de versão, workflows e colaboração em equipe.",
+                duration: "40h",
+                lessons: 20,
+                modules: 4,
+                level: "Iniciante ao Intermediário",
+                price: "Incluso nos planos",
+                topics: ["Git básico", "Branches", "Merge", "Pull requests", "Workflows", "CI/CD"]
+            },
+            {
+                id: 10,
+                title: "Empreendedorismo Tech",
+                category: "negocios",
+                icon: "rocket",
+                description: "Como criar, validar e escalar startups de tecnologia.",
+                duration: "50h",
+                lessons: 24,
+                modules: 5,
+                level: "Todos os níveis",
+                price: "Incluso nos planos",
+                topics: ["Validação", "MVP", "Product-Market Fit", "Fundraising", "Growth", "Exit"]
+            },
+            {
+                id: 11,
+                title: "Finanças para Tech",
+                category: "negocios",
+                icon: "trending-up",
+                description: "Gestão financeira, métricas e valuation para empresas de tecnologia.",
+                duration: "45h",
+                lessons: 22,
+                modules: 4,
+                level: "Intermediário",
+                price: "Incluso nos planos",
+                topics: ["Fluxo de caixa", "Métricas SaaS", "Valuation", "Cap table", "Investimentos"]
+            },
+            {
+                id: 12,
+                title: "Power BI & Business Intelligence",
+                category: "dados",
+                icon: "pie-chart",
+                description: "Dashboards, modelagem de dados e análise de negócios.",
+                duration: "65h",
+                lessons: 28,
+                modules: 5,
+                level: "Iniciante ao Intermediário",
+                price: "Incluso nos planos",
+                topics: ["Power BI Desktop", "DAX", "Modelagem", "Dashboards", "Publicação"]
+            }
+        ];
+
+        // Renderizar cursos
+        function renderCourses(filteredCourses = courses) {
+            const grid = document.getElementById('course-grid');
+            
+            if (filteredCourses.length === 0) {
+                grid.innerHTML = '<div class="loading">Nenhum curso encontrado com os filtros selecionados.</div>';
+                return;
+            }
+
+            grid.innerHTML = filteredCourses.map(course => `
+                <div class="course-card" onclick="openCourseModal(${course.id})">
+                    <div class="course-header">
+                        <div class="course-icon">
+                            <i data-lucide="${course.icon}" style="width:28px;height:28px;"></i>
+                        </div>
+                        <span class="course-badge">
+                            <i data-lucide="check-circle" style="width:12px;height:12px;"></i>
+                            Profissional
+                        </span>
+                    </div>
+                    <h3 class="course-title">${course.title}</h3>
+                    <p class="course-description">${course.description}</p>
+                    <div class="course-meta">
+                        <span><i data-lucide="clock" style="width:14px;height:14px;"></i> ${course.duration}</span>
+                        <span><i data-lucide="play-circle" style="width:14px;height:14px;"></i> ${course.lessons} aulas</span>
+                        <span><i data-lucide="folder" style="width:14px;height:14px;"></i> ${course.modules} módulos</span>
+                    </div>
+                    <div class="course-footer">
+                        <span class="course-level">${course.level}</span>
+                        <span class="course-price">${course.price}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        // Modal de curso
+        function openCourseModal(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            if (!course) return;
+
+            const modal = document.getElementById('course-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            modalTitle.textContent = course.title;
+            modalBody.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="course-icon" style="width: 72px; height: 72px;">
+                        <i data-lucide="${course.icon}" style="width:36px;height:36px;"></i>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="tag" style="width:14px;height:14px;"></i>
+                            ${course.category}
+                        </div>
+                        <div style="font-weight: 600; color: var(--teal); display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="award" style="width:16px;height:16px;"></i>
+                            ${course.level}
+                        </div>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.7;">${course.description}</p>
+
+                <div class="modal-stats">
+                    <div class="modal-stat">
+                        <i data-lucide="clock" style="width:24px;height:24px;color:var(--teal);margin-bottom:0.5rem;"></i>
+                        <div class="modal-stat-value">${course.duration}</div>
+                        <div class="modal-stat-label">Carga horária</div>
+                    </div>
+                    <div class="modal-stat">
+                        <i data-lucide="play-circle" style="width:24px;height:24px;color:var(--teal);margin-bottom:0.5rem;"></i>
+                        <div class="modal-stat-value">${course.lessons}</div>
+                        <div class="modal-stat-label">Aulas</div>
+                    </div>
+                    <div class="modal-stat">
+                        <i data-lucide="folder" style="width:24px;height:24px;color:var(--teal);margin-bottom:0.5rem;"></i>
+                        <div class="modal-stat-value">${course.modules}</div>
+                        <div class="modal-stat-label">Módulos</div>
+                    </div>
+                </div>
+
+                <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-lucide="list-checks" style="width:22px;height:22px;color:var(--teal);"></i>
+                    Tópicos abordados
+                </h3>
+                <div class="topic-tags">
+                    ${course.topics.map(topic => `
+                        <span class="topic-tag">
+                            <i data-lucide="check" style="width:14px;height:14px;color:var(--teal);"></i>
+                            ${topic}
+                        </span>
+                    `).join('')}
+                </div>
+
+                <div style="background: var(--bg-tertiary); padding: 2rem; border-radius: 12px; margin: 2rem 0; border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 0.75rem; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; gap: 0.75rem;">
+                        <i data-lucide="book-open" style="width:20px;height:20px;color:var(--teal);"></i>
+                        Grade curricular completa
+                    </h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7;">
+                        Ao se matricular, você terá acesso a todos os ${course.modules} módulos com ${course.lessons} aulas detalhadas, exercícios práticos e projeto final com feedback docente.
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <a href="checkout.html?course=${course.id}" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                        <i data-lucide="credit-card" style="width:18px;height:18px;"></i>
+                        Reservar Matrícula
+                    </a>
+                    <button onclick="closeModal()" class="btn btn-secondary">
+                        <i data-lucide="x" style="width:18px;height:18px;"></i>
+                        Fechar
+                    </button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('course-modal').classList.remove('active');
+        }
+
+        // Filtros
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.dataset.filter;
+                if (filter === 'all') {
+                    renderCourses(courses);
+                } else {
+                    const filtered = courses.filter(c => c.category === filter);
+                    renderCourses(filtered);
+                }
+            });
+        });
+
+        // Busca
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = courses.filter(course => 
+                course.title.toLowerCase().includes(searchTerm) ||
+                course.description.toLowerCase().includes(searchTerm) ||
+                course.topics.some(topic => topic.toLowerCase().includes(searchTerm))
+            );
+            renderCourses(filtered);
+        });
+
+        // Formulário de contato
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Mensagem enviada com sucesso! Entraremos em contato em até 1 dia útil.');
+            this.reset();
+        });
+
+        // Animação de estatísticas
+        function animateStats() {
+            const stats = [
+                { id: 'stat-courses', target: 12 },
+                { id: 'stat-students', target: 128 },
+                { id: 'stat-lessons', target: 383 },
+                { id: 'stat-companies', target: 24 }
+            ];
+
+            stats.forEach(stat => {
+                const element = document.getElementById(stat.id);
+                let current = 0;
+                const increment = stat.target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= stat.target) {
+                        current = stat.target;
+                        clearInterval(timer);
+                    }
+                    element.textContent = Math.floor(current);
+                }, 30);
+            });
+        }
+
+        // Inicialização
+        renderCourses();
+        animateStats();
+
+        // Fechar modal ao clicar fora
+        document.getElementById('course-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
 </html>

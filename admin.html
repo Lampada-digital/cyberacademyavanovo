@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Painel Administrativo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0f14;--bg2:#111820;--bg3:#151d28;--bg4:#1a2332;--input:#0f1620;--teal:#00a8b5;--tealL:#00d4e0;--glow:rgba(0,168,181,.15);--txt:#fff;--txt2:#a0aec0;--txt3:#6b7a8d;--bd:#2a3544;--ok:#00d4a0;--warn:#ffb84d;--err:#ef4444;--grad:linear-gradient(135deg,#00a8b5,#00d4e0)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--teal);border-radius:4px}
+.logo-svg{width:40px;height:40px}
+
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at top,#1a2332 0%,#0a0f14 70%)}
+.login-box{background:var(--bg3);border:1.5px solid var(--bd);border-radius:16px;padding:2.5rem;max-width:440px;width:100%}
+.login-box .logo{text-align:center;margin-bottom:2rem}
+.login-box .logo svg{width:56px;height:56px;margin-bottom:.5rem}
+.login-box h1{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;text-align:center;margin-bottom:.5rem}
+.login-box .sub{text-align:center;color:var(--txt2);font-size:.9rem;margin-bottom:2rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--txt2)}
+.fg input,.fg select,.fg textarea{width:100%;padding:.85rem 1rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:.95rem;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--teal)}
+.fg textarea{resize:vertical;min-height:80px}
+.btn{padding:.9rem 1.5rem;border-radius:8px;font-weight:600;border:none;cursor:pointer;font-size:.95rem;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;transition:.2s;text-decoration:none}
+.btn i{width:16px;height:16px}
+.pri{background:var(--grad);color:var(--bg);box-shadow:0 4px 14px var(--glow)}
+.pri:hover{transform:translateY(-2px)}
+.sec{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+.gh{background:var(--bg4);color:var(--txt2);border:1px solid var(--bd)}
+.dan{background:rgba(239,68,68,.15);color:var(--err);border:1px solid var(--err)}
+.blk{width:100%}.lg{padding:1rem 2rem;font-size:1rem}.sm{padding:.5rem 1rem;font-size:.85rem}
+.err-box{background:rgba(239,68,68,.1);border:1px solid var(--err);color:var(--err);padding:.75rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem;display:none}
+.err-box.on{display:block}
+.hint{background:var(--bg4);border:1px solid var(--bd);border-radius:8px;padding:.75rem;font-size:.8rem;color:var(--txt2);margin-top:1rem}
+.hint strong{color:var(--teal)}
+
+.app{display:none;min-height:100vh}
+.app.on{display:flex}
+.side{width:240px;background:var(--bg2);border-right:1px solid var(--bd);position:fixed;height:100vh;padding:1.5rem 0;overflow-y:auto;z-index:50}
+.side-h{padding:0 1.5rem 1.5rem;border-bottom:1px solid var(--bd);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.side-h .lt{font-family:'Space Grotesk',sans-serif;font-size:1rem;color:var(--teal);font-weight:700}
+.side-h .ls{font-size:.6rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase}
+.nav{padding:0 .75rem}
+.nav-t{font-size:.7rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;padding:0 .75rem;margin:.75rem 0 .5rem;font-weight:600}
+.nv{display:flex;align-items:center;gap:.6rem;padding:.65rem .75rem;border-radius:8px;color:var(--txt2);text-decoration:none;font-size:.9rem;cursor:pointer;transition:.2s;margin-bottom:.15rem}
+.nv:hover{background:var(--bg4);color:var(--txt)}
+.nv.on{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.nv i{width:16px;height:16px}
+.nv .bdg{margin-left:auto;background:var(--teal);color:var(--bg);padding:.1rem .4rem;border-radius:100px;font-size:.65rem;font-weight:700}
+.nv .bdg.w{background:var(--warn)}
+.side-f{padding:1rem .75rem;border-top:1px solid var(--bd);margin-top:1rem}
+.uc{display:flex;align-items:center;gap:.6rem;padding:.6rem;background:var(--bg4);border-radius:8px;margin-bottom:.6rem}
+.uc .av{width:36px;height:36px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:.85rem}
+.uc .n{font-size:.85rem;font-weight:600}
+.uc .p{font-size:.7rem;color:var(--teal)}
+.main{margin-left:240px;flex:1;min-height:100vh}
+.top{background:var(--bg2);border-bottom:1px solid var(--bd);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.top h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700}
+.top .s{font-size:.8rem;color:var(--txt3)}
+.top-r{display:flex;gap:.5rem;align-items:center}
+.ct{padding:2rem;max-width:1400px}
+.pg{display:none}.pg.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem}
+.st{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.25rem;transition:.2s}
+.st:hover{border-color:var(--teal);transform:translateY(-2px)}
+.st .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.st .ic{width:40px;height:40px;background:var(--glow);border:1px solid var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.st .ic.ok{background:rgba(0,212,160,.15);border-color:var(--ok);color:var(--ok)}
+.st .ic.w{background:rgba(255,184,77,.15);border-color:var(--warn);color:var(--warn)}
+.st .ic.d{background:rgba(239,68,68,.15);border-color:var(--err);color:var(--err)}
+.st .ic i{width:20px;height:20px}
+.st .l{font-size:.8rem;color:var(--txt3)}
+.st .v{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;color:var(--teal)}
+.st .c{font-size:.75rem;color:var(--ok);display:flex;align-items:center;gap:.25rem}
+
+.tbl{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+.tbl-h{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.tbl-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.1rem}
+.tbl-f{display:flex;gap:.5rem;flex-wrap:wrap}
+.tbl-f input,.tbl-f select{padding:.5rem .75rem;background:var(--input);border:1.5px solid var(--bd);border-radius:6px;color:var(--txt);font-size:.85rem;font-family:inherit;min-width:180px}
+.tbl-f input:focus,.tbl-f select:focus{outline:none;border-color:var(--teal)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.85rem 1.5rem;font-size:.75rem;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);background:var(--bg4)}
+td{padding:.85rem 1.5rem;border-bottom:1px solid var(--bd);font-size:.9rem}
+tr:last-child td{border:none}
+tr:hover{background:var(--bg4)}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:100px;font-size:.7rem;font-weight:600}
+.b-ok{background:rgba(0,212,160,.15);color:var(--ok);border:1px solid var(--ok)}
+.b-w{background:rgba(255,184,77,.15);color:var(--warn);border:1px solid var(--warn)}
+.b-d{background:rgba(239,68,68,.15);color:var(--err);border:1px solid var(--err)}
+.b-i{background:var(--glow);color:var(--teal);border:1px solid var(--teal)}
+.acts{display:flex;gap:.4rem}
+.ab{width:30px;height:30px;background:var(--bg4);border:1px solid var(--bd);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--txt2);cursor:pointer;transition:.2s}
+.ab:hover{border-color:var(--teal);color:var(--teal)}
+.ab.d:hover{border-color:var(--err);color:var(--err)}
+.ab i{width:14px;height:14px}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);z-index:100;align-items:center;justify-content:center;padding:2rem}
+.modal.on{display:flex}
+.m-c{background:var(--bg2);border:1.5px solid var(--bd);border-radius:16px;max-width:1100px;width:100%;max-height:92vh;overflow:hidden;display:grid;grid-template-columns:1fr 380px}
+.m-h{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;grid-column:1/-1}
+.m-h h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem}
+.m-x{background:none;border:none;color:var(--txt2);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.m-x:hover{background:var(--bg4);color:var(--teal)}
+.m-x i{width:18px;height:18px}
+.m-b{padding:1.5rem;overflow-y:auto;max-height:calc(92vh - 140px)}
+.m-f{padding:1rem 1.5rem;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:.5rem;grid-column:1/-1}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:768px){.row{grid-template-columns:1fr}.m-c{grid-template-columns:1fr}}
+
+/* PREVIEW PANE */
+.preview-pane{background:var(--bg3);border-left:1px solid var(--bd);padding:1.5rem;overflow-y:auto;max-height:calc(92vh - 140px)}
+.preview-pane h4{font-family:'Space Grotesk',sans-serif;font-size:.95rem;margin-bottom:1rem;color:var(--teal);display:flex;align-items:center;gap:.5rem}
+.preview-pane h4 i{width:16px;height:16px}
+
+/* COURSE CARD PREVIEW */
+.preview-card{background:var(--bg2);border:1.5px solid var(--bd);border-radius:14px;overflow:hidden;transition:.3s}
+.preview-card:hover{border-color:var(--teal);transform:translateY(-4px)}
+.preview-thumb{aspect-ratio:16/9;background:linear-gradient(135deg,var(--bg4),var(--bg2));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.preview-thumb img{width:100%;height:100%;object-fit:cover}
+.preview-thumb .fallback{color:var(--teal)}
+.preview-thumb .fallback i{width:48px;height:48px}
+.preview-thumb .status-dot{position:absolute;top:.75rem;right:.75rem}
+.preview-thumb .feat-dot{position:absolute;top:.75rem;left:.75rem}
+.preview-body{padding:1.25rem}
+.preview-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
+.preview-title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.5rem;line-height:1.3}
+.preview-desc{color:var(--txt2);font-size:.85rem;margin-bottom:1rem;line-height:1.5}
+.preview-meta{display:flex;gap:1rem;color:var(--txt3);font-size:.8rem;margin-bottom:.75rem;flex-wrap:wrap}
+.preview-meta span{display:flex;align-items:center;gap:.3rem}
+.preview-meta i{width:12px;height:12px}
+.preview-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
+.preview-tag{background:var(--bg4);border:1px solid var(--bd);padding:.2rem .6rem;border-radius:6px;font-size:.7rem;color:var(--txt2)}
+.preview-footer{display:flex;justify-content:space-between;align-items:center;padding-top:.75rem;border-top:1px solid var(--bd);font-size:.8rem}
+.preview-level{color:var(--txt2)}
+.preview-price{color:var(--teal);font-weight:700;font-family:'Space Grotesk',sans-serif}
+
+/* FORM EXTRAS */
+.toggle-row{display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--bg4);border-radius:8px;margin-bottom:.75rem}
+.toggle-row label{margin:0;flex:1;cursor:pointer}
+.toggle{position:relative;width:44px;height:24px;background:var(--bg);border-radius:100px;cursor:pointer;transition:.2s;flex-shrink:0}
+.toggle.on{background:var(--teal)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
+.toggle.on::after{left:22px}
+
+.upload-area{border:2px dashed var(--bd);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:.2s;background:var(--bg4)}
+.upload-area:hover{border-color:var(--teal);background:var(--glow)}
+.upload-area i{width:32px;height:32px;color:var(--teal);margin-bottom:.5rem}
+.upload-area p{font-size:.85rem;color:var(--txt2)}
+.upload-area small{font-size:.75rem;color:var(--txt3)}
+.upload-preview{margin-top:.75rem;border-radius:8px;overflow:hidden;position:relative}
+.upload-preview img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.upload-preview .rm{position:absolute;top:.5rem;right:.5rem;background:var(--err);color:#fff;border:none;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.upload-preview .rm i{width:14px;height:14px}
+
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:.4rem;padding:.5rem;background:var(--input);border:1.5px solid var(--bd);border-radius:8px;min-height:44px;align-items:center}
+.tag-input-wrap:focus-within{border-color:var(--teal)}
+.tag-chip{background:var(--glow);border:1px solid var(--teal);color:var(--teal);padding:.25rem .6rem;border-radius:6px;font-size:.8rem;display:flex;align-items:center;gap:.4rem}
+.tag-chip button{background:none;border:none;color:var(--teal);cursor:pointer;padding:0;display:flex}
+.tag-chip button i{width:12px;height:12px}
+.tag-input-wrap input{background:none;border:none;color:var(--txt);font-size:.85rem;flex:1;min-width:100px;outline:none;font-family:inherit}
+
+@media(max-width:900px){.side{transform:translateX(-100%);transition:.3s}.side.open{transform:none}.main{margin-left:0}.stats{grid-template-columns:1fr}.tbl{overflow-x:auto}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="logo">
+<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text><text x="50" y="18" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">CYBER ACADEMY</text><text x="50" y="92" font-family="Space Grotesk" font-size="9" font-weight="600" fill="#00a8b5" text-anchor="middle">EST. 2022</text></svg>
+</div>
+<h1>Acesso administrativo</h1>
+<p class="sub">Gestão central da plataforma</p>
+<div class="err-box" id="login-err"></div>
+<form id="login-form" onsubmit="doLogin(event)">
+<div class="fg"><label>E-mail</label><input type="email" id="li-email" required placeholder="admin@cyberacademy.demo"></div>
+<div class="fg"><label>Senha</label><input type="password" id="li-pass" required placeholder="••••••••"></div>
+<button type="submit" class="btn pri blk"><i data-lucide="shield"></i> Entrar no painel</button>
+</form>
+<div class="hint"><strong>Conta demo:</strong> admin@cyberacademy.demo · admin1234</div>
+<div style="text-align:center;margin-top:1rem"><a href="index.html" class="btn gh" style="width:auto;padding:.6rem 1rem;font-size:.85rem">Voltar ao site</a></div>
+</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+<aside class="side" id="side">
+<div class="side-h">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/><circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/><text x="50" y="62" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text></svg>
+<div><div class="lt">Cyber Academy</div><div class="ls">Painel Admin</div></div>
+</div>
+<nav class="nav">
+<div class="nav-t">Principal</div>
+<a class="nv on" data-p="dash"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+<a class="nv" data-p="courses"><i data-lucide="book-open"></i> Cursos <span class="bdg" id="nv-c">0</span></a>
+<a class="nv" data-p="students"><i data-lucide="users"></i> Alunos <span class="bdg" id="nv-s">0</span></a>
+<a class="nv" data-p="teachers"><i data-lucide="graduation-cap"></i> Professores</a>
+<div class="nav-t">Financeiro</div>
+<a class="nv" data-p="payments"><i data-lucide="credit-card"></i> Pagamentos <span class="bdg w" id="nv-p">0</span></a>
+<a class="nv" data-p="revenue"><i data-lucide="trending-up"></i> Receita</a>
+<div class="nav-t">Sistema</div>
+<a class="nv" data-p="settings"><i data-lucide="settings"></i> Configurações</a>
+</nav>
+<div class="side-f">
+<div class="uc"><div class="av">AD</div><div><div class="n">Admin</div><div class="p">Super Admin</div></div></div>
+<button class="btn gh blk" onclick="logout()" style="font-size:.85rem;padding:.6rem"><i data-lucide="log-out"></i> Sair</button>
+</div>
+</aside>
+
+<main class="main">
+<div class="top">
+<div><h2 id="pg-t">Dashboard</h2><div class="s" id="pg-s">Visão geral da plataforma</div></div>
+<div class="top-r">
+<a href="index.html" class="btn gh sm"><i data-lucide="external-link"></i> Site</a>
+<a href="portal.html" class="btn gh sm"><i data-lucide="user"></i> Portal</a>
+</div>
+</div>
+<div class="ct">
+
+<!-- DASHBOARD -->
+<div class="pg on" id="pg-dash">
+<div class="stats">
+<div class="st"><div class="h"><div class="ic"><i data-lucide="users"></i></div><span class="l">Alunos ativos</span></div><div class="v" id="s-st">0</div><div class="c"><i data-lucide="trending-up"></i> <span id="s-st-c">0 este mês</span></div></div>
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="dollar-sign"></i></div><span class="l">MRR</span></div><div class="v" id="s-mrr">R$ 0</div><div class="c"><i data-lucide="trending-up"></i> Receita recorrente</div></div>
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="book-open"></i></div><span class="l">Cursos publicados</span></div><div class="v" id="s-c">0</div><div class="c"><i data-lucide="plus"></i> <span id="s-c-c">no catálogo</span></div></div>
+<div class="st"><div class="h"><div class="ic d"><i data-lucide="alert-circle"></i></div><span class="l">Inadimplência</span></div><div class="v" id="s-ch">0%</div><div class="c" style="color:var(--err)"><i data-lucide="trending-down"></i> <span id="s-ch-c">0 alunos</span></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+<div class="chart" style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem">
+<h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:1rem">Receita últimos 6 meses</h4>
+<div class="bars" id="rev-chart" style="display:flex;align-items:flex-end;gap:.5rem;height:180px;padding:1rem 0"></div>
+</div>
+<div class="chart" style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:1.5rem">
+<h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:1rem">Distribuição por plano</h4>
+<div id="plan-chart"></div>
+</div>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Últimos pagamentos</h3><button class="btn sec sm" onclick="navTo('payments')">Ver todos <i data-lucide="arrow-right"></i></button></div>
+<table><thead><tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Status</th><th>Data</th></tr></thead><tbody id="recent-pay"></tbody></table>
+</div>
+</div>
+
+<!-- COURSES -->
+<div class="pg" id="pg-courses">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Gestão de Cursos</h3><p style="color:var(--txt3);font-size:.9rem">Crie, edite e gerencie o catálogo</p></div>
+<button class="btn pri" onclick="openCourse()"><i data-lucide="plus"></i> Novo curso</button>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Catálogo</h3><div class="tbl-f"><input type="text" id="c-search" placeholder="Buscar cursos..."><select id="c-status-filter"><option value="">Todos os status</option><option value="publicado">Publicados</option><option value="rascunho">Rascunhos</option></select></div></div>
+<table><thead><tr><th>Curso</th><th>Status</th><th>Destaque</th><th>Categoria</th><th>Aulas</th><th>Alunos</th><th>Ações</th></tr></thead><tbody id="c-tbl"></tbody></table>
+</div>
+</div>
+
+<!-- STUDENTS -->
+<div class="pg" id="pg-students">
+<div style="margin-bottom:1.5rem"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Gestão de Alunos</h3><p style="color:var(--txt3);font-size:.9rem">Lista completa de alunos matriculados</p></div>
+<div class="tbl">
+<div class="tbl-h"><h3>Alunos cadastrados</h3><div class="tbl-f"><input type="text" id="st-search" placeholder="Buscar por nome ou e-mail..."><select id="st-plan"><option value="">Todos os planos</option><option value="essencial">Essencial</option><option value="profissional">Profissional</option><option value="corporativo">Corporativo</option></select></div></div>
+<table><thead><tr><th>Aluno</th><th>E-mail</th><th>Plano</th><th>Cursos</th><th>Status</th><th>Ações</th></tr></thead><tbody id="st-tbl"></tbody></table>
+</div>
+</div>
+
+<!-- TEACHERS -->
+<div class="pg" id="pg-teachers">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+<div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Corpo Docente</h3><p style="color:var(--txt3);font-size:.9rem">Professores cadastrados</p></div>
+<button class="btn pri" onclick="openTeacher()"><i data-lucide="plus"></i> Novo professor</button>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Professores</h3></div>
+<table><thead><tr><th>Professor</th><th>Especialidade</th><th>Cursos</th><th>Experiência</th><th>Ações</th></tr></thead><tbody id="t-tbl"></tbody></table>
+</div>
+</div>
+
+<!-- PAYMENTS -->
+<div class="pg" id="pg-payments">
+<div style="margin-bottom:1.5rem"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Pagamentos</h3><p style="color:var(--txt3);font-size:.9rem">Histórico de transações</p></div>
+<div class="stats">
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="check-circle"></i></div><span class="l">Aprovados</span></div><div class="v" id="p-ok">0</div></div>
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="clock"></i></div><span class="l">Pendentes</span></div><div class="v" id="p-pd">0</div></div>
+<div class="st"><div class="h"><div class="ic d"><i data-lucide="x-circle"></i></div><span class="l">Recusados</span></div><div class="v" id="p-dc">0</div></div>
+<div class="st"><div class="h"><div class="ic"><i data-lucide="dollar-sign"></i></div><span class="l">Receita total</span></div><div class="v" id="p-tot">R$ 0</div></div>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Todas as transações</h3><div class="tbl-f"><input type="text" id="p-search" placeholder="Buscar por e-mail..."></div></div>
+<table><thead><tr><th>Protocolo</th><th>Aluno</th><th>Plano</th><th>Valor</th><th>Método</th><th>Status</th><th>Data</th></tr></thead><tbody id="p-tbl"></tbody></table>
+</div>
+</div>
+
+<!-- REVENUE -->
+<div class="pg" id="pg-revenue">
+<div style="margin-bottom:1.5rem"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Receita & Métricas</h3><p style="color:var(--txt3);font-size:.9rem">Indicadores financeiros</p></div>
+<div class="stats">
+<div class="st"><div class="h"><div class="ic ok"><i data-lucide="trending-up"></i></div><span class="l">MRR</span></div><div class="v" id="r-mrr">R$ 0</div><div class="c">Receita mensal recorrente</div></div>
+<div class="st"><div class="h"><div class="ic"><i data-lucide="calendar"></i></div><span class="l">ARR</span></div><div class="v" id="r-arr">R$ 0</div><div class="c">Projeção anual</div></div>
+<div class="st"><div class="h"><div class="ic w"><i data-lucide="users"></i></div><span class="l">LTV médio</span></div><div class="v" id="r-ltv">R$ 0</div><div class="c">Valor por aluno</div></div>
+<div class="st"><div class="h"><div class="ic d"><i data-lucide="alert-circle"></i></div><span class="l">Churn</span></div><div class="v" id="r-ch">0%</div><div class="c" style="color:var(--err)">Taxa de cancelamento</div></div>
+</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="pg" id="pg-settings">
+<div style="margin-bottom:1.5rem"><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem">Configurações</h3><p style="color:var(--txt3);font-size:.9rem">Parâmetros do sistema</p></div>
+<div style="background:var(--bg4);border:1px solid var(--bd);border-radius:10px;padding:1rem;margin-bottom:1.5rem;display:flex;gap:.75rem;align-items:flex-start">
+<i data-lucide="info" style="width:20px;height:20px;color:var(--teal);flex-shrink:0;margin-top:2px"></i>
+<p style="font-size:.9rem;color:var(--txt2)">As configurações são salvas no armazenamento local do navegador.</p>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+<div class="tbl">
+<div class="tbl-h"><h3>Planos e preços</h3></div>
+<div style="padding:1.5rem">
+<div class="fg"><label>Plano Essencial (R$/mês)</label><input type="number" id="set-p1" value="100"></div>
+<div class="fg"><label>Plano Profissional (R$/mês)</label><input type="number" id="set-p2" value="150"></div>
+<div class="fg"><label>Plano Corporativo (R$/aluno/mês)</label><input type="number" id="set-p3" value="250"></div>
+<button class="btn pri blk" onclick="saveSettings()"><i data-lucide="save"></i> Salvar configurações</button>
+</div>
+</div>
+<div class="tbl">
+<div class="tbl-h"><h3>Dados do sistema</h3></div>
+<div style="padding:1.5rem">
+<div style="margin-bottom:1rem">
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Usuários cadastrados</span><span style="font-weight:600" id="set-st">0</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Pagamentos registrados</span><span style="font-weight:600" id="set-p">0</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Cursos no catálogo</span><span style="font-weight:600" id="set-c">0</span></div>
+<div style="display:flex;justify-content:space-between;padding:.75rem 0"><span style="color:var(--txt3)">Professores</span><span style="font-weight:600" id="set-t">0</span></div>
+</div>
+<button class="btn dan blk" onclick="resetSystem()"><i data-lucide="trash-2"></i> Resetar todos os dados</button>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</main>
+</div>
+
+<!-- MODAL COURSE (com preview ao vivo) -->
+<div class="modal" id="m-course">
+<div class="m-c">
+<div class="m-h"><h3 id="mc-title">Novo curso</h3><button class="m-x" onclick="closeM('m-course')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<input type="hidden" id="mc-id">
+
+<!-- Status toggle -->
+<div class="toggle-row">
+<label for="mc-status" style="cursor:pointer"><strong style="color:var(--txt)">Status de publicação</strong><br><small style="color:var(--txt3)">Apenas cursos publicados aparecem no site</small></label>
+<div class="toggle on" id="mc-status-toggle" onclick="toggleStatus()"></div>
+<input type="hidden" id="mc-status" value="publicado">
+</div>
+
+<!-- Order -->
+<div class="fg">
+<label>Ordem de exibição</label>
+<select id="mc-order" onchange="updatePreview()">
+<option value="normal">Normal (ordem padrão)</option>
+<option value="destaque">⭐ Destaque (aparece primeiro)</option>
+<option value="popular">🔥 Mais populares</option>
+</select>
+</div>
+
+<!-- Thumbnail upload -->
+<div class="fg">
+<label>Imagem de capa (thumbnail)</label>
+<div class="upload-area" onclick="document.getElementById('mc-thumb-file').click()">
+<i data-lucide="image-plus"></i>
+<p>Clique para enviar uma imagem</p>
+<small>PNG, JPG ou WebP · recomendado 1280×720</small>
+</div>
+<input type="file" id="mc-thumb-file" accept="image/*" style="display:none" onchange="handleThumbUpload(event)">
+<div class="upload-preview" id="thumb-preview" style="display:none">
+<img id="thumb-img" src="">
+<button class="rm" onclick="removeThumb(event)"><i data-lucide="x"></i></button>
+</div>
+</div>
+
+<!-- Title -->
+<div class="fg">
+<label>Título <span style="color:var(--err)">*</span></label>
+<input type="text" id="mc-t" placeholder="Ex: Python do Zero ao Avançado" oninput="updatePreview()">
+</div>
+
+<!-- Category + Level -->
+<div class="row">
+<div class="fg">
+<label>Categoria <span style="color:var(--err)">*</span></label>
+<select id="mc-cat" onchange="updatePreview()">
+<option value="desenvolvimento">Desenvolvimento</option>
+<option value="dados">Dados</option>
+<option value="cloud">Cloud</option>
+<option value="ia">IA</option>
+<option value="negocios">Negócios</option>
+</select>
+</div>
+<div class="fg">
+<label>Nível</label>
+<select id="mc-lvl" onchange="updatePreview()">
+<option>Iniciante</option>
+<option>Iniciante ao Intermediário</option>
+<option>Intermediário</option>
+<option>Intermediário ao Avançado</option>
+<option>Iniciante ao Avançado</option>
+<option>Todos os níveis</option>
+</select>
+</div>
+</div>
+
+<!-- Description -->
+<div class="fg">
+<label>Descrição</label>
+<textarea id="mc-d" placeholder="Descreva o curso..." oninput="updatePreview()"></textarea>
+</div>
+
+<!-- Duration + Lessons -->
+<div class="row">
+<div class="fg">
+<label>Carga horária</label>
+<input type="text" id="mc-dur" placeholder="120h" oninput="updatePreview()">
+</div>
+<div class="fg">
+<label>Nº de aulas</label>
+<input type="number" id="mc-les" placeholder="48" oninput="updatePreview()">
+</div>
+</div>
+
+<div class="fg">
+<label>Nº de módulos</label>
+<input type="number" id="mc-mod" placeholder="8" oninput="updatePreview()">
+</div>
+
+<!-- Tags -->
+<div class="fg">
+<label>Tags (pressione Enter para adicionar)</label>
+<div class="tag-input-wrap" id="tag-wrap">
+<input type="text" id="tag-input" placeholder="Ex: python, ia, automação..." onkeydown="handleTagKey(event)">
+</div>
+<small style="color:var(--txt3);font-size:.75rem">As tags aparecem como filtros no site</small>
+</div>
+
+</div>
+
+<!-- PREVIEW PANE -->
+<div class="preview-pane">
+<h4><i data-lucide="eye"></i> Preview ao vivo</h4>
+<div id="live-preview"></div>
+</div>
+
+<div class="m-f">
+<button class="btn gh" onclick="closeM('m-course')">Cancelar</button>
+<button class="btn pri" onclick="saveCourse()"><i data-lucide="save"></i> Salvar curso</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL TEACHER -->
+<div class="modal" id="m-teacher">
+<div class="m-c" style="max-width:640px;display:block">
+<div class="m-h"><h3 id="mt-title">Novo professor</h3><button class="m-x" onclick="closeM('m-teacher')"><i data-lucide="x"></i></button></div>
+<div class="m-b">
+<input type="hidden" id="mt-id">
+<div class="row">
+<div class="fg"><label>Nome <span style="color:var(--err)">*</span></label><input type="text" id="mt-n" placeholder="Nome completo"></div>
+<div class="fg"><label>E-mail <span style="color:var(--err)">*</span></label><input type="email" id="mt-e" placeholder="email@exemplo.com"></div>
+</div>
+<div class="fg"><label>Especialidade <span style="color:var(--err)">*</span></label><input type="text" id="mt-s" placeholder="Ex: Front-end, Python, IA..."></div>
+<div class="fg"><label>Biografia</label><textarea id="mt-b" placeholder="Breve descrição profissional..."></textarea></div>
+<div class="row">
+<div class="fg"><label>Anos de experiência</label><input type="number" id="mt-x" placeholder="10"></div>
+<div class="fg"><label>Cursos lecionados</label><input type="number" id="mt-c" placeholder="3"></div>
+</div>
+</div>
+<div class="m-f">
+<button class="btn gh" onclick="closeM('m-teacher')">Cancelar</button>
+<button class="btn pri" onclick="saveTeacher()"><i data-lucide="save"></i> Salvar</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL STUDENT DETAIL -->
+<div class="modal" id="m-student">
+<div class="m-c lg" style="max-width:900px;display:block">
+<div class="m-h"><h3>Detalhes do aluno</h3><button class="m-x" onclick="closeM('m-student')"><i data-lucide="x"></i></button></div>
+<div class="m-b" id="st-detail"></div>
+</div>
+</div>
+
+<script>
+lucide.createIcons();
+
+const DB={
+  get:(k)=>JSON.parse(localStorage.getItem(k)||'[]'),
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
+  getO:(k)=>JSON.parse(localStorage.getItem(k)||'null'),
+  setO:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+
+const icons={desenvolvimento:'code-2',dados:'database',cloud:'cloud',ia:'brain',negocios:'rocket'};
+const catLabels={desenvolvimento:'Desenvolvimento',dados:'Dados',cloud:'Cloud',ia:'IA',negocios:'Negócios'};
+
+let editingTags=[];
+let editingThumbnail='';
+
+function initDefaults(){
+  if(!DB.get('ca_courses').length){
+    DB.set('ca_courses',[
+      {id:1,title:"Python do Zero ao Avançado",cat:"desenvolvimento",icon:"code-2",dur:"120h",les:48,mod:8,lvl:"Iniciante ao Avançado",desc:"Domine Python com IA e automação",students:45,status:"publicado",order:"destaque",tags:["python","ia","automação"],thumbnail:""},
+      {id:2,title:"SQL & NoSQL Completo",cat:"dados",icon:"database",dur:"80h",les:36,mod:6,lvl:"Iniciante ao Avançado",desc:"Bancos relacionais e não-relacionais",students:32,status:"publicado",order:"popular",tags:["sql","mongodb","redis"],thumbnail:""},
+      {id:3,title:"Front-end Moderno",cat:"desenvolvimento",icon:"layout",dur:"100h",les:42,mod:7,lvl:"Iniciante ao Avançado",desc:"HTML, CSS, JS, React e TypeScript",students:58,status:"publicado",order:"popular",tags:["react","typescript","css"],thumbnail:""},
+      {id:4,title:"Back-end & Arquitetura",cat:"desenvolvimento",icon:"server",dur:"110h",les:45,mod:8,lvl:"Intermediário ao Avançado",desc:"APIs, microsserviços e arquitetura",students:28,status:"publicado",order:"normal",tags:["api","microsserviços",".net"],thumbnail:""},
+      {id:5,title:"Azure & DevOps",cat:"cloud",icon:"cloud",dur:"90h",les:38,mod:7,lvl:"Intermediário ao Avançado",desc:"Cloud, CI/CD, containers e IaC",students:22,status:"publicado",order:"normal",tags:["azure","devops","docker"],thumbnail:""},
+      {id:6,title:"IA Generativa & Machine Learning",cat:"ia",icon:"brain",dur:"95h",les:40,mod:7,lvl:"Intermediário ao Avançado",desc:"RAG, agentes e ML aplicado",students:67,status:"publicado",order:"destaque",tags:["ia","rag","llm","machine-learning"],thumbnail:""},
+      {id:7,title:"Lógica de Programação & POO",cat:"desenvolvimento",icon:"lightbulb",dur:"60h",les:28,mod:5,lvl:"Iniciante",desc:"Fundamentos e OOP",students:89,status:"publicado",order:"normal",tags:["lógica","oop","fundamentos"],thumbnail:""},
+      {id:8,title:"Análise de Dados com Python",cat:"dados",icon:"bar-chart-3",dur:"75h",les:32,mod:6,lvl:"Intermediário",desc:"Pandas, NumPy e visualização",students:41,status:"publicado",order:"normal",tags:["pandas","numpy","dados"],thumbnail:""},
+      {id:9,title:"Git & GitHub Profissional",cat:"desenvolvimento",icon:"git-branch",dur:"40h",les:20,mod:4,lvl:"Iniciante ao Intermediário",desc:"Controle de versão e colaboração",students:73,status:"publicado",order:"popular",tags:["git","github","colaboração"],thumbnail:""},
+      {id:10,title:"Empreendedorismo Tech",cat:"negocios",icon:"rocket",dur:"50h",les:24,mod:5,lvl:"Todos os níveis",desc:"Criar, validar e escalar startups",students:19,status:"publicado",order:"normal",tags:["startup","empreendedorismo"],thumbnail:""},
+      {id:11,title:"Finanças para Tech",cat:"negocios",icon:"trending-up",dur:"45h",les:22,mod:4,lvl:"Intermediário",desc:"Gestão financeira e valuation",students:15,status:"publicado",order:"normal",tags:["finanças","valuation"],thumbnail:""},
+      {id:12,title:"Power BI & Business Intelligence",cat:"dados",icon:"pie-chart",dur:"65h",les:28,mod:5,lvl:"Iniciante ao Intermediário",desc:"Dashboards e análise de negócios",students:34,status:"publicado",order:"normal",tags:["powerbi","bi","dashboards"],thumbnail:""}
+    ]);
+  }
+  if(!DB.get('ca_teachers').length){
+    DB.set('ca_teachers',[
+      {id:1,name:"Beatriz Rocha",email:"beatriz@cyberacademy.demo",spec:"Lógica · POO · Git",bio:"Especialista em fundamentos de programação",exp:12,courses:3},
+      {id:2,name:"Lucas Meireles",email:"lucas@cyberacademy.demo",spec:"Front-end",bio:"Engenheiro front-end sênior",exp:10,courses:4},
+      {id:3,name:"Caio Bertoldi",email:"caio@cyberacademy.demo",spec:"Back-end & Arquitetura",bio:"Arquiteto de software",exp:12,courses:3},
+      {id:4,name:"Paulo Sena",email:"paulo@cyberacademy.demo",spec:"Banco de Dados & BI",bio:"DBA e engenheiro de dados",exp:15,courses:4},
+      {id:5,name:"Diego Tavares",email:"diego@cyberacademy.demo",spec:"Azure & DevOps",bio:"Arquiteto cloud certificado Azure",exp:13,courses:5},
+      {id:6,name:"Marina Sato",email:"marina@cyberacademy.demo",spec:"IA & Machine Learning",bio:"Doutora em Computação",exp:11,courses:4}
+    ]);
+  }
+}
+
+function doLogin(e){
+  e.preventDefault();
+  const em=document.getElementById('li-email').value.trim();
+  const pw=document.getElementById('li-pass').value;
+  const err=document.getElementById('login-err');
+  if(em==='admin@cyberacademy.demo'&&pw==='admin1234'){
+    DB.setO('ca_admin',{email:em,at:new Date().toISOString()});
+    enterApp();
+  }else{
+    err.textContent='Credenciais inválidas. Use a conta demo.';err.classList.add('on');
+  }
+}
+
+function enterApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('on');
+  navTo('dash');
+}
+
+function logout(){
+  if(!confirm('Sair do painel?'))return;
+  localStorage.removeItem('ca_admin');
+  location.reload();
+}
+
+document.querySelectorAll('.nv').forEach(n=>n.addEventListener('click',()=>navTo(n.dataset.p)));
+
+function navTo(p){
+  document.querySelectorAll('.nv').forEach(n=>n.classList.remove('on'));
+  document.querySelector(`.nv[data-p="${p}"]`)?.classList.add('on');
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-'+p).classList.add('on');
+  const t={dash:['Dashboard','Visão geral'],courses:['Cursos','Gestão do catálogo'],students:['Alunos','Gestão de alunos'],teachers:['Professores','Corpo docente'],payments:['Pagamentos','Transações'],revenue:['Receita','Métricas financeiras'],settings:['Configurações','Parâmetros do sistema']};
+  document.getElementById('pg-t').textContent=t[p][0];
+  document.getElementById('pg-s').textContent=t[p][1];
+  if(p==='dash')renderDash();
+  if(p==='courses')renderCourses();
+  if(p==='students')renderStudents();
+  if(p==='teachers')renderTeachers();
+  if(p==='payments')renderPayments();
+  if(p==='revenue')renderRevenue();
+  if(p==='settings')renderSettings();
+  lucide.createIcons();
+}
+
+function renderDash(){
+  const st=DB.get('ca_students'),pay=DB.get('ca_payments'),c=DB.get('ca_courses');
+  const approved=pay.filter(p=>p.status==='paid'||p.status==='approved');
+  const mrr=approved.reduce((s,p)=>s+(p.monthly||0),0);
+  const thisMonth=st.filter(s=>new Date(s.createdAt)>new Date(Date.now()-30*24*3600000)).length;
+  const churn=st.length?((st.filter(s=>s.status==='inactive').length/st.length)*100).toFixed(1):0;
+  const pubCount=c.filter(x=>x.status==='publicado').length;
+  
+  document.getElementById('s-st').textContent=st.length;
+  document.getElementById('s-st-c').textContent=`+${thisMonth} este mês`;
+  document.getElementById('s-mrr').textContent=`R$ ${mrr.toFixed(0)}`;
+  document.getElementById('s-c').textContent=pubCount;
+  document.getElementById('s-c-c').textContent=`${c.length} no catálogo`;
+  document.getElementById('s-ch').textContent=`${churn}%`;
+  document.getElementById('s-ch-c').textContent=`${st.filter(s=>s.status==='inactive').length} alunos`;
+  
+  document.getElementById('nv-c').textContent=c.length;
+  document.getElementById('nv-s').textContent=st.length;
+  document.getElementById('nv-p').textContent=pay.filter(p=>p.status==='pending').length;
+  
+  const months=['Jun','Jul','Ago','Set','Out','Nov'];
+  const revs=[2400,3200,4100,5800,7200,mrr||8500];
+  const max=Math.max(...revs);
+  document.getElementById('rev-chart').innerHTML=months.map((m,i)=>`<div class="bar" style="flex:1;background:var(--grad);border-radius:4px 4px 0 0;min-height:20px;height:${(revs[i]/max)*100}%;position:relative"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:600">R$${revs[i]}</div><div style="position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:.7rem;color:var(--txt3);white-space:nowrap">${m}</div></div>`).join('');
+  
+  const plans={essencial:0,profissional:0,corporativo:0};
+  st.forEach(s=>{if(plans[s.plan]!==undefined)plans[s.plan]++});
+  const total=st.length||1;
+  document.getElementById('plan-chart').innerHTML=Object.entries(plans).map(([p,c])=>`<div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem"><strong style="text-transform:capitalize">${p}</strong><span style="color:var(--txt3);font-size:.8rem">${c} alunos (${((c/total)*100).toFixed(0)}%)</span></div><div style="background:var(--bg4);border-radius:100px;height:8px;overflow:hidden"><div style="background:var(--grad);height:100%;width:${(c/total)*100}%;border-radius:100px"></div></div></div>`).join('');
+  
+  const recent=approved.slice(-5).reverse();
+  document.getElementById('recent-pay').innerHTML=recent.length?recent.map(p=>`<tr><td><strong>${p.name}</strong><br><span style="color:var(--txt3);font-size:.8rem">${p.email}</span></td><td><span class="badge b-i">${p.planName}</span></td><td style="font-weight:600">R$ ${(p.total||0).toFixed(2).replace('.',',')}</td><td><span class="badge b-ok">Aprovado</span></td><td style="color:var(--txt3)">${new Date(p.paidAt||p.date).toLocaleDateString('pt-BR')}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:2rem">Nenhum pagamento registrado</td></tr>';
+}
+
+function renderCourses(){
+  const c=DB.get('ca_courses');
+  const s=(document.getElementById('c-search')?.value||'').toLowerCase();
+  const st=(document.getElementById('c-status-filter')?.value||'');
+  const f=c.filter(x=>(x.title.toLowerCase().includes(s)||x.cat.includes(s))&&(!st||x.status===st));
+  document.getElementById('c-tbl').innerHTML=f.length?f.map(x=>`<tr>
+    <td><strong>${x.title}</strong><br><span style="color:var(--txt3);font-size:.8rem">${x.desc||''}</span></td>
+    <td><span class="badge ${x.status==='publicado'?'b-ok':'b-w'}">${x.status==='publicado'?'Publicado':'Rascunho'}</span></td>
+    <td>${x.order==='destaque'?'<span class="badge b-i">⭐ Destaque</span>':x.order==='popular'?'<span class="badge b-w">🔥 Popular</span>':'<span style="color:var(--txt3);font-size:.8rem">Normal</span>'}</td>
+    <td><span class="badge b-i">${x.cat}</span></td>
+    <td>${x.les} aulas</td>
+    <td><span class="badge b-i">${x.students||0}</span></td>
+    <td><div class="acts"><button class="ab" onclick="editCourse(${x.id})"><i data-lucide="edit"></i></button><button class="ab d" onclick="delCourse(${x.id})"><i data-lucide="trash-2"></i></button></div></td>
+  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--txt3);padding:2rem">Nenhum curso encontrado</td></tr>';
+  lucide.createIcons();
+}
+document.getElementById('c-search')?.addEventListener('input',renderCourses);
+document.getElementById('c-status-filter')?.addEventListener('change',renderCourses);
+
+function openCourse(id){
+  editingTags=[];
+  editingThumbnail='';
+  document.getElementById('mc-id').value='';
+  document.getElementById('mc-t').value='';
+  document.getElementById('mc-d').value='';
+  document.getElementById('mc-dur').value='';
+  document.getElementById('mc-les').value='';
+  document.getElementById('mc-mod').value='';
+  document.getElementById('mc-order').value='normal';
+  document.getElementById('mc-status').value='publicado';
+  document.getElementById('mc-status-toggle').classList.add('on');
+  document.getElementById('mc-title').textContent='Novo curso';
+  document.getElementById('thumb-preview').style.display='none';
+  document.getElementById('thumb-img').src='';
+  
+  if(id){
+    const c=DB.get('ca_courses').find(x=>x.id===id);
+    if(c){
+      document.getElementById('mc-id').value=c.id;
+      document.getElementById('mc-t').value=c.title;
+      document.getElementById('mc-cat').value=c.cat;
+      document.getElementById('mc-lvl').value=c.lvl;
+      document.getElementById('mc-d').value=c.desc||'';
+      document.getElementById('mc-dur').value=c.dur;
+      document.getElementById('mc-les').value=c.les;
+      document.getElementById('mc-mod').value=c.mod;
+      document.getElementById('mc-order').value=c.order||'normal';
+      document.getElementById('mc-status').value=c.status||'publicado';
+      document.getElementById('mc-status-toggle').classList.toggle('on',c.status==='publicado');
+      editingTags=[...(c.tags||[])];
+      editingThumbnail=c.thumbnail||'';
+      if(editingThumbnail){
+        document.getElementById('thumb-img').src=editingThumbnail;
+        document.getElementById('thumb-preview').style.display='block';
+      }
+      document.getElementById('mc-title').textContent='Editar curso';
+    }
+  }
+  renderTags();
+  updatePreview();
+  document.getElementById('m-course').classList.add('on');
+}
+function editCourse(id){openCourse(id)}
+
+function toggleStatus(){
+  const t=document.getElementById('mc-status-toggle');
+  const inp=document.getElementById('mc-status');
+  t.classList.toggle('on');
+  inp.value=t.classList.contains('on')?'publicado':'rascunho';
+  updatePreview();
+}
+
+function handleThumbUpload(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){alert('Imagem muito grande (máx. 2MB)');return}
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    editingThumbnail=ev.target.result;
+    document.getElementById('thumb-img').src=editingThumbnail;
+    document.getElementById('thumb-preview').style.display='block';
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeThumb(e){
+  e.stopPropagation();
+  editingThumbnail='';
+  document.getElementById('thumb-preview').style.display='none';
+  document.getElementById('thumb-img').src='';
+  document.getElementById('mc-thumb-file').value='';
+  updatePreview();
+}
+
+function handleTagKey(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().toLowerCase().replace(/,/g,'');
+    if(v&&!editingTags.includes(v)){
+      editingTags.push(v);
+      renderTags();
+      updatePreview();
+    }
+    e.target.value='';
+  }else if(e.key==='Backspace'&&!e.target.value&&editingTags.length){
+    editingTags.pop();
+    renderTags();
+    updatePreview();
+  }
+}
+
+function removeTag(tag){
+  editingTags=editingTags.filter(t=>t!==tag);
+  renderTags();
+  updatePreview();
+}
+
+function renderTags(){
+  const wrap=document.getElementById('tag-wrap');
+  const input=document.getElementById('tag-input');
+  wrap.querySelectorAll('.tag-chip').forEach(c=>c.remove());
+  editingTags.forEach(t=>{
+    const chip=document.createElement('span');
+    chip.className='tag-chip';
+    chip.innerHTML=`${t}<button type="button" onclick="removeTag('${t}')"><i data-lucide="x"></i></button>`;
+    wrap.insertBefore(chip,input);
+  });
+  lucide.createIcons();
+}
+
+// LIVE PREVIEW
+function updatePreview(){
+  const title=document.getElementById('mc-t').value||'Título do curso';
+  const cat=document.getElementById('mc-cat').value;
+  const lvl=document.getElementById('mc-lvl').value;
+  const desc=document.getElementById('mc-d').value||'Descrição do curso aparecerá aqui...';
+  const dur=document.getElementById('mc-dur').value||'0h';
+  const les=document.getElementById('mc-les').value||'0';
+  const mod=document.getElementById('mc-mod').value||'0';
+  const status=document.getElementById('mc-status').value;
+  const order=document.getElementById('mc-order').value;
+  
+  const icon=icons[cat]||'book-open';
+  
+  let statusBadge='';
+  if(status==='rascunho')statusBadge='<span style="position:absolute;top:.75rem;right:.75rem;background:var(--warn);color:#000;padding:.25rem .6rem;border-radius:100px;font-size:.7rem;font-weight:700">RASCUNHO</span>';
+  if(order==='destaque')statusBadge='<span style="position:absolute;top:.75rem;left:.75rem;background:var(--teal);color:var(--bg);padding:.25rem .6rem;border-radius:100px;font-size:.7rem;font-weight:700">⭐ DESTAQUE</span>';
+  
+  const thumbHtml=editingThumbnail
+    ?`<img src="${editingThumbnail}" alt="">`
+    :`<div class="fallback"><i data-lucide="${icon}"></i></div>`;
+  
+  const tagsHtml=editingTags.length
+    ?`<div class="preview-tags">${editingTags.map(t=>`<span class="preview-tag">#${t}</span>`).join('')}</div>`
+    :'';
+  
+  document.getElementById('live-preview').innerHTML=`
+    <div class="preview-card">
+      <div class="preview-thumb">
+        ${thumbHtml}
+        ${statusBadge}
+      </div>
+      <div class="preview-body">
+        <div class="preview-badges">
+          <span class="badge b-i" style="font-size:.7rem">${catLabels[cat]||cat}</span>
+          ${order==='destaque'?'<span class="badge b-i" style="font-size:.7rem">⭐ Destaque</span>':''}
+          ${order==='popular'?'<span class="badge b-w" style="font-size:.7rem">🔥 Popular</span>':''}
+        </div>
+        <h3 class="preview-title">${title}</h3>
+        <p class="preview-desc">${desc}</p>
+        ${tagsHtml}
+        <div class="preview-meta">
+          <span><i data-lucide="clock"></i> ${dur}</span>
+          <span><i data-lucide="play-circle"></i> ${les} aulas</span>
+          <span><i data-lucide="folder"></i> ${mod} módulos</span>
+        </div>
+        <div class="preview-footer">
+          <span class="preview-level">${lvl}</span>
+          <span class="preview-price">Incluso nos planos</span>
+        </div>
+      </div>
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+function saveCourse(){
+  const id=document.getElementById('mc-id').value;
+  const t=document.getElementById('mc-t').value.trim();
+  const cat=document.getElementById('mc-cat').value;
+  const lvl=document.getElementById('mc-lvl').value;
+  const d=document.getElementById('mc-d').value.trim();
+  const dur=document.getElementById('mc-dur').value.trim();
+  const les=parseInt(document.getElementById('mc-les').value);
+  const mod=parseInt(document.getElementById('mc-mod').value);
+  const status=document.getElementById('mc-status').value;
+  const order=document.getElementById('mc-order').value;
+  
+  if(!t||!dur||!les||!mod){toast('Preencha os campos obrigatórios','err');return}
+  
+  const c=DB.get('ca_courses');
+  if(id){
+    const i=c.findIndex(x=>x.id===parseInt(id));
+    if(i>=0)c[i]={...c[i],title:t,cat,icon:icons[cat],lvl,desc:d,dur,les,mod,status,order,tags:[...editingTags],thumbnail:editingThumbnail};
+  }else{
+    const nid=c.length?Math.max(...c.map(x=>x.id))+1:1;
+    c.push({id:nid,title:t,cat,icon:icons[cat],dur,les,mod,lvl,desc:d,status,order,tags:[...editingTags],thumbnail:editingThumbnail,students:0,rating:0});
+  }
+  DB.set('ca_courses',c);
+  closeM('m-course');
+  toast(id?'Curso atualizado!':'Curso criado!','ok');
+  renderCourses();
+}
+
+function delCourse(id){
+  if(!confirm('Excluir este curso?'))return;
+  DB.set('ca_courses',DB.get('ca_courses').filter(x=>x.id!==id));
+  toast('Curso excluído','ok');
+  renderCourses();
+}
+
+function renderStudents(){
+  const st=DB.get('ca_students');
+  const s=(document.getElementById('st-search')?.value||'').toLowerCase();
+  const pl=document.getElementById('st-plan')?.value||'';
+  const f=st.filter(x=>(x.name.toLowerCase().includes(s)||x.email.toLowerCase().includes(s))&&(!pl||x.plan===pl));
+  document.getElementById('st-tbl').innerHTML=f.length?f.map(x=>`<tr><td><strong>${x.name}</strong></td><td style="color:var(--txt3)">${x.email}</td><td><span class="badge b-i">${x.planName}</span></td><td>${x.activeCourses?.length||0}/${x.courseLimit}</td><td><span class="badge b-ok">Ativo</span></td><td><div class="acts"><button class="ab" onclick="viewStudent('${x.email}')"><i data-lucide="eye"></i></button></div></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--txt3);padding:2rem">Nenhum aluno encontrado</td></tr>';
+  lucide.createIcons();
+}
+document.getElementById('st-search')?.addEventListener('input',renderStudents);
+document.getElementById('st-plan')?.addEventListener('change',renderStudents);
+
+function viewStudent(email){
+  const st=DB.get('ca_students').find(x=>x.email===email);
+  if(!st)return;
+  const c=DB.get('ca_courses');
+  const active=st.activeCourses?.map(id=>c.find(x=>x.id===id)).filter(Boolean)||[];
+  const ini=st.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('st-detail').innerHTML=`
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap">
+      <div style="width:80px;height:80px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:1.75rem">${ini}</div>
+      <div><h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:.25rem">${st.name}</h3><p style="color:var(--txt2)">${st.email}</p><div style="display:inline-flex;align-items:center;gap:.5rem;background:var(--glow);border:1px solid var(--teal);color:var(--teal);padding:.35rem .75rem;border-radius:100px;font-size:.8rem;font-weight:600;margin-top:.5rem"><i data-lucide="crown" style="width:14px;height:14px"></i> ${st.planName}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+      <div><h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:1rem">Informações</h4>
+        <div style="background:var(--bg4);border-radius:10px;padding:1rem">
+          <div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Plano</span><span style="font-weight:600">${st.planName}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bd)"><span style="color:var(--txt3)">Mensalidade</span><span style="font-weight:600">R$ ${(st.monthly||0).toFixed(2).replace('.',',')}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.75rem 0"><span style="color:var(--txt3)">Desde</span><span style="font-weight:600">${new Date(st.createdAt).toLocaleDateString('pt-BR')}</span></div>
+        </div>
+      </div>
+      <div><h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:1rem">Cursos ativos (${active.length}/${st.courseLimit})</h4>
+        <div style="background:var(--bg4);border-radius:10px;padding:1rem;max-height:300px;overflow-y:auto">
+          ${active.length?active.map(c=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--bd)"><div style="width:32px;height:32px;background:var(--glow);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--teal)"><i data-lucide="${c.icon}" style="width:16px;height:16px"></i></div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">${c.title}</div><div style="font-size:.8rem;color:var(--txt3)">${c.dur} · ${c.les} aulas</div></div></div>`).join(''):'<p style="color:var(--txt3);text-align:center;padding:2rem">Nenhum curso ativo</p>'}
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('m-student').classList.add('on');
+  lucide.createIcons();
+}
+
+function renderTeachers(){
+  const t=DB.get('ca_teachers');
+  document.getElementById('t-tbl').innerHTML=t.length?t.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--txt3);font-size:.8rem">${x.email}</span></td><td><span class="badge b-i">${x.spec}</span></td><td>${x.courses||0} cursos</td><td>${x.exp||0} anos</td><td><div class="acts"><button class="ab" onclick="editTeacher(${x.id})"><i data-lucide="edit"></i></button><button class="ab d" onclick="delTeacher(${x.id})"><i data-lucide="trash-2"></i></button></div></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:2rem">Nenhum professor</td></tr>';
+  lucide.createIcons();
+}
+function openTeacher(id){
+  document.getElementById('mt-id').value='';
+  document.getElementById('mt-n').value='';
+  document.getElementById('mt-e').value='';
+  document.getElementById('mt-s').value='';
+  document.getElementById('mt-b').value='';
+  document.getElementById('mt-x').value='';
+  document.getElementById('mt-c').value='';
+  document.getElementById('mt-title').textContent='Novo professor';
+  if(id){
+    const t=DB.get('ca_teachers').find(x=>x.id===id);
+    if(t){
+      document.getElementById('mt-id').value=t.id;
+      document.getElementById('mt-n').value=t.name;
+      document.getElementById('mt-e').value=t.email;
+      document.getElementById('mt-s').value=t.spec;
+      document.getElementById('mt-b').value=t.bio||'';
+      document.getElementById('mt-x').value=t.exp||'';
+      document.getElementById('mt-c').value=t.courses||'';
+      document.getElementById('mt-title').textContent='Editar professor';
+    }
+  }
+  document.getElementById('m-teacher').classList.add('on');
+}
+function editTeacher(id){openTeacher(id)}
+function saveTeacher(){
+  const id=document.getElementById('mt-id').value;
+  const n=document.getElementById('mt-n').value.trim();
+  const e=document.getElementById('mt-e').value.trim();
+  const s=document.getElementById('mt-s').value.trim();
+  const b=document.getElementById('mt-b').value.trim();
+  const x=parseInt(document.getElementById('mt-x').value)||0;
+  const c=parseInt(document.getElementById('mt-c').value)||0;
+  if(!n||!e||!s){toast('Preencha os campos obrigatórios','err');return}
+  const t=DB.get('ca_teachers');
+  if(id){
+    const i=t.findIndex(x=>x.id===parseInt(id));
+    if(i>=0)t[i]={...t[i],name:n,email:e,spec:s,bio:b,exp:x,courses:c};
+  }else{
+    const nid=t.length?Math.max(...t.map(x=>x.id))+1:1;
+    t.push({id:nid,name:n,email:e,spec:s,bio:b,exp:x,courses:c});
+  }
+  DB.set('ca_teachers',t);
+  closeM('m-teacher');
+  toast(id?'Professor atualizado!':'Professor cadastrado!','ok');
+  renderTeachers();
+}
+function delTeacher(id){
+  if(!confirm('Excluir este professor?'))return;
+  DB.set('ca_teachers',DB.get('ca_teachers').filter(x=>x.id!==id));
+  toast('Professor excluído','ok');
+  renderTeachers();
+}
+
+function renderPayments(){
+  const p=DB.get('ca_payments');
+  const s=(document.getElementById('p-search')?.value||'').toLowerCase();
+  const f=p.filter(x=>x.email.toLowerCase().includes(s)||x.name.toLowerCase().includes(s));
+  const ok=p.filter(x=>x.status==='paid'||x.status==='approved').length;
+  const pd=p.filter(x=>x.status==='pending').length;
+  const dc=p.filter(x=>x.status==='declined').length;
+  const tot=p.filter(x=>x.status==='paid'||x.status==='approved').reduce((s,x)=>s+(x.total||0),0);
+  document.getElementById('p-ok').textContent=ok;
+  document.getElementById('p-pd').textContent=pd;
+  document.getElementById('p-dc').textContent=dc;
+  document.getElementById('p-tot').textContent=`R$ ${tot.toFixed(0)}`;
+  document.getElementById('p-tbl').innerHTML=f.length?f.map(x=>`<tr><td style="font-family:'Courier New',monospace;font-size:.8rem">${x.token||x.id||'—'}</td><td><strong>${x.name}</strong><br><span style="color:var(--txt3);font-size:.8rem">${x.email}</span></td><td><span class="badge b-i">${x.planName}</span></td><td style="font-weight:600">R$ ${(x.total||0).toFixed(2).replace('.',',')}</td><td><span class="badge b-i">${x.method}</span></td><td><span class="badge ${x.status==='paid'||x.status==='approved'?'b-ok':'b-w'}">${x.status==='paid'||x.status==='approved'?'Aprovado':'Pendente'}</span></td><td style="color:var(--txt3)">${new Date(x.paidAt||x.date).toLocaleDateString('pt-BR')}</td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--txt3);padding:2rem">Nenhum pagamento</td></tr>';
+  lucide.createIcons();
+}
+document.getElementById('p-search')?.addEventListener('input',renderPayments);
+
+function renderRevenue(){
+  const p=DB.get('ca_payments'),st=DB.get('ca_students');
+  const ok=p.filter(x=>x.status==='paid'||x.status==='approved');
+  const mrr=ok.reduce((s,x)=>s+(x.monthly||0),0);
+  const arr=mrr*12;
+  const ltv=st.length?(ok.reduce((s,x)=>s+(x.total||0),0)/st.length):0;
+  const ch=st.length?((st.filter(s=>s.status==='inactive').length/st.length)*100).toFixed(1):0;
+  document.getElementById('r-mrr').textContent=`R$ ${mrr.toFixed(0)}`;
+  document.getElementById('r-arr').textContent=`R$ ${arr.toFixed(0)}`;
+  document.getElementById('r-ltv').textContent=`R$ ${ltv.toFixed(0)}`;
+  document.getElementById('r-ch').textContent=`${ch}%`;
+}
+
+function renderSettings(){
+  document.getElementById('set-st').textContent=DB.get('ca_students').length;
+  document.getElementById('set-p').textContent=DB.get('ca_payments').length;
+  document.getElementById('set-c').textContent=DB.get('ca_courses').length;
+  document.getElementById('set-t').textContent=DB.get('ca_teachers').length;
+}
+function saveSettings(){toast('Configurações salvas!','ok')}
+function resetSystem(){
+  if(!confirm('ATENÇÃO: Isso apagará TODOS os dados. Continuar?'))return;
+  if(!confirm('Tem CERTEZA? Esta ação não pode ser desfeita.'))return;
+  ['ca_students','ca_payments','ca_courses','ca_teachers','ca_session','ca_admin'].forEach(k=>localStorage.removeItem(k));
+  initDefaults();
+  toast('Sistema resetado','ok');
+  setTimeout(()=>location.reload(),1000);
+}
+
+function closeM(id){document.getElementById(id).classList.remove('on')}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
+
+function toast(msg,type='ok'){
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<i data-lucide="${type==='ok'?'check-circle':'alert-circle'}"></i><span>${msg}</span>`;
+  document.body.appendChild(t);
+  lucide.createIcons();
+  setTimeout(()=>t.remove(),4000);
+}
+
+initDefaults();
+if(DB.getO('ca_admin'))enterApp();
+lucide.createIcons();
+</script>
+</body>
+</html>

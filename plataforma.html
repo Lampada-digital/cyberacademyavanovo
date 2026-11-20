@@ -1,0 +1,3277 @@
+<file_write path="index.html">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy — Cursos Profissionais de Tecnologia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+--bg-primary: #0a0f14;
+--bg-secondary: #111820;
+--bg-tertiary: #1a2332;
+--bg-card: #151d28;
+--teal: #00a8b5;
+--teal-light: #00d4e0;
+--teal-dark: #008a94;
+--teal-glow: rgba(0, 168, 181, 0.15);
+--text-primary: #ffffff;
+--text-secondary: #a0aec0;
+--text-muted: #6b7a8d;
+--border: #2a3544;
+--success: #00d4a0;
+--warning: #ffb84d;
+--danger: #ef4444;
+--gradient-teal: linear-gradient(135deg, #00a8b5 0%, #00d4e0 100%);
+}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--teal-dark); border-radius: 4px; }
+
+    .logo-svg { width: 48px; height: 48px; }
+
+    header {
+        background: rgba(10, 15, 20, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.25rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+    }
+
+    .logo-text { display: flex; flex-direction: column; }
+
+    .logo-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--teal);
+        line-height: 1.2;
+    }
+
+    .logo-subtitle {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    nav { display: flex; gap: 2.5rem; align-items: center; }
+
+    nav a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    nav a:hover { color: var(--teal); }
+
+    nav a::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--teal);
+        transition: width 0.3s;
+    }
+
+    nav a:hover::after { width: 100%; }
+
+    .nav-buttons { display: flex; gap: 1rem; }
+
+    .btn {
+        padding: 0.75rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: var(--gradient-teal);
+        color: var(--bg-primary);
+        box-shadow: 0 4px 16px var(--teal-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 168, 181, 0.3);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--teal);
+        border: 1.5px solid var(--teal);
+    }
+
+    .btn-secondary:hover {
+        background: var(--teal-glow);
+        transform: translateY(-2px);
+    }
+
+    .btn-large { padding: 1rem 2.5rem; font-size: 1.05rem; }
+
+    .hero {
+        background: radial-gradient(ellipse at top, var(--bg-tertiary) 0%, var(--bg-primary) 70%);
+        padding: 8rem 2rem 6rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(circle, var(--teal-glow) 0%, transparent 70%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .hero-content {
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        color: var(--teal);
+        padding: 0.5rem 1.5rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 4.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        letter-spacing: -2px;
+    }
+
+    .hero h1 .highlight {
+        background: var(--gradient-teal);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero p {
+        font-size: 1.35rem;
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.7;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 5rem;
+    }
+
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 3rem;
+        max-width: 900px;
+        margin: 0 auto;
+        padding-top: 4rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .stat { text-align: center; }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 1rem;
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+    }
+
+    .stat-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--teal);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    section {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 6rem 2rem;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .section-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--teal);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: -1px;
+    }
+
+    .section-header p {
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .catalog-controls {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3.5rem;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--teal);
+        background: var(--bg-tertiary);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--teal);
+        color: var(--teal);
+    }
+
+    .filter-btn.active {
+        background: var(--teal);
+        color: var(--bg-primary);
+        border-color: var(--teal);
+    }
+
+    .course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 2rem;
+    }
+
+    .course-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        transition: all 0.4s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--gradient-teal);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .course-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--teal);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px var(--teal-glow);
+    }
+
+    .course-card:hover::before { opacity: 1; }
+
+    .course-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1.5rem;
+    }
+
+    .course-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--teal-glow);
+        border: 1.5px solid var(--teal);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+    }
+
+    .course-badge {
+        background: var(--teal-glow);
+        color: var(--teal);
+        padding: 0.4rem 1rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid var(--teal);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .course-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .course-description {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .course-meta {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .course-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .course-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .course-level {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .course-price {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--teal);
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .plan-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        position: relative;
+        transition: all 0.4s;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--teal);
+    }
+
+    .plan-card.featured {
+        border-color: var(--teal);
+        background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-card) 100%);
+        box-shadow: 0 20px 60px rgba(0, 168, 181, 0.15);
+    }
+
+    .plan-badge {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--gradient-teal);
+        color: var(--bg-primary);
+        padding: 0.5rem 1.75rem;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .plan-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .plan-tagline {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    .plan-price {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--teal);
+        margin: 1.5rem 0;
+        line-height: 1;
+    }
+
+    .plan-price span {
+        font-size: 1rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .plan-enrollment {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .plan-features {
+        list-style: none;
+        margin-bottom: 2.5rem;
+    }
+
+    .plan-features li {
+        padding: 0.75rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .plan-features li::before {
+        content: "✓";
+        color: var(--teal);
+        font-weight: 700;
+        width: 24px;
+        height: 24px;
+        background: var(--teal-glow);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 1px solid var(--teal);
+    }
+
+    .institution-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .institution-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2.5rem;
+        transition: all 0.3s;
+    }
+
+    .institution-card:hover {
+        border-color: var(--teal);
+        transform: translateY(-4px);
+    }
+
+    .institution-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--teal-glow);
+        border: 1.5px solid var(--teal);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+        margin-bottom: 1.5rem;
+    }
+
+    .institution-card h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .institution-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    footer {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        padding: 4rem 2rem 2rem;
+        margin-top: 6rem;
+    }
+
+    .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        margin-top: 1.5rem;
+    }
+
+    .footer-column h4 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--teal);
+    }
+
+    .footer-column ul { list-style: none; }
+
+    .footer-column li { margin-bottom: 0.75rem; }
+
+    .footer-column a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .footer-column a:hover { color: var(--teal); }
+
+    .footer-bottom {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+        background: var(--bg-secondary);
+        border: 1.5px solid var(--border);
+        border-radius: 20px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 2rem 2.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .modal-close:hover {
+        background: var(--bg-tertiary);
+        color: var(--teal);
+    }
+
+    .modal-body { padding: 2.5rem; }
+
+    .modal-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .modal-stat {
+        background: var(--bg-tertiary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid var(--border);
+    }
+
+    .modal-stat-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--teal);
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-stat-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 4rem;
+        color: var(--text-muted);
+        grid-column: 1 / -1;
+    }
+
+    .spinner {
+        border: 3px solid var(--border);
+        border-top: 3px solid var(--teal);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1024px) {
+        .footer-content { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        .hero h1 { font-size: 2.75rem; }
+        .section-header h2 { font-size: 2rem; }
+        nav { display: none; }
+        .course-grid { grid-template-columns: 1fr; }
+        .plans-grid { grid-template-columns: 1fr; }
+        .modal-stats { grid-template-columns: 1fr; }
+        .footer-content { grid-template-columns: 1fr; }
+        .header-content { padding: 1rem; }
+        .hero { padding: 5rem 1rem 4rem; }
+        section { padding: 4rem 1rem; }
+    }
+</style>
+</head>
+<body>
+<header>
+<div class="header-content">
+<a href="index.html" class="logo-container">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+<circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+<text x="50" y="62" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+<text x="50" y="18" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">CYBER ACADEMY</text>
+<text x="50" y="92" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">EST. 2022</text>
+</svg>
+<div class="logo-text">
+<span class="logo-title">Cyber Academy</span>
+<span class="logo-subtitle">Est. 2022 · Ensino Livre</span>
+</div>
+</a>
+<nav>
+<a href="#catalogo">Catálogo</a>
+<a href="#planos">Planos</a>
+<a href="#instituicao">Instituição</a>
+<a href="#contato">Contato</a>
+</nav>
+<div class="nav-buttons">
+<a href="portal.html" class="btn btn-secondary">
+<i data-lucide="user-circle" style="width:18px;height:18px;"></i>
+Área do Aluno
+</a>
+<a href="#planos" class="btn btn-primary">
+<i data-lucide="graduation-cap" style="width:18px;height:18px;"></i>
+Matricule-se
+</a>
+</div>
+</div>
+</header>
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i data-lucide="calendar-check" style="width:16px;height:16px;"></i>
+            Matrículas Abertas · Nov 2026
+        </div>
+        <h1>Tecnologia inteira.<br><span class="highlight">Nível profissional.</span></h1>
+        <p>Instituição de ensino livre 100% online com grade curricular completa em cada curso. Matrícula única e mensalidade fixa.</p>
+        <div class="hero-buttons">
+            <a href="#catalogo" class="btn btn-primary btn-large">
+                <i data-lucide="book-open" style="width:20px;height:20px;"></i>
+                Ver Catálogo Completo
+            </a>
+            <a href="checkout.html" class="btn btn-secondary btn-large">
+                <i data-lucide="credit-card" style="width:20px;height:20px;"></i>
+                Reservar Matrícula
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-icon"><i data-lucide="layers" style="width:24px;height:24px;"></i></div>
+                <div class="stat-value" id="stat-courses">0</div>
+                <div class="stat-label">Cursos Profissionais</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon"><i data-lucide="users" style="width:24px;height:24px;"></i></div>
+                <div class="stat-value" id="stat-students">0</div>
+                <div class="stat-label">Alunos Ativos</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon"><i data-lucide="play-circle" style="width:24px;height:24px;"></i></div>
+                <div class="stat-value" id="stat-lessons">0</div>
+                <div class="stat-label">Aulas Publicadas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon"><i data-lucide="building-2" style="width:24px;height:24px;"></i></div>
+                <div class="stat-value" id="stat-companies">0</div>
+                <div class="stat-label">Equipes Treinadas</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="catalogo">
+    <div class="section-header">
+        <div class="section-label">
+            <i data-lucide="library" style="width:16px;height:16px;"></i>
+            Catálogo Completo
+        </div>
+        <h2>Toda a tecnologia, módulo a módulo</h2>
+        <p>Abra qualquer curso para ver a grade curricular completa</p>
+    </div>
+
+    <div class="catalog-controls">
+        <div class="search-box">
+            <i data-lucide="search" class="search-icon" style="width:20px;height:20px;"></i>
+            <input type="text" id="search-input" placeholder="Buscar cursos...">
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">
+                <i data-lucide="grid-3x3" style="width:16px;height:16px;"></i>
+                Todos
+            </button>
+            <button class="filter-btn" data-filter="desenvolvimento">
+                <i data-lucide="code-2" style="width:16px;height:16px;"></i>
+                Desenvolvimento
+            </button>
+            <button class="filter-btn" data-filter="dados">
+                <i data-lucide="database" style="width:16px;height:16px;"></i>
+                Dados
+            </button>
+            <button class="filter-btn" data-filter="cloud">
+                <i data-lucide="cloud" style="width:16px;height:16px;"></i>
+                Cloud
+            </button>
+            <button class="filter-btn" data-filter="ia">
+                <i data-lucide="brain" style="width:16px;height:16px;"></i>
+                IA
+            </button>
+            <button class="filter-btn" data-filter="negocios">
+                <i data-lucide="briefcase" style="width:16px;height:16px;"></i>
+                Negócios
+            </button>
+        </div>
+    </div>
+
+    <div class="course-grid" id="course-grid">
+        <div class="loading">
+            <div class="spinner"></div>
+            Carregando cursos...
+        </div>
+    </div>
+</section>
+
+<section id="planos">
+    <div class="section-header">
+        <div class="section-label">
+            <i data-lucide="crown" style="width:16px;height:16px;"></i>
+            Planos de Mensalidade
+        </div>
+        <h2>Estude o ano inteiro. Pague por mês.</h2>
+        <p>Matrícula única, mensalidade fixa e sem fidelidade</p>
+    </div>
+
+    <div class="plans-grid">
+        <div class="plan-card">
+            <div class="plan-name">Essencial</div>
+            <div class="plan-tagline">Para dar o primeiro passo</div>
+            <div class="plan-price">R$100<span>/mês</span></div>
+            <div class="plan-enrollment">+ matrícula única de R$ 79,00</div>
+            <ul class="plan-features">
+                <li>1 curso ativo</li>
+                <li>Grade completa liberada</li>
+                <li>Nível profissional</li>
+                <li>Projeto final</li>
+                <li>Certificado verificável</li>
+                <li>Acesso em 1 dispositivo</li>
+                <li>Fórum da comunidade</li>
+            </ul>
+            <a href="checkout.html?plan=essencial" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                Reservar Matrícula
+            </a>
+        </div>
+
+        <div class="plan-card featured">
+            <div class="plan-badge">
+                <i data-lucide="star" style="width:14px;height:14px;"></i>
+                MAIS ESCOLHIDO
+            </div>
+            <div class="plan-name">Profissional</div>
+            <div class="plan-tagline">Para acelerar a carreira</div>
+            <div class="plan-price">R$150<span>/mês</span></div>
+            <div class="plan-enrollment">+ matrícula única de R$ 99,00</div>
+            <ul class="plan-features">
+                <li>5 cursos ativos</li>
+                <li>Grades completas liberadas</li>
+                <li>Trilhas guiadas</li>
+                <li>2 mentorias ao vivo/mês</li>
+                <li>Feedback docente</li>
+                <li>Certificados verificáveis</li>
+                <li>Suporte prioritário</li>
+            </ul>
+            <a href="checkout.html?plan=profissional" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                <i data-lucide="rocket" style="width:18px;height:18px;"></i>
+                Reservar Matrícula
+            </a>
+        </div>
+
+        <div class="plan-card">
+            <div class="plan-name">Corporativo</div>
+            <div class="plan-tagline">Para treinar equipes</div>
+            <div class="plan-price">R$250<span>/aluno/mês</span></div>
+            <div class="plan-enrollment">+ adesão única de R$ 199,00</div>
+            <ul class="plan-features">
+                <li>7 cursos por aluno</li>
+                <li>Turmas fechadas</li>
+                <li>Trilha por cargo</li>
+                <li>Painel de gestão</li>
+                <li>Relatórios de progresso</li>
+                <li>Gerente de conta dedicado</li>
+                <li>Mínimo 5 alunos</li>
+            </ul>
+            <a href="checkout.html?plan=corporativo" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i data-lucide="building" style="width:18px;height:18px;"></i>
+                Reservar para Empresa
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="instituicao">
+    <div class="section-header">
+        <div class="section-label">
+            <i data-lucide="landmark" style="width:16px;height:16px;"></i>
+            A Instituição
+        </div>
+        <h2>Ensino livre com padrão profissional</h2>
+        <p>Fundada em 2022, formando profissionais de tecnologia</p>
+    </div>
+
+    <div class="institution-grid">
+        <div class="institution-card">
+            <div class="institution-icon"><i data-lucide="target" style="width:28px;height:28px;"></i></div>
+            <h3>Missão</h3>
+            <p>Formar profissionais capazes de construir software, operar dados e nuvem, aplicar IA e conduzir negócios de tecnologia com padrão de mercado.</p>
+        </div>
+        <div class="institution-card">
+            <div class="institution-icon"><i data-lucide="file-text" style="width:28px;height:28px;"></i></div>
+            <h3>Grade Transparente</h3>
+            <p>Módulos, aulas e cargas horárias publicados curso a curso. O aluno sabe exatamente o que vai estudar antes de se matricular.</p>
+        </div>
+        <div class="institution-card">
+            <div class="institution-icon"><i data-lucide="users-round" style="width:28px;height:28px;"></i></div>
+            <h3>Corpo Docente</h3>
+            <p>Instrutores com experiência real de mercado e formação acadêmica sólida, selecionados por domínio técnico e didática.</p>
+        </div>
+        <div class="institution-card">
+            <div class="institution-icon"><i data-lucide="building-2" style="width:28px;height:28px;"></i></div>
+            <h3>Treinamento Corporativo</h3>
+            <p>Programas tecnológicos para equipes: turmas fechadas, conteúdo aplicado ao contexto da empresa e indicadores para o RH.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-brand">
+            <div class="logo-container">
+                <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+                    <text x="50" y="62" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+                    <text x="50" y="18" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">CYBER ACADEMY</text>
+                    <text x="50" y="92" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">EST. 2022</text>
+                </svg>
+                <div class="logo-text">
+                    <span class="logo-title">Cyber Academy</span>
+                    <span class="logo-subtitle">Est. 2022 · Ensino Livre</span>
+                </div>
+            </div>
+            <p>Instituição de ensino livre 100% online. Cursos de tecnologia em nível profissional com grade curricular completa.</p>
+        </div>
+        <div class="footer-column">
+            <h4>Ensino</h4>
+            <ul>
+                <li><a href="#catalogo"><i data-lucide="book-open" style="width:14px;height:14px;"></i> Catálogo</a></li>
+                <li><a href="#planos"><i data-lucide="crown" style="width:14px;height:14px;"></i> Planos</a></li>
+                <li><a href="checkout.html"><i data-lucide="credit-card" style="width:14px;height:14px;"></i> Checkout</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Plataforma</h4>
+            <ul>
+                <li><a href="portal.html"><i data-lucide="user-circle" style="width:14px;height:14px;"></i> Portal do Aluno</a></li>
+                <li><a href="admin.html"><i data-lucide="shield" style="width:14px;height:14px;"></i> Admin</a></li>
+                <li><a href="certificados.html"><i data-lucide="award" style="width:14px;height:14px;"></i> Certificados</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Legal</h4>
+            <ul>
+                <li><a href="#"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Termos de uso</a></li>
+                <li><a href="#"><i data-lucide="lock" style="width:14px;height:14px;"></i> Privacidade</a></li>
+                <li><a href="#"><i data-lucide="award" style="width:14px;height:14px;"></i> Certificados</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Cyber Academy · EST. 2022 · Cursos livres conforme Decreto nº 5.154/2004
+    </div>
+</footer>
+
+<div class="modal" id="course-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Detalhes do Curso</h2>
+            <button class="modal-close" onclick="closeModal()">
+                <i data-lucide="x" style="width:24px;height:24px;"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // Banco de dados centralizado
+    const DB = {
+        getCourses: () => JSON.parse(localStorage.getItem('cyber_courses') || '[]'),
+        setCourses: (data) => localStorage.setItem('cyber_courses', JSON.stringify(data)),
+        getStudents: () => JSON.parse(localStorage.getItem('cyber_students') || '[]'),
+        setStudents: (data) => localStorage.setItem('cyber_students', JSON.stringify(data)),
+        getPayments: () => JSON.parse(localStorage.getItem('cyber_payments') || '[]'),
+        setPayments: (data) => localStorage.setItem('cyber_payments', JSON.stringify(data))
+    };
+
+    // Inicializar cursos padrão se vazio
+    function initDatabase() {
+        if (DB.getCourses().length === 0) {
+            const defaultCourses = [
+                { id: 1, title: "Python do Zero ao Avançado", category: "desenvolvimento", icon: "code-2", duration: "120h", lessons: 48, modules: 8, level: "Iniciante ao Avançado", description: "Domine Python desde os fundamentos até projetos avançados com IA e automação.", students: 45 },
+                { id: 2, title: "SQL & NoSQL Completo", category: "dados", icon: "database", duration: "80h", lessons: 36, modules: 6, level: "Iniciante ao Avançado", description: "Bancos de dados relacionais e não-relacionais do básico ao avançado.", students: 32 },
+                { id: 3, title: "Front-end Moderno", category: "desenvolvimento", icon: "layout", duration: "100h", lessons: 42, modules: 7, level: "Iniciante ao Avançado", description: "HTML, CSS, JavaScript, React e TypeScript para aplicações profissionais.", students: 58 },
+                { id: 4, title: "Back-end & Arquitetura", category: "desenvolvimento", icon: "server", duration: "110h", lessons: 45, modules: 8, level: "Intermediário ao Avançado", description: "APIs, microsserviços, mensageria e arquitetura de sistemas distribuídos.", students: 28 },
+                { id: 5, title: "Azure & DevOps", category: "cloud", icon: "cloud", duration: "90h", lessons: 38, modules: 7, level: "Intermediário ao Avançado", description: "Cloud computing, CI/CD, containers e infraestrutura como código.", students: 22 },
+                { id: 6, title: "IA Generativa & Machine Learning", category: "ia", icon: "brain", duration: "95h", lessons: 40, modules: 7, level: "Intermediário ao Avançado", description: "Inteligência artificial, RAG, agentes e machine learning aplicado.", students: 67 },
+                { id: 7, title: "Lógica de Programação & POO", category: "desenvolvimento", icon: "lightbulb", duration: "60h", lessons: 28, modules: 5, level: "Iniciante", description: "Fundamentos da programação e programação orientada a objetos.", students: 89 },
+                { id: 8, title: "Análise de Dados com Python", category: "dados", icon: "bar-chart-3", duration: "75h", lessons: 32, modules: 6, level: "Intermediário", description: "Pandas, NumPy, visualização e análise exploratória de dados.", students: 41 },
+                { id: 9, title: "Git & GitHub Profissional", category: "desenvolvimento", icon: "git-branch", duration: "40h", lessons: 20, modules: 4, level: "Iniciante ao Intermediário", description: "Controle de versão, workflows e colaboração em equipe.", students: 73 },
+                { id: 10, title: "Empreendedorismo Tech", category: "negocios", icon: "rocket", duration: "50h", lessons: 24, modules: 5, level: "Todos os níveis", description: "Como criar, validar e escalar startups de tecnologia.", students: 19 },
+                { id: 11, title: "Finanças para Tech", category: "negocios", icon: "trending-up", duration: "45h", lessons: 22, modules: 4, level: "Intermediário", description: "Gestão financeira, métricas e valuation para empresas de tecnologia.", students: 15 },
+                { id: 12, title: "Power BI & Business Intelligence", category: "dados", icon: "pie-chart", duration: "65h", lessons: 28, modules: 5, level: "Iniciante ao Intermediário", description: "Dashboards, modelagem de dados e análise de negócios.", students: 34 }
+            ];
+            DB.setCourses(defaultCourses);
+        }
+    }
+
+    function renderCourses(filteredCourses = DB.getCourses()) {
+        const grid = document.getElementById('course-grid');
+        
+        if (filteredCourses.length === 0) {
+            grid.innerHTML = '<div class="loading">Nenhum curso encontrado.</div>';
+            return;
+        }
+
+        grid.innerHTML = filteredCourses.map(course => `
+            <div class="course-card" onclick="openCourseModal(${course.id})">
+                <div class="course-header">
+                    <div class="course-icon">
+                        <i data-lucide="${course.icon}" style="width:28px;height:28px;"></i>
+                    </div>
+                    <span class="course-badge">
+                        <i data-lucide="check-circle" style="width:12px;height:12px;"></i>
+                        Profissional
+                    </span>
+                </div>
+                <h3 class="course-title">${course.title}</h3>
+                <p class="course-description">${course.description}</p>
+                <div class="course-meta">
+                    <span><i data-lucide="clock" style="width:14px;height:14px;"></i> ${course.duration}</span>
+                    <span><i data-lucide="play-circle" style="width:14px;height:14px;"></i> ${course.lessons} aulas</span>
+                    <span><i data-lucide="folder" style="width:14px;height:14px;"></i> ${course.modules} módulos</span>
+                </div>
+                <div class="course-footer">
+                    <span class="course-level">${course.level}</span>
+                    <span class="course-price">Incluso nos planos</span>
+                </div>
+            </div>
+        `).join('');
+        
+        lucide.createIcons();
+    }
+
+    function openCourseModal(courseId) {
+        const course = DB.getCourses().find(c => c.id === courseId);
+        if (!course) return;
+
+        const modal = document.getElementById('course-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        modalTitle.textContent = course.title;
+        modalBody.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="course-icon" style="width: 72px; height: 72px;">
+                    <i data-lucide="${course.icon}" style="width:36px;height:36px;"></i>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="tag" style="width:14px;height:14px;"></i>
+                        ${course.category}
+                    </div>
+                    <div style="font-weight: 600; color: var(--teal); display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="award" style="width:16px;height:16px;"></i>
+                        ${course.level}
+                    </div>
+                </div>
+            </div>
+
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.7;">${course.description}</p>
+
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <i data-lucide="clock" style="width:24px;height:24px;color:var(--teal);margin-bottom:0.5rem;"></i>
+                    <div class="modal-stat-value">${course.duration}</div>
+                    <div class="modal-stat-label">Carga horária</div>
+                </div>
+                <div class="modal-stat">
+                    <i data-lucide="play-circle" style="width:24px;height:24px;color:var(--teal);margin-bottom:0.5rem;"></i>
+                    <div class="modal-stat-value">${course.lessons}</div>
+                    <div class="modal-stat-label">Aulas</div>
+                </div>
+                <div class="modal-stat">
+                    <i data-lucide="folder" style="width:24px;height:24px;color:var(--teal);margin-bottom:0.5rem;"></i>
+                    <div class="modal-stat-value">${course.modules}</div>
+                    <div class="modal-stat-label">Módulos</div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 2rem; border-radius: 12px; margin: 2rem 0; border: 1px solid var(--border);">
+                <h4 style="margin-bottom: 0.75rem; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-lucide="book-open" style="width:20px;height:20px;color:var(--teal);"></i>
+                    Grade curricular completa
+                </h4>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7;">
+                    Ao se matricular, você terá acesso a todos os ${course.modules} módulos com ${course.lessons} aulas detalhadas, exercícios práticos e projeto final com feedback docente.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <a href="checkout.html?course=${course.id}" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                    <i data-lucide="credit-card" style="width:18px;height:18px;"></i>
+                    Reservar Matrícula
+                </a>
+                <button onclick="closeModal()" class="btn btn-secondary">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                    Fechar
+                </button>
+            </div>
+        `;
+
+        modal.classList.add('active');
+        lucide.createIcons();
+    }
+
+    function closeModal() {
+        document.getElementById('course-modal').classList.remove('active');
+    }
+
+    // Filtros
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const filter = this.dataset.filter;
+            if (filter === 'all') {
+                renderCourses(DB.getCourses());
+            } else {
+                const filtered = DB.getCourses().filter(c => c.category === filter);
+                renderCourses(filtered);
+            }
+        });
+    });
+
+    // Busca
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filtered = DB.getCourses().filter(course => 
+            course.title.toLowerCase().includes(searchTerm) ||
+            course.description.toLowerCase().includes(searchTerm)
+        );
+        renderCourses(filtered);
+    });
+
+    // Atualizar estatísticas
+    function updateStats() {
+        const courses = DB.getCourses();
+        const students = DB.getStudents();
+        const totalLessons = courses.reduce((sum, c) => sum + c.lessons, 0);
+
+        document.getElementById('stat-courses').textContent = courses.length;
+        document.getElementById('stat-students').textContent = students.length;
+        document.getElementById('stat-lessons').textContent = totalLessons;
+        document.getElementById('stat-companies').textContent = Math.floor(students.length / 10);
+    }
+
+    // Inicializar
+    initDatabase();
+    renderCourses();
+    updateStats();
+
+    // Fechar modal ao clicar fora
+    document.getElementById('course-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ESC para fechar modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
+</file_write>
+
+Agora vou criar o checkout.html funcional que salva dados reais no banco de dados compartilhado:
+<file_write path="checkout.html">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Academy · Checkout & Pagamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+--bg-primary: #0a0f14;
+--bg-secondary: #111820;
+--bg-tertiary: #1a2332;
+--bg-card: #151d28;
+--bg-input: #0f1620;
+--teal: #00a8b5;
+--teal-light: #00d4e0;
+--teal-dark: #008a94;
+--teal-glow: rgba(0, 168, 181, 0.15);
+--text-primary: #ffffff;
+--text-secondary: #a0aec0;
+--text-muted: #6b7a8d;
+--border: #2a3544;
+--success: #00d4a0;
+--warning: #ffb84d;
+--danger: #ef4444;
+--gradient-teal: linear-gradient(135deg, #00a8b5 0%, #00d4e0 100%);
+}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--teal-dark); border-radius: 4px; }
+
+    .logo-svg { width: 40px; height: 40px; }
+
+    header {
+        background: rgba(10, 15, 20, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .header-content {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        text-decoration: none;
+    }
+
+    .logo-text { display: flex; flex-direction: column; }
+
+    .logo-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--teal);
+        line-height: 1.2;
+    }
+
+    .logo-subtitle {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .header-badge {
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        color: var(--teal);
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .header-nav { display: flex; gap: 1rem; align-items: center; }
+
+    .btn-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-link:hover { color: var(--teal); }
+
+    .checkout-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .checkout-header h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        letter-spacing: -1px;
+    }
+
+    .checkout-header p {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .progress-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+
+    .step.active {
+        border-color: var(--teal);
+        background: var(--teal-glow);
+    }
+
+    .step.completed {
+        border-color: var(--success);
+        background: rgba(0, 212, 160, 0.1);
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--bg-tertiary);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        transition: all 0.3s;
+    }
+
+    .step.active .step-number {
+        background: var(--teal);
+        border-color: var(--teal);
+        color: var(--bg-primary);
+    }
+
+    .step.completed .step-number {
+        background: var(--success);
+        border-color: var(--success);
+        color: var(--bg-primary);
+    }
+
+    .step-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .step.active .step-label { color: var(--text-primary); }
+    .step.completed .step-label { color: var(--success); }
+
+    .step-connector {
+        width: 40px;
+        height: 2px;
+        background: var(--border);
+    }
+
+    .step-connector.completed { background: var(--success); }
+
+    .step-content { display: none; animation: fadeIn 0.4s ease-out; }
+    .step-content.active { display: block; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 2rem;
+    }
+
+    .panel {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+    }
+
+    .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .panel-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+    }
+
+    .panel-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .panel-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .plans-selector { display: grid; gap: 1rem; margin-bottom: 2rem; }
+
+    .plan-option {
+        background: var(--bg-tertiary);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .plan-option:hover {
+        border-color: var(--teal);
+        transform: translateY(-2px);
+    }
+
+    .plan-option.selected {
+        border-color: var(--teal);
+        background: var(--teal-glow);
+    }
+
+    .plan-option.featured { border-color: var(--teal); }
+
+    .plan-option.featured::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 2rem;
+        right: 2rem;
+        height: 3px;
+        background: var(--gradient-teal);
+        border-radius: 0 0 3px 3px;
+    }
+
+    .plan-option-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .plan-option-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .plan-badge {
+        background: var(--gradient-teal);
+        color: var(--bg-primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 100px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .plan-option-price {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--teal);
+    }
+
+    .plan-option-price span {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .plan-option-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .course-limit-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--bg-card);
+        border: 1px solid var(--teal);
+        color: var(--teal);
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-top: 0.75rem;
+    }
+
+    .frequency-toggle {
+        display: flex;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.35rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .freq-option {
+        flex: 1;
+        padding: 0.75rem;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .freq-option.active {
+        background: var(--teal);
+        color: var(--bg-primary);
+    }
+
+    .freq-discount {
+        background: var(--success);
+        color: var(--bg-primary);
+        padding: 0.15rem 0.5rem;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .form-grid { display: grid; gap: 1.25rem; }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group { display: flex; flex-direction: column; }
+
+    .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .form-group label .required { color: var(--danger); }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.9rem 1rem;
+        background: var(--bg-input);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--teal);
+        background: var(--bg-tertiary);
+    }
+
+    .form-group input.error { border-color: var(--danger); }
+
+    .form-error {
+        color: var(--danger);
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        display: none;
+    }
+
+    .form-error.show { display: block; }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row:last-child { border-bottom: none; }
+
+    .summary-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .summary-value {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .summary-total {
+        background: var(--bg-tertiary);
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .summary-total .summary-row {
+        border-bottom: none;
+        padding: 0.5rem 0;
+    }
+
+    .summary-total .summary-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--teal);
+    }
+
+    .summary-total .summary-value small {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .btn {
+        padding: 0.9rem 1.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .btn-primary {
+        background: var(--gradient-teal);
+        color: var(--bg-primary);
+        box-shadow: 0 4px 16px var(--teal-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 168, 181, 0.3);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--teal);
+        border: 1.5px solid var(--teal);
+    }
+
+    .btn-secondary:hover { background: var(--teal-glow); }
+
+    .btn-ghost {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+        border-color: var(--teal);
+        color: var(--teal);
+    }
+
+    .btn-block { width: 100%; }
+    .btn-large { padding: 1.1rem 2rem; font-size: 1rem; }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: space-between;
+    }
+
+    .payment-methods {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .payment-method {
+        background: var(--bg-tertiary);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+    .payment-method:hover {
+        border-color: var(--teal);
+        transform: translateY(-2px);
+    }
+
+    .payment-method.selected {
+        border-color: var(--teal);
+        background: var(--teal-glow);
+    }
+
+    .payment-method-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 0.75rem;
+        background: var(--bg-card);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+    }
+
+    .payment-method.selected .payment-method-icon {
+        background: var(--teal);
+        color: var(--bg-primary);
+    }
+
+    .payment-method-name { font-weight: 600; font-size: 0.95rem; }
+
+    .payment-method-desc {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    .payment-content {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .pix-container { text-align: center; }
+
+    .qr-code {
+        width: 220px;
+        height: 220px;
+        background: white;
+        border-radius: 12px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .qr-code svg { width: 100%; height: 100%; }
+
+    .pix-timer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: var(--warning);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .pix-code {
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        word-break: break-all;
+        margin-bottom: 1rem;
+    }
+
+    .pix-actions { display: flex; gap: 0.75rem; }
+
+    .card-form { display: grid; gap: 1rem; }
+
+    .card-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .test-cards {
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .test-cards-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .test-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .test-card:last-child { border-bottom: none; }
+
+    .test-card-status {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 100px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+    }
+
+    .status-approved {
+        background: rgba(0, 212, 160, 0.15);
+        color: var(--success);
+    }
+
+    .status-declined {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+    }
+
+    .success-container {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(0, 212, 160, 0.15);
+        border: 2px solid var(--success);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: var(--success);
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+    }
+
+    .success-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: var(--success);
+    }
+
+    .success-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        margin-bottom: 2rem;
+    }
+
+    .receipt {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: left;
+        max-width: 500px;
+        margin: 0 auto 2rem;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.9rem;
+    }
+
+    .receipt-row:last-child { border-bottom: none; }
+
+    .receipt-label { color: var(--text-muted); }
+    .receipt-value { font-weight: 600; }
+
+    .success-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .access-section {
+        margin-top: 3rem;
+        padding-top: 3rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .access-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .access-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+    }
+
+    .access-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .access-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--teal-glow);
+        border: 1px solid var(--teal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal);
+    }
+
+    .access-card h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .access-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .access-input-group { display: flex; gap: 0.75rem; }
+
+    .access-input-group input {
+        flex: 1;
+        padding: 0.9rem 1rem;
+        background: var(--bg-input);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .access-input-group input:focus {
+        outline: none;
+        border-color: var(--teal);
+    }
+
+    .access-result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: none;
+    }
+
+    .access-result.show { display: block; }
+
+    .access-result.success {
+        background: rgba(0, 212, 160, 0.1);
+        border: 1px solid var(--success);
+        color: var(--success);
+    }
+
+    .access-result.error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--danger);
+        color: var(--danger);
+    }
+
+    footer {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        padding: 2rem;
+        margin-top: 4rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 968px) {
+        .checkout-grid { grid-template-columns: 1fr; }
+        .access-grid { grid-template-columns: 1fr; }
+        .card-row { grid-template-columns: 1fr; }
+        .form-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+        .payment-methods { grid-template-columns: 1fr; }
+        .checkout-header h1 { font-size: 1.75rem; }
+        .header-content { padding: 0.75rem 1rem; }
+        .checkout-container { padding: 2rem 1rem; }
+        .step-label { display: none; }
+        .step-connector { width: 20px; }
+        .header-nav { display: none; }
+    }
+
+    .processing {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .processing.show { display: block; }
+
+    .spinner {
+        border: 3px solid var(--border);
+        border-top: 3px solid var(--teal);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+</head>
+<body>
+<header>
+<div class="header-content">
+<a href="index.html" class="logo-container">
+<svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="50" cy="50" r="45" stroke="#00a8b5" stroke-width="2"/>
+<circle cx="50" cy="50" r="35" stroke="#00a8b5" stroke-width="1.5"/>
+<text x="50" y="62" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#00a8b5" text-anchor="middle">C</text>
+<text x="50" y="18" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">CYBER ACADEMY</text>
+<text x="50" y="92" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="600" fill="#00a8b5" text-anchor="middle" letter-spacing="1">EST. 2022</text>
+</svg>
+<div class="logo-text">
+<span class="logo-title">Cyber Academy</span>
+<span class="logo-subtitle">Checkout · Etapa 2</span>
+</div>
+</a>
+<div class="header-badge">
+<i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+Gateway Seguro
+</div>
+<div class="header-nav">
+<a href="index.html" class="btn-link">
+<i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+Voltar ao site
+</a>
+</div>
+</div>
+</header>
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1>Finalize sua matrícula</h1>
+        <p>Modelo de escola: matrícula única + mensalidade fixa. Sem fidelidade, cancele quando quiser.</p>
+    </div>
+
+    <div class="progress-bar">
+        <div class="step active" data-step="1">
+            <div class="step-number">1</div>
+            <div class="step-label">Pedido</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="2">
+            <div class="step-number">2</div>
+            <div class="step-label">Pagamento</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="3">
+            <div class="step-number">3</div>
+            <div class="step-label">Confirmação</div>
+        </div>
+    </div>
+
+    <!-- STEP 1: Pedido -->
+    <div class="step-content active" id="step-1">
+        <div class="checkout-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-icon"><i data-lucide="crown" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="panel-title">Escolha seu plano</div>
+                        <div class="panel-subtitle">Cada plano libera uma quantidade de cursos ativos</div>
+                    </div>
+                </div>
+
+                <div class="frequency-toggle">
+                    <div class="freq-option active" data-freq="mensal">
+                        <i data-lucide="calendar" style="width:16px;height:16px;"></i>
+                        Mensal
+                    </div>
+                    <div class="freq-option" data-freq="anual">
+                        <i data-lucide="calendar-days" style="width:16px;height:16px;"></i>
+                        Anual
+                        <span class="freq-discount">-15%</span>
+                    </div>
+                </div>
+
+                <div class="plans-selector">
+                    <div class="plan-option" data-plan="essencial" data-price="100" data-courses="1">
+                        <div class="plan-option-header">
+                            <div class="plan-option-name">
+                                <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--teal);"></i>
+                                Essencial
+                            </div>
+                            <div class="plan-option-price">R$100<span>/mês</span></div>
+                        </div>
+                        <div class="plan-option-desc">Para dar o primeiro passo · foco em um curso</div>
+                        <div class="course-limit-badge">
+                            <i data-lucide="book-open" style="width:14px;height:14px;"></i>
+                            1 curso ativo liberado
+                        </div>
+                    </div>
+
+                    <div class="plan-option featured selected" data-plan="profissional" data-price="150" data-courses="5">
+                        <div class="plan-option-header">
+                            <div class="plan-option-name">
+                                <i data-lucide="rocket" style="width:18px;height:18px;color:var(--teal);"></i>
+                                Profissional
+                                <span class="plan-badge">MAIS ESCOLHIDO</span>
+                            </div>
+                            <div class="plan-option-price">R$150<span>/mês</span></div>
+                        </div>
+                        <div class="plan-option-desc">Para acelerar a carreira · múltiplas frentes</div>
+                        <div class="course-limit-badge">
+                            <i data-lucide="book-open" style="width:14px;height:14px;"></i>
+                            5 cursos ativos liberados
+                        </div>
+                    </div>
+
+                    <div class="plan-option" data-plan="corporativo" data-price="250" data-courses="7">
+                        <div class="plan-option-header">
+                            <div class="plan-option-name">
+                                <i data-lucide="building-2" style="width:18px;height:18px;color:var(--teal);"></i>
+                                Corporativo
+                            </div>
+                            <div class="plan-option-price">R$250<span>/aluno/mês</span></div>
+                        </div>
+                        <div class="plan-option-desc">Para treinar equipes · mínimo 5 alunos</div>
+                        <div class="course-limit-badge">
+                            <i data-lucide="book-open" style="width:14px;height:14px;"></i>
+                            7 cursos ativos por aluno
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-icon"><i data-lucide="file-text" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="panel-title">Dados do pedido</div>
+                        <div class="panel-subtitle">Informações para matrícula</div>
+                    </div>
+                </div>
+
+                <form id="order-form" class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            <i data-lucide="book-open" style="width:14px;height:14px;"></i>
+                            Curso pretendido
+                            <span style="color:var(--text-muted);font-weight:400;">(opcional)</span>
+                        </label>
+                        <select id="course-select">
+                            <option value="">Escolher depois no portal</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i data-lucide="user" style="width:14px;height:14px;"></i>
+                            Nome completo
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="name" placeholder="Seu nome completo" required>
+                        <span class="form-error">Informe seu nome (mín. 3 caracteres)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i data-lucide="mail" style="width:14px;height:14px;"></i>
+                            E-mail
+                            <span class="required">*</span>
+                        </label>
+                        <input type="email" id="email" placeholder="seu@email.com" required>
+                        <span class="form-error">Informe um e-mail válido</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                <i data-lucide="id-card" style="width:14px;height:14px;"></i>
+                                CPF ou CNPJ
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="document" placeholder="Somente dígitos" required>
+                            <span class="form-error">Informe 11 dígitos (CPF) ou 14 (CNPJ)</span>
+                        </div>
+                        <div class="form-group" id="company-group" style="display:none;">
+                            <label>
+                                <i data-lucide="building" style="width:14px;height:14px;"></i>
+                                Empresa
+                            </label>
+                            <input type="text" id="company" placeholder="Nome da empresa">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="students-group" style="display:none;">
+                        <label>
+                            <i data-lucide="users" style="width:14px;height:14px;"></i>
+                            Número de alunos
+                        </label>
+                        <input type="number" id="students" min="5" max="500" value="5" placeholder="Mínimo 5">
+                    </div>
+                </form>
+
+                <div class="actions">
+                    <a href="index.html" class="btn btn-ghost">
+                        <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
+                        Voltar
+                    </a>
+                    <button class="btn btn-primary btn-large" onclick="goToStep(2)">
+                        Ir para pagamento
+                        <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: Pagamento -->
+    <div class="step-content" id="step-2">
+        <div class="checkout-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-icon"><i data-lucide="credit-card" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="panel-title">Escolha como pagar</div>
+                        <div class="panel-subtitle">Conexão segura · dados não enviados a servidores</div>
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+                    <div class="payment-method selected" data-method="pix">
+                        <div class="payment-method-icon">
+                            <i data-lucide="qr-code" style="width:24px;height:24px;"></i>
+                        </div>
+                        <div class="payment-method-name">Pix</div>
+                        <div class="payment-method-desc">Confirmação instantânea</div>
+                    </div>
+                    <div class="payment-method" data-method="card">
+                        <div class="payment-method-icon">
+                            <i data-lucide="credit-card" style="width:24px;height:24px;"></i>
+                        </div>
+                        <div class="payment-method-name">Cartão</div>
+                        <div class="payment-method-desc">Recorrência mensal</div>
+                    </div>
+                    <div class="payment-method" data-method="boleto">
+                        <div class="payment-method-icon">
+                            <i data-lucide="barcode" style="width:24px;height:24px;"></i>
+                        </div>
+                        <div class="payment-method-name">Boleto</div>
+                        <div class="payment-method-desc">1-3 dias úteis</div>
+                    </div>
+                </div>
+
+                <div class="payment-content" id="payment-pix">
+                    <div class="pix-container">
+                        <div class="qr-code">
+                            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="200" height="200" fill="white"/>
+                                <g fill="#0a0f14">
+                                    <rect x="20" y="20" width="50" height="50"/>
+                                    <rect x="30" y="30" width="30" height="30" fill="white"/>
+                                    <rect x="40" y="40" width="10" height="10"/>
+                                    <rect x="130" y="20" width="50" height="50"/>
+                                    <rect x="140" y="30" width="30" height="30" fill="white"/>
+                                    <rect x="150" y="40" width="10" height="10"/>
+                                    <rect x="20" y="130" width="50" height="50"/>
+                                    <rect x="30" y="140" width="30" height="30" fill="white"/>
+                                    <rect x="40" y="150" width="10" height="10"/>
+                                    <rect x="80" y="20" width="10" height="10"/>
+                                    <rect x="100" y="20" width="10" height="10"/>
+                                    <rect x="80" y="40" width="10" height="10"/>
+                                    <rect x="110" y="40" width="10" height="10"/>
+                                    <rect x="80" y="60" width="10" height="10"/>
+                                    <rect x="20" y="80" width="10" height="10"/>
+                                    <rect x="40" y="80" width="10" height="10"/>
+                                    <rect x="60" y="80" width="10" height="10"/>
+                                    <rect x="80" y="80" width="10" height="10"/>
+                                    <rect x="100" y="80" width="10" height="10"/>
+                                    <rect x="120" y="80" width="10" height="10"/>
+                                    <rect x="140" y="80" width="10" height="10"/>
+                                    <rect x="160" y="80" width="10" height="10"/>
+                                    <rect x="180" y="80" width="10" height="10"/>
+                                    <rect x="80" y="100" width="10" height="10"/>
+                                    <rect x="110" y="100" width="10" height="10"/>
+                                    <rect x="140" y="100" width="10" height="10"/>
+                                    <rect x="170" y="100" width="10" height="10"/>
+                                    <rect x="80" y="120" width="10" height="10"/>
+                                    <rect x="100" y="120" width="10" height="10"/>
+                                    <rect x="130" y="120" width="10" height="10"/>
+                                    <rect x="160" y="120" width="10" height="10"/>
+                                    <rect x="80" y="140" width="10" height="10"/>
+                                    <rect x="110" y="140" width="10" height="10"/>
+                                    <rect x="140" y="140" width="10" height="10"/>
+                                    <rect x="170" y="140" width="10" height="10"/>
+                                    <rect x="80" y="160" width="10" height="10"/>
+                                    <rect x="100" y="160" width="10" height="10"/>
+                                    <rect x="130" y="160" width="10" height="10"/>
+                                    <rect x="160" y="160" width="10" height="10"/>
+                                    <rect x="80" y="180" width="10" height="10"/>
+                                    <rect x="110" y="180" width="10" height="10"/>
+                                    <rect x="140" y="180" width="10" height="10"/>
+                                    <rect x="170" y="180" width="10" height="10"/>
+                                    <rect x="130" y="130" width="10" height="10"/>
+                                    <rect x="150" y="150" width="10" height="10"/>
+                                    <rect x="170" y="170" width="10" height="10"/>
+                                </g>
+                                <rect x="85" y="85" width="30" height="30" fill="#00a8b5" rx="4"/>
+                                <text x="100" y="105" font-family="Space Grotesk" font-size="14" font-weight="700" fill="white" text-anchor="middle">CA</text>
+                            </svg>
+                        </div>
+                        <div class="pix-timer">
+                            <i data-lucide="clock" style="width:18px;height:18px;"></i>
+                            <span id="pix-timer">15:00</span> para o QR Code expirar
+                        </div>
+                        <div class="pix-code" id="pix-code">00020126580014br.gov.bcb.pix0136ca-2026-abc123-xyz789-5204000053039865405150.005802BR5925CYBER ACADEMY LTDA6009SAO PAULO62070503***6304ABCD</div>
+                        <div class="pix-actions">
+                            <button class="btn btn-secondary" onclick="copyPix()">
+                                <i data-lucide="copy" style="width:16px;height:16px;"></i>
+                                Copiar código
+                            </button>
+                            <button class="btn btn-primary" onclick="simulatePix()">
+                                <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+                                Simular pagamento Pix
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-content" id="payment-card" style="display:none;">
+                    <form class="card-form" id="card-form">
+                        <div class="form-group">
+                            <label>Número do cartão</label>
+                            <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome impresso no cartão</label>
+                            <input type="text" id="card-name" placeholder="Como está no cartão">
+                        </div>
+                        <div class="card-row">
+                            <div class="form-group">
+                                <label>Validade</label>
+                                <input type="text" id="card-expiry" placeholder="MM/AA" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="text" id="card-cvv" placeholder="123" maxlength="4">
+                            </div>
+                            <div class="form-group">
+                                <label>Parcelas</label>
+                                <select id="card-installments">
+                                    <option value="1">1x sem juros</option>
+                                    <option value="2">2x sem juros</option>
+                                    <option value="3">3x sem juros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-large btn-block" onclick="processCard()">
+                            <i data-lucide="lock" style="width:18px;height:18px;"></i>
+                            Pagar agora
+                        </button>
+                    </form>
+                    <div class="test-cards">
+                        <div class="test-cards-title">Cartões de teste do gateway demo</div>
+                        <div class="test-card">
+                            <span>4242 4242 4242 4242</span>
+                            <span class="test-card-status status-approved">Aprovado</span>
+                        </div>
+                        <div class="test-card">
+                            <span>5555 4444 3333 1111</span>
+                            <span class="test-card-status status-approved">Aprovado</span>
+                        </div>
+                        <div class="test-card">
+                            <span>4000 0000 0000 0002</span>
+                            <span class="test-card-status status-declined">Recusado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-content" id="payment-boleto" style="display:none;">
+                    <div class="pix-container">
+                        <div style="background:var(--bg-input);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;">
+                            <i data-lucide="barcode" style="width:48px;height:48px;color:var(--teal);margin-bottom:1rem;"></i>
+                            <div style="font-family:'Courier New',monospace;font-size:0.9rem;color:var(--text-secondary);word-break:break-all;" id="boleto-code">23793.38128 60000.000003 00000.000402 1 74230000015000</div>
+                        </div>
+                        <div class="pix-actions" style="justify-content:center;">
+                            <button class="btn btn-secondary" onclick="copyBoleto()">
+                                <i data-lucide="copy" style="width:16px;height:16px;"></i>
+                                Copiar linha digitável
+                            </button>
+                            <button class="btn btn-primary" onclick="simulateBoleto()">
+                                <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+                                Simular compensação
+                            </button>
+                        </div>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-top:1.5rem;">
+                            <i data-lucide="info" style="width:14px;height:14px;display:inline;vertical-align:middle;"></i>
+                            Em produção o boleto compensa em 1-3 dias úteis
+                        </p>
+                    </div>
+                </div>
+
+                <div class="processing" id="processing">
+                    <div class="spinner"></div>
+                    <div style="color:var(--text-secondary);font-weight:600;">Processando pagamento…</div>
+                    <div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">Aguarde a confirmação</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-ghost" onclick="goToStep(1)">
+                        <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
+                        Voltar
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-icon"><i data-lucide="receipt" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="panel-title">Resumo do pedido</div>
+                        <div class="panel-subtitle">Matrícula única + mensalidade</div>
+                    </div>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <i data-lucide="crown" style="width:16px;height:16px;color:var(--teal);"></i>
+                        Plano
+                    </span>
+                    <span class="summary-value" id="summary-plan">Profissional</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <i data-lucide="book-open" style="width:16px;height:16px;color:var(--teal);"></i>
+                        Cursos liberados
+                    </span>
+                    <span class="summary-value" id="summary-courses" style="color:var(--teal);font-weight:700;">5 ativos</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <i data-lucide="calendar" style="width:16px;height:16px;color:var(--teal);"></i>
+                        Frequência
+                    </span>
+                    <span class="summary-value" id="summary-freq">Mensal</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <i data-lucide="book-open" style="width:16px;height:16px;color:var(--teal);"></i>
+                        Curso
+                    </span>
+                    <span class="summary-value" id="summary-course">A escolher</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <i data-lucide="user" style="width:16px;height:16px;color:var(--teal);"></i>
+                        Aluno
+                    </span>
+                    <span class="summary-value" id="summary-name">—</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <i data-lucide="mail" style="width:16px;height:16px;color:var(--teal);"></i>
+                        E-mail
+                    </span>
+                    <span class="summary-value" id="summary-email">—</span>
+                </div>
+
+                <div class="summary-total">
+                    <div class="summary-row">
+                        <span class="summary-label">Matrícula única</span>
+                        <span class="summary-value" id="summary-enrollment">R$ 99,00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Mensalidade</span>
+                        <span class="summary-value" id="summary-monthly">R$ 150,00</span>
+                    </div>
+                    <div class="summary-row" style="padding-top:1rem;border-top:1px solid var(--border);">
+                        <span class="summary-label" style="font-weight:700;color:var(--text-primary);">Total hoje</span>
+                        <span class="summary-value" id="summary-total">R$ 249,00 <small>+ R$ 150,00/mês</small></span>
+                    </div>
+                </div>
+
+                <div style="margin-top:1.5rem;padding:1rem;background:var(--bg-tertiary);border-radius:10px;display:flex;gap:0.75rem;align-items:flex-start;">
+                    <i data-lucide="shield-check" style="width:20px;height:20px;color:var(--success);flex-shrink:0;margin-top:2px;"></i>
+                    <div style="font-size:0.85rem;color:var(--text-secondary);">
+                        <strong style="color:var(--text-primary);">Garantia legal de 7 dias</strong><br>
+                        Cancele sem multa · Sem fidelidade · Sem taxas ocultas
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: Confirmação -->
+    <div class="step-content" id="step-3">
+        <div class="panel" style="max-width:700px;margin:0 auto;">
+            <div class="success-container">
+                <div class="success-icon">
+                    <i data-lucide="check" style="width:48px;height:48px;"></i>
+                </div>
+                <h2 class="success-title">Pagamento aprovado!</h2>
+                <p class="success-subtitle">Sua matrícula foi confirmada. O Portal do Aluno está liberado para seu e-mail.</p>
+
+                <div class="receipt">
+                    <div class="receipt-row">
+                        <span class="receipt-label">Protocolo</span>
+                        <span class="receipt-value" id="receipt-protocol">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Plano</span>
+                        <span class="receipt-value" id="receipt-plan">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Cursos liberados</span>
+                        <span class="receipt-value" id="receipt-courses" style="color:var(--teal);">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Aluno</span>
+                        <span class="receipt-value" id="receipt-name">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">E-mail</span>
+                        <span class="receipt-value" id="receipt-email">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Total pago</span>
+                        <span class="receipt-value" id="receipt-total" style="color:var(--teal);">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Data</span>
+                        <span class="receipt-value" id="receipt-date">—</span>
+                    </div>
+                </div>
+
+                <div class="success-actions">
+                    <a href="portal.html" class="btn btn-primary btn-large">
+                        <i data-lucide="log-in" style="width:18px;height:18px;"></i>
+                        Acessar Portal do Aluno
+                    </a>
+                    <button class="btn btn-secondary" onclick="resetCheckout()">
+                        <i data-lucide="plus" style="width:18px;height:18px;"></i>
+                        Novo pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="access-section">
+        <div class="checkout-header" style="margin-bottom:1rem;">
+            <h1 style="font-size:1.75rem;">Verifique seu acesso</h1>
+            <p>Consulte se existe pagamento aprovado para seu e-mail</p>
+        </div>
+        <div class="access-grid">
+            <div class="access-card">
+                <div class="access-card-header">
+                    <div class="access-icon"><i data-lucide="search" style="width:20px;height:20px;"></i></div>
+                    <h3>Consultar acesso</h3>
+                </div>
+                <p>Informe o e-mail usado no pedido para verificar se existe pagamento aprovado.</p>
+                <div class="access-input-group">
+                    <input type="email" id="access-email" placeholder="seu@email.com">
+                    <button class="btn btn-primary" onclick="checkAccess()">
+                        <i data-lucide="search" style="width:16px;height:16px;"></i>
+                        Verificar
+                    </button>
+                </div>
+                <div class="access-result" id="access-result"></div>
+            </div>
+            <div class="access-card">
+                <div class="access-card-header">
+                    <div class="access-icon"><i data-lucide="info" style="width:20px;height:20px;"></i></div>
+                    <h3>Como funciona</h3>
+                </div>
+                <p>Sem um pagamento aprovado para o e-mail, o cadastro e o login do Portal do Aluno permanecem bloqueados — Essencial, Profissional ou Corporativo.</p>
+                <a href="portal.html" class="btn btn-ghost btn-block" style="margin-top:1rem;">
+                    <i data-lucide="external-link" style="width:16px;height:16px;"></i>
+                    Ir para Portal do Aluno
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div style="max-width:1280px;margin:0 auto;">
+        <div style="display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <a href="index.html">Site institucional</a>
+            <a href="portal.html">Portal do Aluno</a>
+            <a href="admin.html">Admin</a>
+            <a href="certificados.html">Certificados</a>
+        </div>
+        <div>© 2026 Cyber Academy · EST. 2022 · Etapa 2 de 6 · Gateway simulado</div>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // Banco de dados centralizado
+    const DB = {
+        getCourses: () => JSON.parse(localStorage.getItem('cyber_courses') || '[]'),
+        getStudents: () => JSON.parse(localStorage.getItem('cyber_students') || '[]'),
+        setStudents: (data) => localStorage.setItem('cyber_students', JSON.stringify(data)),
+        getPayments: () => JSON.parse(localStorage.getItem('cyber_payments') || '[]'),
+        setPayments: (data) => localStorage.setItem('cyber_payments', JSON.stringify(data))
+    };
+
+    // State
+    let state = {
+        step: 1,
+        plan: 'profissional',
+        planPrice: 150,
+        courseLimit: 5,
+        frequency: 'mensal',
+        method: 'pix',
+        order: null
+    };
+
+    const planConfig = {
+        essencial: {
+            name: 'Essencial',
+            price: 100,
+            enrollment: 79,
+            courses: 1,
+            label: '1 curso ativo'
+        },
+        profissional: {
+            name: 'Profissional',
+            price: 150,
+            enrollment: 99,
+            courses: 5,
+            label: '5 cursos ativos'
+        },
+        corporativo: {
+            name: 'Corporativo',
+            price: 250,
+            enrollment: 199,
+            courses: 7,
+            label: '7 cursos ativos por aluno'
+        }
+    };
+
+    // Carregar cursos no select
+    function loadCourses() {
+        const courses = DB.getCourses();
+        const select = document.getElementById('course-select');
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.id;
+            option.textContent = course.title;
+            select.appendChild(option);
+        });
+    }
+
+    // Seleção de plano
+    document.querySelectorAll('.plan-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+
+            const planKey = opt.dataset.plan;
+            const config = planConfig[planKey];
+
+            state.plan = planKey;
+            state.planPrice = config.price;
+            state.courseLimit = config.courses;
+
+            const isCorp = state.plan === 'corporativo';
+            document.getElementById('company-group').style.display = isCorp ? 'block' : 'none';
+            document.getElementById('students-group').style.display = isCorp ? 'block' : 'none';
+
+            updateSummary();
+        });
+    });
+
+    // Toggle frequência
+    document.querySelectorAll('.freq-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.freq-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            state.frequency = opt.dataset.freq;
+            updateSummary();
+        });
+    });
+
+    // Método de pagamento
+    document.querySelectorAll('.payment-method').forEach(m => {
+        m.addEventListener('click', () => {
+            document.querySelectorAll('.payment-method').forEach(x => x.classList.remove('selected'));
+            m.classList.add('selected');
+            state.method = m.dataset.method;
+
+            document.getElementById('payment-pix').style.display = state.method === 'pix' ? 'block' : 'none';
+            document.getElementById('payment-card').style.display = state.method === 'card' ? 'block' : 'none';
+            document.getElementById('payment-boleto').style.display = state.method === 'boleto' ? 'block' : 'none';
+        });
+    });
+
+    function updateSummary() {
+        const config = planConfig[state.plan];
+        const freq = state.frequency;
+        const monthly = config.price;
+        const enrollment = config.enrollment;
+        const discount = freq === 'anual' ? 0.85 : 1;
+        const totalMonthly = monthly * discount;
+        const totalToday = enrollment + totalMonthly;
+
+        document.getElementById('summary-plan').textContent = config.name;
+        document.getElementById('summary-courses').textContent = config.label;
+        document.getElementById('summary-freq').textContent = freq === 'mensal' ? 'Mensal' : 'Anual (-15%)';
+        document.getElementById('summary-enrollment').textContent = `R$ ${enrollment.toFixed(2).replace('.', ',')}`;
+        document.getElementById('summary-monthly').textContent = `R$ ${totalMonthly.toFixed(2).replace('.', ',')}`;
+        document.getElementById('summary-total').innerHTML = `R$ ${totalToday.toFixed(2).replace('.', ',')} <small>+ R$ ${totalMonthly.toFixed(2).replace('.', ',')}/mês</small>`;
+
+        document.querySelectorAll('.plan-option').forEach(opt => {
+            const basePrice = parseInt(opt.dataset.price);
+            const adjustedPrice = basePrice * discount;
+            const priceEl = opt.querySelector('.plan-option-price');
+            if (priceEl) {
+                priceEl.innerHTML = `R$${adjustedPrice.toFixed(0)}<span>/${freq === 'mensal' ? 'mês' : 'mês'}</span>`;
+            }
+        });
+    }
+
+    document.getElementById('name').addEventListener('input', e => {
+        document.getElementById('summary-name').textContent = e.target.value || '—';
+    });
+    document.getElementById('email').addEventListener('input', e => {
+        document.getElementById('summary-email').textContent = e.target.value || '—';
+    });
+    document.getElementById('course-select').addEventListener('change', e => {
+        const text = e.target.options[e.target.selectedIndex].text;
+        document.getElementById('summary-course').textContent = text;
+    });
+
+    function goToStep(n) {
+        if (n === 2 && !validateStep1()) return;
+
+        state.step = n;
+        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${n}`).classList.add('active');
+
+        document.querySelectorAll('.step').forEach(s => {
+            const stepNum = parseInt(s.dataset.step);
+            s.classList.remove('active', 'completed');
+            if (stepNum === n) s.classList.add('active');
+            else if (stepNum < n) s.classList.add('completed');
+        });
+
+        document.querySelectorAll('.step-connector').forEach((c, i) => {
+            c.classList.toggle('completed', i < n - 1);
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        lucide.createIcons();
+    }
+
+    function validateStep1() {
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const doc = document.getElementById('document').value.trim();
+
+        let valid = true;
+
+        if (name.length < 3) {
+            document.getElementById('name').classList.add('error');
+            document.getElementById('name').nextElementSibling.classList.add('show');
+            valid = false;
+        } else {
+            document.getElementById('name').classList.remove('error');
+            document.getElementById('name').nextElementSibling.classList.remove('show');
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('email').classList.add('error');
+            document.getElementById('email').nextElementSibling.classList.add('show');
+            valid = false;
+        } else {
+            document.getElementById('email').classList.remove('error');
+            document.getElementById('email').nextElementSibling.classList.remove('show');
+        }
+
+        if (!/^\d{11}$|^\d{14}$/.test(doc.replace(/\D/g, ''))) {
+            document.getElementById('document').classList.add('error');
+            document.getElementById('document').nextElementSibling.classList.add('show');
+            valid = false;
+        } else {
+            document.getElementById('document').classList.remove('error');
+            document.getElementById('document').nextElementSibling.classList.remove('show');
+        }
+
+        if (state.plan === 'corporativo') {
+            const students = parseInt(document.getElementById('students').value);
+            if (students < 5) {
+                alert('Plano corporativo requer mínimo de 5 alunos');
+                return false;
+            }
+        }
+
+        return valid;
+    }
+
+    let pixTime = 15 * 60;
+    setInterval(() => {
+        if (pixTime > 0 && state.step === 2 && state.method === 'pix') {
+            pixTime--;
+            const m = Math.floor(pixTime / 60).toString().padStart(2, '0');
+            const s = (pixTime % 60).toString().padStart(2, '0');
+            document.getElementById('pix-timer').textContent = `${m}:${s}`;
+        }
+    }, 1000);
+
+    function copyPix() {
+        const code = document.getElementById('pix-code').textContent;
+        navigator.clipboard.writeText(code);
+        alert('Código Pix copiado!');
+    }
+
+    function copyBoleto() {
+        const code = document.getElementById('boleto-code').textContent;
+        navigator.clipboard.writeText(code);
+        alert('Linha digitável copiada!');
+    }
+
+    function simulatePix() {
+        showProcessing();
+        setTimeout(() => approvePayment('pix'), 2000);
+    }
+
+    function simulateBoleto() {
+        showProcessing();
+        setTimeout(() => approvePayment('boleto'), 2000);
+    }
+
+    function processCard() {
+        const number = document.getElementById('card-number').value.replace(/\s/g, '');
+        if (number === '4000000000000002') {
+            alert('Pagamento recusado pelo emissor. Use outro cartão de teste.');
+            return;
+        }
+        if (number.length < 13) {
+            alert('Número de cartão inválido');
+            return;
+        }
+        showProcessing();
+        setTimeout(() => approvePayment('card'), 2000);
+    }
+
+    function showProcessing() {
+        document.getElementById('processing').classList.add('show');
+        document.querySelectorAll('.payment-content').forEach(c => c.style.display = 'none');
+    }
+
+    function approvePayment(method) {
+        const protocol = `CA-2026-${Math.floor(Math.random() * 9000 + 1000)}`;
+        const config = planConfig[state.plan];
+        const discount = state.frequency === 'anual' ? 0.85 : 1;
+        const monthly = config.price * discount;
+        const enrollment = config.enrollment;
+        const total = enrollment + monthly;
+
+        const payment = {
+            protocol,
+            plan: state.plan,
+            planName: config.name,
+            frequency: state.frequency,
+            method,
+            courseLimit: state.courseLimit,
+            courseLimitLabel: config.label,
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            document: document.getElementById('document').value,
+            company: document.getElementById('company')?.value || '',
+            students: parseInt(document.getElementById('students')?.value || 0),
+            course: document.getElementById('course-select').value,
+            enrollment,
+            monthly,
+            total,
+            date: new Date().toISOString(),
+            status: 'approved'
+        };
+
+        // Salvar pagamento
+        const payments = DB.getPayments();
+        payments.push(payment);
+        DB.setPayments(payments);
+
+        // Criar conta de aluno
+        const students = DB.getStudents();
+        const existingStudent = students.find(s => s.email === payment.email);
+        
+        if (!existingStudent) {
+            students.push({
+                email: payment.email,
+                name: payment.name,
+                password: 'demo1234',
+                plan: payment.plan,
+                planName: payment.planName,
+                courseLimit: payment.courseLimit,
+                courseLimitLabel: payment.courseLimitLabel,
+                frequency: payment.frequency,
+                monthly: payment.monthly,
+                activeCourses: payment.course ? [parseInt(payment.course)] : [],
+                lessonsProgress: {},
+                projects: [],
+                certificates: [],
+                streak: 1,
+                createdAt: new Date().toISOString(),
+                lastAccess: new Date().toISOString()
+            });
+            DB.setStudents(students);
+        }
+
+        // Preencher recibo
+        document.getElementById('receipt-protocol').textContent = protocol;
+        document.getElementById('receipt-plan').textContent = payment.planName;
+        document.getElementById('receipt-courses').textContent = config.label;
+        document.getElementById('receipt-name').textContent = payment.name;
+        document.getElementById('receipt-email').textContent = payment.email;
+        document.getElementById('receipt-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById('receipt-date').textContent = new Date().toLocaleDateString('pt-BR');
+
+        document.getElementById('processing').classList.remove('show');
+        goToStep(3);
+    }
+
+    function checkAccess() {
+        const email = document.getElementById('access-email').value.trim();
+        const result = document.getElementById('access-result');
+
+        if (!email) {
+            result.className = 'access-result show error';
+            result.innerHTML = '<i data-lucide="alert-circle" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Informe um e-mail válido';
+            lucide.createIcons();
+            return;
+        }
+
+        const payments = DB.getPayments();
+        const found = payments.find(p => p.email.toLowerCase() === email.toLowerCase() && p.status === 'approved');
+
+        if (found) {
+            result.className = 'access-result show success';
+            result.innerHTML = `<i data-lucide="check-circle" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Pagamento aprovado! Plano <strong>${found.planName}</strong> · <strong>${found.courseLimitLabel}</strong>. Portal liberado.`;
+        } else {
+            result.className = 'access-result show error';
+            result.innerHTML = '<i data-lucide="x-circle" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Nenhum pagamento aprovado encontrado para este e-mail.';
+        }
+        lucide.createIcons();
+    }
+
+    function resetCheckout() {
+        location.reload();
+    }
+
+    document.getElementById('card-number').addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+        v = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = v;
+    });
+
+    document.getElementById('card-expiry').addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+        if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2);
+        e.target.value = v;
+    });
+
+    document.getElementById('document').addEventListener('input', e => {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 14);
+    });
+
+    // Importar de URL params
+    const params = new URLSearchParams(window.location.search);
+    const urlPlan = params.get('plan');
+    const urlCourse = params.get('course');
+    
+    if (urlPlan && planConfig[urlPlan]) {
+        state.plan = urlPlan;
+        state.planPrice = planConfig[urlPlan].price;
+        state.courseLimit = planConfig[urlPlan].courses;
+        document.querySelectorAll('.plan-option').forEach(o => {
+            o.classList.toggle('selected', o.dataset.plan === urlPlan);
+        });
+        updateSummary();
+    }
+    
+    if (urlCourse) {
+        document.getElementById('course-select').value = urlCourse;
+        document.getElementById('summary-course').textContent = document.getElementById('course-select').options[document.getElementById('course-select').selectedIndex].text;
+    }
+
+    // Inicializar
+    loadCourses();
+    updateSummary();
+</script>
+</body>
+</html>
+</file_write>
